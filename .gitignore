@@ -1,0 +1,26 @@
+﻿# Env
+.env
+.env.local
+.env.*.local
+
+# Next.js
+web/.next/
+web/out/
+web/node_modules/
+
+# Build outputs
+backend/build/
+backend/.gradle/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.DS_Store
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+ehthumbs.db

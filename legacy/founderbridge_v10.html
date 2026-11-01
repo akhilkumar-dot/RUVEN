@@ -1,0 +1,2345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>FounderBridge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Jost:wght@300;500;700&family=Open+Sans:wght@400;700&family=Playfair+Display:wght@600;800&family=Poppins:wght@400;600;700&family=Space+Grotesk:wght@400;500;700&family=Space+Mono&family=Syne:wght@600;800&family=Work+Sans:wght@400;600&display=swap">
+    <style>
+        :root {
+            --bg: #050a17;
+            --card: #0b1328;
+            --tx: #f1f5ff;
+            --mu: #8fa3c7;
+            --br: #1b2a4f;
+            color-scheme: dark;
+            --pr: #2563eb;
+            --pk: #60a5fa;
+            --or: #0ea5e9;
+            --tl: #38bdf8;
+            --gr: #60a5fa;
+            --sh: 0 6px 20px rgba(37, 99, 235, .10);
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        @media (prefers-color-scheme:dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #050a17;
+                --card: #0b1328;
+                --tx: #f1f5ff;
+                --mu: #8fa3c7;
+                --br: #1b2a4f;
+                --sh: none;
+                color-scheme: dark
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #050a17;
+            --card: #0b1328;
+            --tx: #f1f5ff;
+            --mu: #8fa3c7;
+            --br: #1b2a4f;
+            --sh: none;
+            color-scheme: dark
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px)
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--tx);
+            font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+            color: inherit
+        }
+
+        header {
+            position: sticky;
+            top: env(safe-area-inset-top, 0px);
+            z-index: 20;
+            background: var(--hdr, linear-gradient(100deg, #000, #0a1f5c 55%, #2563eb));
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            color: #fff
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 19px
+        }
+
+        nav {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+            overflow-x: auto
+        }
+
+        nav button {
+            border: 0;
+            background: none;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #e9e2ff;
+            font-weight: 600;
+            white-space: nowrap
+        }
+
+        nav button.on {
+            background: #fff;
+            color: var(--pr)
+        }
+
+        .ic {
+            border: 0;
+            background: rgba(255, 255, 255, .2);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            position: relative
+        }
+
+        .dot {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--or);
+            color: #fff;
+            border-radius: 9px;
+            font-size: 11px;
+            padding: 0 5px
+        }
+
+        main {
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 18px 16px 90px
+        }
+
+        .grid {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr))
+        }
+
+        .two {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: 2fr 1fr;
+            align-items: start
+        }
+
+        @media(max-width:760px) {
+            .two {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--br);
+            border-top: 4px solid var(--a, var(--pr));
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: var(--sh)
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 21px
+        }
+
+        h3 {
+            margin: 0 0 6px;
+            font-size: 16px
+        }
+
+        .mu {
+            color: var(--mu);
+            font-size: 13px
+        }
+
+        .btn {
+            border: 0;
+            background: linear-gradient(90deg, var(--pr), var(--pk));
+            color: var(--bx, #fff);
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600
+        }
+
+        .btn.g {
+            background: none;
+            border: 1px solid var(--br);
+            color: var(--tx)
+        }
+
+        .btn.s {
+            padding: 5px 11px;
+            font-size: 13px
+        }
+
+        .tag {
+            display: inline-block;
+            background: color-mix(in srgb, var(--a, var(--pr)) 15%, transparent);
+            color: var(--a, var(--pr));
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 12px;
+            margin: 2px 4px 2px 0;
+            font-weight: 600
+        }
+
+        .av {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-weight: 700;
+            flex: none
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        .sp {
+            justify-content: space-between
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 9px
+        }
+
+        .hero {
+            border-radius: 16px;
+            padding: 34px 22px;
+            color: #fff;
+            background: linear-gradient(120deg, var(--a), #60a5fa)
+        }
+
+        .hero h1 {
+            margin: 0 0 4px;
+            font-size: 30px
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--br);
+            border-radius: 10px;
+            padding: 9px 11px
+        }
+
+        label {
+            font-size: 13px;
+            color: var(--mu);
+            display: block;
+            margin: 8px 0 3px
+        }
+
+        .sub {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 14px 0
+        }
+
+        .sub button {
+            border: 1px solid var(--br);
+            background: var(--card);
+            border-radius: 20px;
+            padding: 6px 14px;
+            cursor: pointer
+        }
+
+        .sub button.on {
+            background: var(--pr);
+            color: #fff;
+            border-color: var(--pr)
+        }
+
+        .bar {
+            height: 9px;
+            background: var(--br);
+            border-radius: 8px;
+            overflow: hidden
+        }
+
+        .bar i {
+            display: block;
+            height: 100%;
+            background: linear-gradient(90deg, var(--gr), var(--tl))
+        }
+
+        .ph {
+            aspect-ratio: 4/3;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--a), var(--pk));
+            background-size: cover;
+            background-position: center;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-weight: 700;
+            text-align: center;
+            padding: 6px
+        }
+
+        .pimg {
+            width: 100%;
+            max-height: 340px;
+            object-fit: cover;
+            border-radius: 12px
+        }
+
+        .fab {
+            position: fixed;
+            right: 18px;
+            bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--pr), var(--pk));
+            box-shadow: 0 6px 20px rgba(56, 189, 248, .45)
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 8, 25, .6);
+            display: none;
+            place-items: center;
+            z-index: 50;
+            padding: 16px
+        }
+
+        .modal.on {
+            display: grid
+        }
+
+        .modal .card {
+            width: 100%;
+            max-width: 480px;
+            max-height: 88vh;
+            overflow: auto
+        }
+
+        .pop {
+            position: fixed;
+            right: 16px;
+            top: calc(60px + env(safe-area-inset-top, 0px));
+            width: 320px;
+            max-width: calc(100% - 32px);
+            z-index: 30;
+            display: none
+        }
+
+        .pop.on {
+            display: block
+        }
+
+        .it {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--br)
+        }
+
+        .it:last-child {
+            border: 0
+        }
+
+        .done {
+            text-decoration: line-through;
+            color: var(--mu)
+        }
+
+        .stat {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px
+        }
+
+        .stat div {
+            flex: 1;
+            min-width: 110px;
+            border-radius: 14px;
+            padding: 12px;
+            color: #fff;
+            font-weight: 700
+        }
+
+        .stat small {
+            display: block;
+            font-weight: 400;
+            opacity: .9
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 0, #0b2a7a66 0, transparent 45%), radial-gradient(circle at 100% 15%, #1d4ed855 0, transparent 40%), var(--bg);
+            background-attachment: fixed
+        }
+
+        .card {
+            transition: transform .15s, box-shadow .15s
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(37, 99, 235, .18)
+        }
+
+        .hero h1 {
+            text-shadow: 0 2px 10px rgba(0, 0, 0, .15)
+        }
+
+        a.btn {
+            text-decoration: none;
+            display: inline-block
+        }
+
+        .msg.err {
+            background: #1e3a8a66;
+            color: #bfdbfe;
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 14px
+        }
+
+        .stp {
+            display: flex;
+            gap: 6px;
+            margin: 8px 0 4px
+        }
+
+        .stp i {
+            flex: 1;
+            height: 5px;
+            border-radius: 5px;
+            background: var(--br)
+        }
+
+        .stp i.on {
+            background: linear-gradient(90deg, #2563eb, #38bdf8)
+        }
+
+        .opt {
+            border: 1px solid var(--br);
+            border-radius: 14px;
+            padding: 14px;
+            cursor: pointer;
+            background: var(--bg);
+            text-align: left;
+            width: 100%;
+            margin-top: 10px;
+            color: var(--tx)
+        }
+
+        .opt:hover {
+            border-color: #38bdf8
+        }
+
+        #splash {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            display: grid;
+            place-content: center;
+            justify-items: center;
+            gap: 6px;
+            background: radial-gradient(circle at 50% 40%, #0b2a7a, #000 70%);
+            color: #fff;
+            transition: opacity .6s
+        }
+
+        #splash.off {
+            opacity: 0;
+            pointer-events: none
+        }
+
+        #splash .lg {
+            animation: pop 1s ease both
+        }
+
+        #splash h1 {
+            font-size: 36px;
+            margin: 6px 0 0;
+            letter-spacing: 1px;
+            animation: up .9s .4s both
+        }
+
+        #splash p {
+            margin: 0;
+            color: #9db8ff;
+            animation: up .9s .8s both
+        }
+
+        .ld {
+            width: 190px;
+            height: 4px;
+            background: #ffffff30;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px
+        }
+
+        .ld i {
+            display: block;
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #fff);
+            animation: ld 3.6s linear forwards
+        }
+
+        @keyframes pop {
+            from {
+                transform: scale(.5) rotate(-8deg);
+                opacity: 0
+            }
+
+            to {
+                transform: none;
+                opacity: 1
+            }
+        }
+
+        @keyframes up {
+            from {
+                transform: translateY(14px);
+                opacity: 0
+            }
+
+            to {
+                transform: none;
+                opacity: 1
+            }
+        }
+
+        @keyframes ld {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
+        }
+
+        .web {
+            border-radius: 16px;
+            overflow: clip;
+            background: var(--bg);
+            color: var(--fg)
+        }
+
+        .wn {
+            position: sticky;
+            top: calc(58px + env(safe-area-inset-top, 0px));
+            z-index: 15;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 22px;
+            border-bottom: 1px solid var(--bd)
+        }
+
+        .wn .lo {
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap
+        }
+
+        .wn .lk {
+            display: flex;
+            gap: 2px;
+            flex: 1;
+            justify-content: center;
+            overflow: hidden
+        }
+
+        .web button.nb,
+        .web .ddb {
+            background: none;
+            border: 0;
+            color: var(--fg);
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+            padding: 8px 10px;
+            cursor: pointer;
+            white-space: nowrap
+        }
+
+        .web button.nb:hover,
+        .web .ddb:hover {
+            color: var(--ac2)
+        }
+
+        .dd {
+            position: relative
+        }
+
+        .dd:after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 100%;
+            height: 14px
+        }
+
+        .ddp {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 10px);
+            width: min(840px, 92vw);
+            background: var(--bg);
+            border: 1px solid var(--bd);
+            border-radius: 10px;
+            padding: 26px;
+            grid-template-columns: repeat(3, 1fr) 1.3fr;
+            gap: 22px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .7);
+            z-index: 30
+        }
+
+        .dd:hover .ddp,
+        .dd:focus-within .ddp {
+            display: grid
+        }
+
+        .ddp h4 {
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: #8b8b95;
+            margin: 0 0 10px;
+            font-weight: 600
+        }
+
+        .ddp button {
+            display: block;
+            background: none;
+            border: 0;
+            color: var(--fg);
+            font-size: 15px;
+            text-align: left;
+            padding: 6px 0;
+            cursor: pointer
+        }
+
+        .ddp button:hover {
+            color: var(--ac2)
+        }
+
+        .ddp .cd {
+            background: var(--cd);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            font-size: 14px
+        }
+
+        .ddp .cd small {
+            color: #8b8b95;
+            display: block;
+            margin-top: 2px
+        }
+
+        .wh {
+            color: #fff;
+            min-height: 540px;
+            padding: 70px 28px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-size: cover;
+            background-position: center
+        }
+
+        .wh .ey {
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #cfd8ff;
+            margin-bottom: 14px
+        }
+
+        .wh h1 {
+            font-size: clamp(38px, 7vw, 80px);
+            line-height: 1.02;
+            font-weight: 500;
+            margin: 0 0 18px;
+            max-width: 820px;
+            letter-spacing: -1.5px
+        }
+
+        .wh p {
+            font-size: 18px;
+            max-width: 560px;
+            margin: 0 0 26px;
+            color: #e4e7f5
+        }
+
+        .wb {
+            display: inline-block;
+            background: var(--fg);
+            color: var(--bg);
+            border: 0;
+            border-radius: 6px;
+            padding: 14px 26px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 0 10px 10px 0
+        }
+
+        .wb.o {
+            background: none;
+            color: #fff;
+            border: 1px solid #fff
+        }
+
+        .wb.k {
+            background: var(--ltx);
+            color: var(--lt)
+        }
+
+        .wb.s {
+            padding: 10px 18px
+        }
+
+        .wst {
+            display: flex;
+            gap: 44px;
+            flex-wrap: wrap;
+            padding: 34px 0 30px
+        }
+
+        .wst b {
+            display: block;
+            font-size: 46px;
+            font-weight: 400;
+            letter-spacing: -1px;
+            line-height: 1.1
+        }
+
+        .wst small {
+            color: #d0d6ee;
+            font-size: 13px
+        }
+
+        .ws {
+            padding: 72px 28px;
+            scroll-margin-top: 130px
+        }
+
+        .ws.l {
+            background: var(--lt);
+            color: var(--ltx)
+        }
+
+        .ws.d {
+            background: var(--bg2)
+        }
+
+        .ws.l .mu {
+            color: var(--mul)
+        }
+
+        .ws h2 {
+            font-size: clamp(28px, 4.2vw, 48px);
+            font-weight: 500;
+            margin: 0 0 26px;
+            letter-spacing: -.8px;
+            line-height: 1.08
+        }
+
+        .wg {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))
+        }
+
+        .wg2 {
+            display: grid;
+            gap: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))
+        }
+
+        .wt {
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--cd)
+        }
+
+        .wt img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            display: block
+        }
+
+        .wt .tx {
+            padding: 16px
+        }
+
+        .wsv {
+            border-top: 1px solid var(--bd);
+            padding: 18px 0;
+            font-size: 24px;
+            display: flex;
+            gap: 18px
+        }
+
+        .wsv i {
+            color: var(--ac2);
+            font-style: normal;
+            font-size: 14px;
+            padding-top: 9px
+        }
+
+        .wfa {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            border-bottom: 1px solid var(--lbd);
+            padding: 10px 0;
+            font-size: 15px
+        }
+
+        .wfa span {
+            color: var(--mul)
+        }
+
+        .wph {
+            aspect-ratio: 4/3;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--a), #000);
+            background-size: cover;
+            background-position: center;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px
+        }
+
+        .wfd {
+            background: linear-gradient(120deg, var(--a), #000 85%)
+        }
+
+        .wrow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            border-top: 1px solid var(--lbd);
+            padding: 20px 0
+        }
+
+        @media(max-width:820px) {
+            .wn .lk {
+                display: none
+            }
+
+            .wn {
+                justify-content: space-between
+            }
+
+            .ddp {
+                grid-template-columns: 1fr 1fr;
+                width: min(92vw, 420px)
+            }
+
+            .ws {
+                padding: 48px 18px
+            }
+
+            .wh {
+                padding: 44px 18px 0
+            }
+
+            .wn {
+                gap: 8px;
+                padding: 10px 14px
+            }
+
+            .wn .lo {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                font-size: 12px;
+                letter-spacing: 1px;
+                flex: 1
+            }
+
+            .wn .wb.s {
+                white-space: nowrap;
+                padding: 9px 12px;
+                font-size: 11px
+            }
+
+            .web .ddb {
+                padding: 8px 6px;
+                font-size: 12px
+            }
+        }
+
+        .ph2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 560px;
+            background: var(--bg)
+        }
+
+        .pt {
+            position: relative;
+            background: radial-gradient(circle at 30% 30%, var(--ac3), var(--bg) 70%);
+            background-size: cover;
+            background-position: center top;
+            filter: grayscale(1) contrast(1.1)
+        }
+
+        .pt:after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 60%, var(--bg))
+        }
+
+        .pin {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            font-size: 220px;
+            font-weight: 700;
+            color: var(--bd)
+        }
+
+        .pr {
+            color: var(--fg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px 40px 40px 10px
+        }
+
+        .hl1 {
+            font-size: 44px;
+            font-weight: 300
+        }
+
+        .hl2 {
+            font-size: clamp(40px, 6vw, 68px);
+            font-weight: 700;
+            line-height: 1.1
+        }
+
+        .cur {
+            display: inline-block;
+            width: 2px;
+            height: .9em;
+            background: #fff;
+            margin-left: 16px;
+            vertical-align: middle;
+            animation: bl 1s steps(2) infinite
+        }
+
+        @keyframes bl {
+            50% {
+                opacity: 0
+            }
+        }
+
+        .rl {
+            display: flex;
+            gap: 26px;
+            flex-wrap: wrap;
+            margin: 26px 0;
+            font-size: 13px;
+            font-weight: 700
+        }
+
+        .so {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--bd);
+            background: var(--bg2);
+            color: var(--fg);
+            display: inline-grid;
+            place-items: center;
+            margin: 0 10px 8px 0;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none
+        }
+
+        .so:hover {
+            border-color: var(--ac)
+        }
+
+        .pf .lk {
+            justify-content: flex-end
+        }
+
+        .pf .lo {
+            gap: 0
+        }
+
+        .pf .lk .nb:first-child {
+            color: var(--ac)
+        }
+
+        .ws.d .wfa {
+            border-color: var(--bd)
+        }
+
+        .ws.d .wfa span {
+            color: #9aa3bd
+        }
+
+        .cmp {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 6px
+        }
+
+        .cmp .it2 {
+            flex: 0 0 250px;
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--card);
+            border: 1px solid var(--br)
+        }
+
+        .cmp img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            display: block
+        }
+
+        .cmp .ph0 {
+            height: 110px;
+            display: grid;
+            place-items: center;
+            font-size: 34px;
+            background: linear-gradient(135deg, #1d4ed8, #000)
+        }
+
+        @media(max-width:820px) {
+            .ph2 {
+                grid-template-columns: 1fr
+            }
+
+            .pt {
+                min-height: 340px
+            }
+
+            .pr {
+                padding: 26px 20px
+            }
+
+            .hl1 {
+                font-size: 32px
+            }
+        }
+
+        .vf {
+            display: inline-grid;
+            place-items: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: #fff;
+            font-size: 10px;
+            margin-left: 5px;
+            vertical-align: middle
+        }
+
+        .thd {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid #ffffff55;
+            cursor: pointer;
+            margin-right: 2px;
+            padding: 0
+        }
+
+        .thd.on {
+            outline: 2px solid #fff;
+            outline-offset: 2px
+        }
+
+        .cv {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+            text-align: left;
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            background: none;
+            cursor: pointer;
+            color: var(--tx)
+        }
+
+        .cv.on {
+            background: var(--bg);
+            border-color: var(--br)
+        }
+
+        .ell {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .chip {
+            border: 1px solid var(--br);
+            background: var(--bg);
+            color: var(--tx);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 13px;
+            cursor: pointer
+        }
+
+        .so2 {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--br);
+            background: var(--bg);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 16px
+        }
+
+        .dbox {
+            width: 54px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--pr), var(--pk));
+            color: #fff;
+            text-align: center;
+            padding: 6px 0;
+            flex: none
+        }
+
+        .dbox b {
+            display: block;
+            font-size: 22px;
+            line-height: 1
+        }
+
+        .dbox span {
+            font-size: 12px;
+            text-transform: uppercase
+        }
+
+        .pd {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #ffffff44;
+            cursor: pointer;
+            margin: 0 4px 4px 0;
+            padding: 0
+        }
+
+        .ad {
+            padding: 10px 14px;
+            box-shadow: none;
+            border-style: dashed;
+            background: transparent
+        }
+
+        body.pro {
+            background: radial-gradient(circle at 15% 0, color-mix(in srgb, var(--pr) 24%, transparent), transparent 45%), radial-gradient(circle at 100% 30%, color-mix(in srgb, var(--pk) 14%, transparent), transparent 40%), var(--bg)
+        }
+
+        body.pro .logo:after {
+            content: "PRO";
+            margin-left: 8px;
+            font-size: 10px;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #fde68a, #f5c542);
+            color: #2a1d00;
+            border-radius: 6px;
+            padding: 2px 6px
+        }
+
+        body.pro .card {
+            background: color-mix(in srgb, var(--card) 90%, transparent);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--br);
+            border-top: 2px solid var(--a, var(--pr));
+            border-radius: 22px;
+            box-shadow: 0 14px 44px rgba(0, 0, 0, .4)
+        }
+
+        body.pro .card.ad {
+            background: transparent;
+            box-shadow: none
+        }
+
+        body.pro .btn {
+            border-radius: 999px;
+            box-shadow: 0 6px 18px color-mix(in srgb, var(--pr) 40%, transparent)
+        }
+
+        body.pro .btn.g {
+            box-shadow: none
+        }
+
+        body.pro h2 {
+            font-size: 28px;
+            letter-spacing: -.6px
+        }
+
+        body.pro .hero {
+            border-radius: 28px;
+            background: linear-gradient(120deg, var(--p3, #1d4ed8), var(--pr) 55%, var(--pk))
+        }
+
+        body.pro .stat div {
+            border-radius: 20px
+        }
+
+        body.pro .tag {
+            border-radius: 8px
+        }
+
+        body.pro .web {
+            border-radius: 26px
+        }
+
+        @media(min-width:900px) {
+            body.pro header {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 236px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+                padding: 22px 14px;
+                background: linear-gradient(180deg, #000, var(--p3, #0a1f5c));
+                border-right: 1px solid #ffffff1c;
+                z-index: 25
+            }
+
+            body.pro nav {
+                flex-direction: column;
+                flex: 1;
+                gap: 4px;
+                overflow: visible
+            }
+
+            body.pro nav button {
+                text-align: left;
+                padding: 12px 14px;
+                font-size: 15px;
+                border-radius: 12px
+            }
+
+            body.pro header .ic,
+            body.pro #dbs {
+                align-self: flex-start
+            }
+
+            body.pro main {
+                margin-left: 236px;
+                max-width: 1180px;
+                padding: 28px 40px 90px
+            }
+
+            body.pro .wn {
+                top: 0
+            }
+
+            body.pro .pop {
+                right: auto;
+                left: 252px;
+                top: auto;
+                bottom: 24px
+            }
+        }
+
+        .web {
+            font-family: var(--ff, system-ui, sans-serif)
+        }
+
+        .web h1,
+        .web h2 {
+            font-family: var(--fh, inherit);
+            text-transform: var(--tt, none);
+            letter-spacing: var(--ls, -.5px)
+        }
+
+        .wb {
+            border-radius: var(--bt, 6px)
+        }
+
+        .wt {
+            border-radius: var(--rd, 14px)
+        }
+
+        .wph {
+            border-radius: var(--rd, 12px)
+        }
+
+        .wcard {
+            background: var(--cd);
+            border: 1px solid var(--bd);
+            border-radius: var(--rd, 16px);
+            padding: 20px;
+            box-shadow: 0 10px 30px #0001
+        }
+
+        .hc {
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            position: relative;
+            min-height: 560px
+        }
+
+        .hc h1 {
+            font-size: clamp(40px, 8vw, 92px);
+            font-weight: 700;
+            margin: 6px 0;
+            max-width: none;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 2px
+        }
+
+        .hln {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            width: min(840px, 92%);
+            margin: 0 auto;
+            font-size: 16px;
+            letter-spacing: 2px;
+            font-weight: 300
+        }
+
+        .hln:before,
+        .hln:after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #ffffff66
+        }
+
+        .hln2 {
+            width: min(840px, 92%);
+            height: 1px;
+            background: #ffffff66;
+            margin: 0 auto 22px
+        }
+
+        .hc p {
+            margin: 0 auto 24px;
+            text-align: center
+        }
+
+        .hc .wb.o {
+            border-color: var(--ac);
+            color: var(--ac)
+        }
+
+        .har {
+            position: absolute;
+            top: 50%;
+            font-size: 56px;
+            font-weight: 200;
+            opacity: .7
+        }
+
+        .har.l {
+            left: 20px
+        }
+
+        .har.r {
+            right: 20px
+        }
+
+        .ha {
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            min-height: 560px;
+            padding-top: 56px
+        }
+
+        .ha h1 {
+            font-size: clamp(34px, 6vw, 76px);
+            line-height: 1.04;
+            font-weight: 500;
+            max-width: 900px;
+            margin: 18px auto
+        }
+
+        .ha p {
+            margin: 0 auto 22px
+        }
+
+        .gt {
+            background: linear-gradient(90deg, var(--ac), var(--ac2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent
+        }
+
+        .pill2 {
+            align-self: center;
+            border: 1px solid var(--bd);
+            border-radius: 999px;
+            padding: 6px 16px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            background: #ffffff10
+        }
+
+        .mono {
+            font-family: 'Space Mono', ui-monospace, monospace;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #c9cdf0;
+            margin-top: 18px
+        }
+
+        .hn {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 30px;
+            padding: 56px 28px 0;
+            align-items: end;
+            background: radial-gradient(circle at 90% 0, color-mix(in srgb, var(--ac) 22%, transparent), transparent 45%), var(--bg);
+            min-height: 600px;
+            color: var(--fg)
+        }
+
+        .hn h1 {
+            font-size: clamp(46px, 8vw, 104px);
+            line-height: .92;
+            font-weight: 400;
+            margin: 14px 0
+        }
+
+        .hn h1 em {
+            font-style: normal;
+            color: var(--ac)
+        }
+
+        .hn p {
+            color: var(--mu2)
+        }
+
+        .hn2 {
+            border-radius: 22px;
+            background: var(--cd) center/cover;
+            min-height: 460px;
+            position: relative
+        }
+
+        .chip2 {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: #000b;
+            border: 1px solid var(--bd);
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-family: 'Space Mono', monospace;
+            color: #fff
+        }
+
+        .hn .wb {
+            background: var(--ac);
+            color: #0a0a0c
+        }
+
+        .hn .wb.o {
+            background: none;
+            color: var(--fg);
+            border: 1px solid var(--bd)
+        }
+
+        .hn .mono {
+            color: var(--mu2)
+        }
+
+        .hst {
+            margin: 26px 0 20px;
+            border-top: 1px solid var(--bd);
+            padding-top: 14px
+        }
+
+        .hst b {
+            color: var(--fg)
+        }
+
+        .hs {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 34px;
+            padding: 56px 28px;
+            background: var(--bg);
+            color: var(--fg);
+            align-items: center;
+            min-height: 560px
+        }
+
+        .hs h1 {
+            font-size: clamp(36px, 5.5vw, 70px);
+            line-height: 1.04;
+            margin: 10px 0 14px;
+            font-weight: 700
+        }
+
+        .hs p {
+            color: var(--mu2)
+        }
+
+        .hs .ey {
+            color: var(--ac)
+        }
+
+        .hsi {
+            aspect-ratio: 1/1;
+            border-radius: var(--rd, 26px);
+            background: linear-gradient(135deg, var(--ac3), var(--ac)) center/cover;
+            display: grid;
+            place-items: center;
+            font-size: 130px;
+            color: #fff;
+            font-weight: 700
+        }
+
+        .wb.o2 {
+            background: none;
+            color: var(--fg);
+            border: 1px solid var(--fg)
+        }
+
+        .hs .wst small {
+            color: var(--mu2)
+        }
+
+        .ph3 {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 20px;
+            padding: 56px 36px;
+            min-height: 560px;
+            align-items: center;
+            background: var(--bg);
+            color: var(--fg);
+            position: relative;
+            overflow: hidden
+        }
+
+        .ph3 h1 {
+            font-size: clamp(36px, 6vw, 76px);
+            line-height: 1.04;
+            font-weight: 800;
+            margin: 6px 0 14px
+        }
+
+        .ph3 p {
+            color: var(--mu2);
+            max-width: 520px
+        }
+
+        .eyl {
+            letter-spacing: 6px;
+            font-size: 22px;
+            font-weight: 300
+        }
+
+        .pp {
+            position: relative;
+            display: grid;
+            place-items: center;
+            min-height: 380px
+        }
+
+        .circ {
+            position: absolute;
+            width: 420px;
+            max-width: 90%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: color-mix(in srgb, var(--ac) 16%, transparent)
+        }
+
+        .pimg2 {
+            position: relative;
+            width: min(340px, 80%);
+            aspect-ratio: 3/4;
+            border-radius: var(--rd, 18px);
+            background-size: cover;
+            background-position: center top;
+            box-shadow: 0 24px 60px #0004
+        }
+
+        .pin2 {
+            position: relative;
+            font-size: 200px;
+            font-weight: 800;
+            color: var(--ac3)
+        }
+
+        .ph3 .so {
+            background: var(--cd);
+            color: var(--fg);
+            border-color: var(--bd)
+        }
+
+        .ph3.mono {
+            background: linear-gradient(rgba(70, 70, 70, .6), rgba(60, 60, 60, .92)), var(--ph, none) center/cover
+        }
+
+        .ph3.mono .pimg2 {
+            filter: grayscale(1)
+        }
+
+        .ph3.mono h1 {
+            font-size: clamp(26px, 4vw, 46px);
+            letter-spacing: 2px
+        }
+
+        .ph3.mono .wb.o {
+            background: none;
+            border: 1px solid #fff;
+            color: #fff
+        }
+
+        .ph3.mono .so {
+            background: #ffffff18;
+            color: #fff
+        }
+
+        .ph3.gold {
+            grid-template-columns: 1fr;
+            text-align: center;
+            justify-items: center
+        }
+
+        .ph3.gold .pimg2 {
+            width: 190px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 3px solid var(--ac);
+            box-shadow: 0 0 0 9px color-mix(in srgb, var(--ac) 20%, transparent)
+        }
+
+        .ph3.gold h1 {
+            font-weight: 600
+        }
+
+        @media(max-width:820px) {
+
+            .hn,
+            .hs,
+            .ph3 {
+                grid-template-columns: 1fr
+            }
+
+            .hn2 {
+                min-height: 300px
+            }
+
+            .ph3 {
+                padding: 36px 20px
+            }
+        }
+
+        .lbi {
+            max-width: 92vw;
+            max-height: 80vh;
+            border-radius: 12px;
+            display: block
+        }
+
+        .web img,
+        .web .wph[data-g],
+        img.pimg {
+            cursor: zoom-in
+        }
+
+        .lbb {
+            z-index: 2;
+            position: fixed;
+            background: #ffffff22;
+            color: #fff;
+            border: 0;
+            border-radius: 50%;
+            width: 46px;
+            height: 46px;
+            font-size: 24px;
+            cursor: pointer
+        }
+    </style>
+</head>
+
+<body>
+    <header><span class="logo row" style="gap:6px;flex-wrap:nowrap"><svg viewBox="0 0 64 64" width="24" height="24"
+                fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round">
+                <path d="M6 44Q32 8 58 44" stroke="#60a5fa" />
+                <path d="M4 48h56" />
+                <path d="M16 34v14M26 24v24M38 24v24M48 34v14" />
+            </svg> FounderBridge</span>
+        <nav id="nav"></nav><span id="dbs" style="font-size:12px;white-space:nowrap">Demo</span><button class="ic"
+            id="palb" aria-label="Colours">🎨</button><button class="ic" id="bell" aria-label="Notifications">🔔<span
+                class="dot" id="nc"></span></button>
+    </header>
+    <div id="splash">
+        <div class="lg"><svg viewBox="0 0 64 64" width="96" height="96" fill="none" stroke="#fff" stroke-width="3"
+                stroke-linecap="round">
+                <path d="M6 44Q32 8 58 44" stroke="#60a5fa" />
+                <path d="M4 48h56" />
+                <path d="M16 34v14M26 24v24M38 24v24M48 34v14" />
+            </svg></div>
+        <h1>FounderBridge</h1>
+        <p>Connect · Collaborate · Launch</p>
+        <div class="ld"><i></i></div>
+    </div>
+    <div class="card pop" id="pop"></div>
+    <div class="card pop" id="palp"></div>
+    <main id="app"></main>
+    <button class="btn ic fab" id="fab" aria-label="Create">+</button>
+    <div class="modal" id="modal">
+        <div class="card" id="mbox"></div>
+    </div>
+    <div class="modal" id="lbx" style="z-index:130;background:rgba(0,0,0,.93)"></div>
+    <div class="modal" id="auth"
+        style="z-index:100;background:radial-gradient(circle at 20% 10%,#1d4ed8,#050a17 55%),#000">
+        <div class="card" id="abox" style="max-width:520px"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <script>
+        const $ = s => document.querySelector(s);
+        const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+        const cols = ["#2563eb", "#0ea5e9", "#38bdf8", "#3b82f6", "#1d4ed8", "#6366f1"];
+        const col = n => cols[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % cols.length];
+        const av = (n, ph) => okImg(ph) ? `<img class="av" src="${ph}" alt="" style="object-fit:cover">` : `<div class="av" style="background:${col(n)}">${esc(n.split(" ").map(w => w[0]).slice(0, 2).join(""))}</div>`;
+        const dd = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10) };
+        const fmt = (d, t) => new Date(d + "T12:00").toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" }) + (t ? ", " + new Date("2000-01-01T" + t).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" }) : "");
+        const P = { tx: "", img: "", kind: "update", title: "", deadline: "", link: "", from: "", dur: "24" };
+        const S = {
+            tab: "home", ctab: "Preview", dtab: "People", view: null,
+            me: { plan: "free", verified: 0, vstatus: "", theme: "midnight", pal: "aurora", name: "Aarav Reddy", type: "Startup founder", head: "Founder & CEO at NovaLeaf Labs", bio: "Building tools for first-time founders.", loc: "Hyderabad, India", edu: "B.Tech CSE, JNTU Hyderabad", exp: "3 yrs product at a SaaS firm; 1 yr freelancing", int: "SaaS, HR tech, mentoring", links: "linkedin.com/in/aarav-demo", skills: ["Product", "Fundraising", "SaaS"] },
+            company: {
+                n: "NovaLeaf Labs", tag: "Simple HR for tiny teams", about: "We help early-stage startups hire, onboard and manage teams from one dashboard.", svc: ["Hiring tracker", "Onboarding kits", "Team directory"], color: "#3b82f6", site: "novaleaf.example", email: "hello@novaleaf.example", phone: "+91 90000 00000", addr: "T-Hub, Hyderabad", pub: 0,
+                jobs: [{ t: "Frontend Developer", type: "Full-time", loc: "Remote", desc: "Build React UI for our dashboard. 1–3 years experience." }],
+                resumes: [{ n: "Sneha Rao", role: "Frontend Developer", st: "New" }, { n: "Kiran Kumar", role: "Frontend Developer", st: "Shortlisted" }],
+                team: [{ n: "Aarav Reddy", r: "Founder & CEO" }, { n: "Meera Iyer", r: "Designer" }], photos: [], sent: [{ to: "sneha@mail.com", s: "Interview invite", b: "Hi Sneha, we would like to chat Friday 4 PM." }]
+            },
+            people: [{ v: 1, n: "Priya Nair", r: "CTO at FinPilot", loc: "Bengaluru", bio: "Ex-Google engineer building AI for small businesses. Loves mentoring first-time founders.", look: "Mobile developers, OCR experts", t: ["Backend", "AI"], c: 0 }, { v: 1, n: "Rohan Mehta", r: "Angel Investor", loc: "Mumbai", bio: "Invested in 14 startups. Focus on pre-seed SaaS and fintech.", look: "Strong founders with early traction", t: ["Investor", "SaaS"], c: 0 }, { n: "Ananya Das", r: "Growth Marketer", loc: "Delhi", bio: "Grew two D2C brands to 1M users. Writes a weekly founder newsletter.", look: "Early-stage brands needing growth help", t: ["Marketing", "D2C"], c: 0 }, { n: "Vikram Singh", r: "Product Designer", loc: "Pune", bio: "Designs mobile-first apps for startups. 6 years of experience.", look: "Co-founder for an edtech idea", t: ["UX", "Mobile"], c: 0 }],
+            cos: [{ v: 1, n: "FinPilot", tag: "AI bookkeeping for SMEs", about: "FinPilot automates bookkeeping, GST filing and cash-flow alerts for small businesses.", svc: ["Auto bookkeeping", "GST filing", "Cash-flow alerts"], color: "#0ea5e9", site: "finpilot.example", email: "team@finpilot.example", phone: "+91 80000 11111", addr: "Koramangala, Bengaluru", st: "Seed", pub: 1, c: 0, fund: "Seed", raise: "₹2 Cr", hl: "Customers: 140\nARR: ₹1.2 Cr\nTeam: 12\nInvoices handled: 90k+", ach: "Selected for T-Hub Cohort 7\nWinner, FinTech Hack 2026", jobs: [{ t: "Backend Engineer", type: "Full-time", loc: "Bengaluru", desc: "Python and Postgres, 2+ years." }], team: [{ n: "Priya Nair", r: "CTO" }, { n: "Dev Patel", r: "CEO" }], photos: ["g:📊 Dashboard", "g:🏢 Office"] },
+            { n: "GreenCart", tag: "Farm to door groceries", about: "We connect local farms directly with households for fresh, fair-priced produce.", svc: ["Daily delivery", "Farm partners", "Weekly boxes"], color: "#60a5fa", site: "greencart.example", email: "hi@greencart.example", phone: "+91 70000 22222", addr: "Banjara Hills, Hyderabad", st: "Pre-seed", pub: 1, c: 0, jobs: [{ t: "Operations Intern", type: "Internship", loc: "Hyderabad", desc: "Help manage farm pickups." }], team: [{ n: "Lakshmi R", r: "Founder" }], photos: ["g:🥕 Fresh produce", "g:🚚 Delivery"] }],
+            ideas: [{ id: 1, by: "Priya Nair", t: "AI invoice reader for kirana stores", d: "Scan paper bills into a simple ledger on the phone.", from: "Bengaluru", team: "2 engineers, 1 designer", ask: "Looking for a mobile dev and OCR expert", need: ["Mobile dev", "OCR"], type: "Idea", reqs: 0, on: 0 }, { id: 2, by: "Ananya Das", t: "Startup Founder Newsletter", d: "Weekly curated funding and hiring news.", from: "Delhi", team: "Solo, 1,200 subscribers", ask: "Need a writer and a sponsor-sales person", need: ["Writer", "Sales"], type: "Project", reqs: 0, on: 0 }],
+            meets: [{ id: 1, t: "Founder Coffee Chat", date: dd(0), time: "18:00", kind: "Video call", host: "FounderBridge", desc: "Casual chat: share what you are building and meet other founders.", plat: "Google Meet", link: "https://meet.google.com/", on: 0 }, { id: 2, t: "Pitch Practice Night", date: dd(2), time: "19:30", kind: "Video call", host: "Rohan Mehta", desc: "Pitch for 3 minutes, get feedback from investors.", plat: "Zoom", link: "https://zoom.us/", on: 0 }, { id: 3, t: "Hyderabad Startup Meetup", date: dd(4), time: "10:00", kind: "In person", host: "T-Hub", desc: "Networking, lightning talks and tea.", on: 0 }],
+            feed: [{ by: "Rohan Mehta", tx: "Looking to back 2 pre-seed SaaS startups this quarter. DM me your deck.", tm: "2h", lk: 12, l: 0, from: Date.now() - 72e5, until: Date.now() + 792e5 }, { by: "GreenCart", tx: "Daily update: 40 new orders, 3 farm partners onboarded! 🥕", tm: "5h", img: "", lk: 31, l: 0, from: Date.now() - 18e6, until: Date.now() + 68e6 }, { by: "T-Hub", kind: "competition", title: "Startup Pitch Challenge 2026", tx: "Win ₹5 lakh funding and mentoring. Open to student and early-stage founders.", deadline: dd(12), link: "https://t-hub.co/", tm: "1h", lk: 8, l: 0, from: Date.now() - 36e5, until: Date.now() + 12 * 864e5 }],
+            notes: [{ x: "Priya Nair sent you a connection request", u: 1 }, { x: "Founder Coffee Chat starts today at 6 PM", u: 1 }, { x: "Sneha Rao applied for Frontend Developer", u: 1 }],
+            tasks: [["Create company page", 1], ["Add contact info", 1], ["Post your first job", 1], ["Upload 3 photos", 0], ["Connect with 5 people", 0], ["Post a daily update", 0], ["Join a meetup", 0], ["Publish your company site", 0]],
+            todo: [{ t: "Prepare investor deck", d: 0 }, { t: "Reply to candidates", d: 0 }], posts: [], dbIdeas: [], dbMeets: [], sites: [], members: [], reqs: [], seen: [], liked: new Set(), chats: [], lc: {}, cw: "", dbInv: [], fstg: "All", gate: true, chk: true, au: { mode: "login", d: {} }, acct: null, q: { d: "", c: 0, m: "", i: 0 }, adreq: [], dbAds: [], ads: [], dbFounders: [], dbDocs: [], docs: [], wd: "", hi: "All", mf: "Upcoming", daily: { d: "", done: [0, 0, 0, 0, 0] }
+        };
+        const tabs = [["home", "Home"], ["discover", "Discover"], ["hub", "Founders Hub"], ["ideas", "Ideas & Projects"], ["meet", "Meetups"], ["company", "My Company"], ["msg", "Messages"], ["work", "Workspace"], ["plans", "Plans"], ["profile", "Profile"]];
+        const isSU = () => S.me.type == "Startup founder";
+        const TB = () => tabs.filter(t => t[0] != "company" || !["Individual", "Investor"].includes(S.me.type));
+        const NT = ["Register the company (Pvt Ltd / LLP / OPC)", "Get Udyam (MSME) registration", "Register for GST", "Apply for DPIIT Startup India recognition", "Open a current bank account", "Write vision & mission", "Add founder & team profiles", "Add a project with photos"];
+        NT.forEach(t => S.tasks.push([t, 0]));
+        const DLY = () => ["Post a daily update", "Reply to messages and requests", "Review job applications", "Check today’s meetups", "Plan your top 3 tasks"];
+        const ck = i => { if (S.tasks[i]) S.tasks[i][1] = 1 };
+        function note(x) { S.notes.unshift({ x, u: 1 }); draw() }
+        const okImg = x => String(x || "").startsWith("data:image/");
+        function site(c, mine) {
+            const TH = thFor((mine && !isPro()) ? "classic" : c.theme, "co"), A = TH.ac, P = c.projects || [], J = c.jobs || [], T = c.team || [], PH = c.photos || [], H = hl(c), SV = c.svc || [];
+            const cover = PH.find(okImg) || (P.map(p => (p.imgs || []).find(okImg)).find(Boolean)) || "";
+            const bg = cover ? `linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.82)),url(${cover})` : `radial-gradient(circle at 85% 15%,${A},transparent 55%),linear-gradient(135deg,var(--hg1),var(--hg2))`;
+            const stats = (H.length ? H.map(([k, v]) => [v, k]) : [[T.length, "Team members"], [P.length, "Projects"], [J.length, "Open roles"], [c.yr || "New", "Founded"]]).slice(0, 4);
+            const rg = [c.rst, c.udyam && "Udyam/MSME " + c.udyam, c.cin && "CIN " + c.cin, c.gst && "GST " + c.gst, c.dpiit && c.dpiit != "No" && "DPIIT: " + c.dpiit].filter(Boolean);
+            const raising = c.fund && c.fund != "Not raising", hasAch = (c.ach || "").trim();
+            const av2 = { about: 1, vision: c.vision || c.mission, services: SV.length, projects: P.length, ach: hasAch, gallery: PH.length, team: T.length, careers: J.length, funding: raising, contact: 1 };
+            const go = (id, t, cl) => `<button class="${cl || ""}" data-a="scr" data-v="sx-${id}">${t}</button>`, ml = (id, t) => av2[id] ? go(id, t) : "";
+            const msgv = `${esc(c.n)}|${c.uid || ""}`;
+            const nav = [["about", "About"], ["projects", "Projects"], ["team", "Team"], ["careers", "Careers"], ["contact", "Contact"]].filter(x => av2[x[0]]).map(x => go(x[0], x[1], "nb")).join("");
+            const facts = [["Type", c.ckind], ["Industry", c.ind], ["Founded", c.yr], ["Location", c.addr]].concat(rg.map(x => ["Registration", x])).filter(x => x[1]).map(x => `<div class="wfa"><span>${x[0]}</span><b style="font-weight:600;text-align:right">${esc(x[1])}</b></div>`).join("");
+            const tile = (p, pi) => { const im = (p.imgs || []).filter(okImg); return `<div class="wt">${im[0] ? `<img src="${im[0]}" alt="" data-a="lb" data-g="proj:${pi}" data-i="0" style="cursor:zoom-in">` : `<div class="wph" style="border-radius:0">${esc((p.t || "?")[0])}</div>`}<div class="tx"><span class="tag" style="background:var(--bd);color:var(--fg)">${esc(p.st)}</span><h3 style="margin:8px 0 4px;font-size:20px;font-weight:600">${esc(p.t)}</h3><div class="mu" style="color:var(--mu2)">${esc(p.d)}</div>${im.length > 1 ? `<div class="row" style="margin-top:10px;gap:6px">${im.slice(1, 4).map((x, k) => `<img src="${x}" alt="" data-a="lb" data-g="proj:${pi}" data-i="${k + 1}" style="width:64px;height:48px;object-fit:cover;border-radius:8px;cursor:zoom-in">`).join("")}</div>` : ""}</div></div>` };
+            const heroStd = `<div class="wh" style="background:${bg};background-size:cover;background-position:center"><div><div class="ey">${esc(c.ckind || "Company")}${c.ind ? " · " + esc(c.ind) : ""}</div><h1>${esc(c.tag || c.n)}</h1><p>${esc((c.about || "").slice(0, 170))}</p>
+  <button class="wb" data-a="scr" data-v="sx-${P.length ? "projects" : "about"}">${P.length ? "Explore our work" : "About us"}</button><button class="wb o" data-a="msg" data-v="${msgv}">Get in touch</button></div>
+  <div class="wst">${stats.map(([k, v]) => `<div><b>${esc(k)}</b><small>${esc(v)}</small></div>`).join("")}</div></div>`;
+            const hero = (HC[TH.hero] || (() => heroStd))({ c, P, bg, cover, stats, msgv });
+            return `<div class="web" style="--a:${A};${thv(TH)}">
+ <div class="wn"><span class="lo">${okImg(c.logo) ? `<img src="${c.logo}" alt="" style="width:30px;height:30px;border-radius:8px;object-fit:cover">` : `<span class="av" style="width:30px;height:30px;font-size:12px;background:${A}">${esc(c.n.split(" ").map(w => w[0]).slice(0, 2).join(""))}</span>`}${esc(c.n)}${(c.v || mine && isVer()) ? vb(1) : ""}</span><div class="lk">${nav}</div>
+  <div class="dd"><button class="ddb" aria-haspopup="true">Explore ▾</button><div class="ddp">
+   <div><h4>COMPANY</h4>${ml("about", "About us")}${ml("vision", "Vision & Mission")}${ml("team", "Our team")}</div>
+   <div><h4>WORK</h4>${ml("services", "Services")}${ml("projects", "Projects")}${ml("ach", "Achievements")}${ml("gallery", "Gallery")}</div>
+   <div><h4>JOIN</h4>${ml("careers", "Careers")}${ml("funding", "Funding")}${ml("contact", "Contact")}</div>
+   <div><div class="cd"><b>Build with us →</b><small>Talk to the founders</small><button data-a="msg" data-v="${msgv}" style="color:var(--ac2);padding:8px 0 0">Send a message</button></div>${String(c.deck || "").startsWith("https://") ? `<div class="cd"><b>Pitch deck</b><small>For investors</small><a href="${esc(c.deck)}" target="_blank" rel="noopener" style="color:var(--ac2);font-size:14px">Open deck ↗</a></div>` : ""}</div>
+  </div></div>
+  <button class="wb s" data-a="msg" data-v="${msgv}" style="margin:0">Contact us</button></div>
+ ${hero}
+ <section class="ws l" id="sx-about"><div class="wg2"><div><h2>About us</h2><p style="font-size:21px;line-height:1.5;margin:0">${esc(c.about || "Add a short description in My Company → Edit page.")}</p></div><div><h3 style="margin:0 0 6px">Company details</h3>${facts || '<div class="mu">No details yet.</div>'}</div></div></section>
+ ${av2.vision ? `<section class="ws d" id="sx-vision"><div class="wg2">${c.vision ? `<div><div class="ey" style="color:var(--ac2);letter-spacing:2px;font-size:12px">OUR VISION</div><h2 style="font-size:clamp(24px,3vw,36px)">${esc(c.vision)}</h2></div>` : ""}${c.mission ? `<div><div class="ey" style="color:var(--ac2);letter-spacing:2px;font-size:12px">OUR MISSION</div><h2 style="font-size:clamp(24px,3vw,36px)">${esc(c.mission)}</h2></div>` : ""}</div></section>` : ""}
+ ${SV.length ? `<section class="ws" id="sx-services" style="background:var(--bg)"><h2>What we do</h2>${SV.map((x, i) => `<div class="wsv"><i>0${i + 1}</i>${esc(x)}</div>`).join("")}</section>` : ""}
+ ${P.length ? `<section class="ws d" id="sx-projects"><h2>Our work</h2><div class="wg">${P.map((p, pi) => tile(p, pi)).join("")}</div></section>` : ""}
+ ${hasAch ? `<section class="ws" id="sx-ach" style="background:var(--bg)"><h2>Achievements</h2>${c.ach.split("\n").filter(x => x.trim()).map(x => `<div class="wsv" style="font-size:20px"><i>★</i>${esc(x)}</div>`).join("")}</section>` : ""}
+ ${raising ? `<section class="ws wfd" id="sx-funding"><div class="ey" style="font-size:12px;letter-spacing:2px;color:#cfd8ff">FUNDING</div><h2>Raising ${esc(c.raise || "")} · ${esc(c.fund)}</h2><p style="max-width:520px;color:#e4e7f5">We are opening conversations with investors who share our vision.</p>${String(c.deck || "").startsWith("https://") ? `<a class="wb" href="${esc(c.deck)}" target="_blank" rel="noopener">View pitch deck</a>` : ""}<button class="wb o" data-a="msg" data-v="${msgv}">Talk to the founders</button></section>` : ""}
+ ${T.length ? `<section class="ws l" id="sx-team"><h2>Meet the team</h2><div class="wg">${T.map(t => `<div class="row" style="align-items:flex-start;flex-wrap:nowrap">${av(t.n)}<div><b>${esc(t.n)}</b><div class="mu">${esc(t.r)}</div>${t.bio ? `<div class="mu" style="margin-top:4px">${esc(t.bio)}</div>` : ""}</div></div>`).join("")}</div></section>` : ""}
+ <section class="ws d" id="sx-careers"><h2>Careers</h2>${J.map(j => `<div class="wrow" style="border-color:#ffffff22"><div><b style="font-size:20px">${esc(j.t)}</b> <span class="tag" style="background:var(--bd);color:var(--fg)">${esc(j.type)}</span><span class="tag" style="background:var(--bd);color:var(--fg)">${esc(j.loc)}</span><div class="mu" style="color:var(--mu2)">${esc(j.desc)}</div></div><button class="wb s" style="margin:0" data-a="apply" data-v="${esc(c.n)}|${esc(j.t)}|${c.uid || ""}">Apply</button></div>`).join("") || '<div style="color:var(--mu2)">No openings right now. Check back soon.</div>'}</section>
+ ${PH.length ? `<section class="ws" id="sx-gallery" style="background:var(--bg)"><h2>Gallery</h2><div class="wg">${PH.map(x => String(x).startsWith("g:") ? `<div class="wph">${esc(x.slice(2))}</div>` : okImg(x) ? `<div class="wph" data-a="lb" data-g="gal" data-i="${PH.filter(okImg).indexOf(x)}" style="background-image:url(${x});cursor:zoom-in"></div>` : "").join("")}</div></section>` : ""}
+ <section class="ws l" id="sx-contact"><h2>Let’s build something together.</h2><div class="wg2"><div style="font-size:18px;line-height:1.9">${c.email ? `✉️ ${esc(c.email)}<br>` : ""}${c.phone ? `📞 ${esc(c.phone)}<br>` : ""}${c.site ? `🌐 ${esc(c.site)}<br>` : ""}${c.addr ? `📍 ${esc(c.addr)}` : ""}</div><div><button class="wb k" data-a="msg" data-v="${msgv}">Send us a message</button></div></div></section>
+ <div style="padding:22px 28px;color:var(--mu2);font-size:13px;background:var(--bg)">© ${esc(c.n)} · ${rg.length ? esc(rg.join(" · ")) + " · " : ""}Built on FounderBridge</div></div>`
+        }
+        function draw() {
+            document.body.classList.toggle("pro", isPro()); applyPal(); $("#palp").innerHTML = "<h3>App colours</h3><div>" + Object.entries(PAL).map(([k, P]) => `<button class="pd" style="background:linear-gradient(135deg,${P.pr},${P.pk});${(PAL[S.me.pal] ? S.me.pal : "aurora") == k ? "outline:2px solid #fff;outline-offset:2px" : ""}" data-a="pal" data-v="${k}" title="${P.n}"></button>`).join("") + "</div>";
+            $("#nav").innerHTML = TB().map(([k, l]) => `<button class="${S.tab == k ? "on" : ""}" data-t="${k}">${isPro() ? (IC[k] || "") + " " : ""}${l}</button>`).join("");
+            const u = S.notes.filter(n => n.u).length; $("#nc").textContent = u || ""; $("#nc").style.display = u ? "" : "none";
+            $("#pop").innerHTML = `<h3>Notifications</h3>` + S.notes.map(n => `<div class="it">${n.u ? "● " : ""}${esc(n.x)}</div>`).join("");
+            $("#app").innerHTML = S.view ? `<button class="btn s g" data-a="back">← Back</button><div style="margin-top:12px">${S.view._p ? psite(S.view._p) : S.view._pf ? ipfView(S.view._pf) : site(S.view)}</div>` : V[S.tab](); persist(); auth(); const mg = document.querySelector(".msgs"); if (mg) mg.scrollTop = mg.scrollHeight
+        }
+        const V = {
+            home() {
+                const d = S.tasks.filter(t => t[1]).length, p = Math.round(d / S.tasks.length * 100);
+                const chk = isSU() ? `<div class="card" style="--a:#60a5fa"><h3>🚀 Startup launch checklist</h3><div class="bar"><i style="width:${p}%"></i></div><div class="mu" style="margin:6px 0">${p}% complete</div>${S.tasks.map((t, i) => `<div class="${t[1] ? "done" : ""}" style="cursor:pointer" data-a="tk" data-i="${i}">${t[1] ? "✅" : "⬜"} ${esc(t[0])}</div>`).join("")}<h3 style="margin-top:14px">📅 Today’s checklist</h3>${(S.daily.d != dd(0) && (S.daily = { d: dd(0), done: [0, 0, 0, 0, 0] }), DLY()).map((x, i) => `<div class="${S.daily.done[i] ? "done" : ""}" style="cursor:pointer" data-a="dly" data-i="${i}">${S.daily.done[i] ? "✅" : "⬜"} ${x}</div>`).join("")}</div>` : `<div class="card" style="--a:#60a5fa"><h3>🚀 Launch checklist</h3><div class="mu">Only for registered startups. Switch your account type to “Startup founder” in Profile to unlock it.</div></div>`;
+                return `<div class="hero" style="--a:#3b82f6;margin-bottom:14px;padding:22px"><h1 style="font-size:24px">Welcome back, ${esc(S.me.name.split(" ")[0])} 👋</h1><div>${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })} · <i>“${dailyQuote()}”</i> ${isVer() ? "✔ Verified" : '<a data-t="plans" style="color:#fff;text-decoration:underline;cursor:pointer">Go Pro (₹199/month) to get verified</a>'}</div></div><div class="row" style="margin-bottom:14px"><button class="btn s g" data-t="ideas">💡 Share an idea</button><button class="btn s g" data-t="meet">📅 Schedule a meetup</button><button class="btn s g" data-a="goinv">💼 Find investors</button><button class="btn s g" data-t="msg">💬 Messages & calls</button></div><div class="stat"><div style="background:linear-gradient(135deg,var(--pr),var(--pk))">${S.people.filter(p => p.c).length + 2}<small>Connections</small></div><div style="background:linear-gradient(135deg,var(--pk),var(--pr))">${MEETS().filter(m => m.on).length}<small>Meetups joined</small></div><div style="background:linear-gradient(135deg,var(--p3,#1d4ed8),var(--pr))">${S.todo.filter(t => !t.d).length}<small>Open to-dos</small></div><div style="background:linear-gradient(135deg,var(--pr),var(--p3,#1d4ed8))">${S.company.resumes.length}<small>Applications</small></div></div>
+ <div class="two"><div class="col">${(() => { const r = MEETS().filter(m => m.on && (m.date == dd(0) || m.date == dd(1))); return r.length ? `<div class="card" style="--a:#0ea5e9"><h3>⏰ Starting soon</h3>${r.map(m => `<div class="it"><b>${esc(m.t)}</b> · ${fmt(m.date, m.time)}</div>`).join("")}</div>` : "" })()}${(() => { const c = FEED().filter(f => f.kind == "competition"); return c.length ? `<div><h3>🏆 Competitions & opportunities</h3><div class="cmp">${c.map(f => `<div class="it2">${f.img ? `<img src="${f.img}" alt="">` : `<div class="ph0">🏆</div>`}<div style="padding:10px"><b>${esc(f.title)}</b><div class="mu">${f.deadline ? "Last date: " + fmt(f.deadline) + " · " : ""}${left(f)}</div>${String(f.link).startsWith("https://") ? `<a class="btn s" style="margin-top:8px" target="_blank" rel="noopener" href="${esc(f.link)}">Register ↗</a>` : ""}</div></div>`).join("")}</div></div>` : "" })()}
+ <div class="card"><h3>What’s happening, ${esc(S.me.name.split(" ")[0])}?</h3><textarea id="up" rows="2" placeholder="Share a message or daily update…">${esc(P.tx)}</textarea>${P.img ? `<img class="pimg" src="${P.img}" alt="">` : ""}<div class="row" style="margin-top:8px"><label class="btn s g" style="margin:0;cursor:pointer">📷 ${P.kind == "competition" ? "Brochure" : "Photo"}<input type="file" accept="image/*" id="pf" hidden></label><select data-pf="kind" style="width:auto"><option value="update" ${P.kind == "update" ? "selected" : ""}>Update</option><option value="competition" ${P.kind == "competition" ? "selected" : ""}>🏆 Competition</option></select><button class="btn s" data-a="post">Post</button></div>
+ ${P.kind == "competition" ? `<div class="grid" style="margin-top:8px"><div><label>Competition name</label><input data-pf="title" value="${esc(P.title)}"></div><div><label>Last date to apply</label><input type="date" data-pf="deadline" value="${esc(P.deadline)}"></div><div><label>Registration link (https://…)</label><input data-pf="link" value="${esc(P.link)}"></div></div>` : ""}
+ <div class="row" style="margin-top:10px"><span class="mu">Show from</span><input type="datetime-local" data-pf="from" value="${esc(P.from)}" style="width:auto"><span class="mu">for</span><select data-pf="dur" style="width:auto">${[["24", "24 hours"], ["72", "3 days"], ["168", "7 days"]].concat(P.kind == "competition" ? [["deadline", "Until last date"]] : []).map(([v, l]) => `<option value="${v}" ${P.dur == v ? "selected" : ""}>${l}</option>`).join("")}</select></div><div class="mu" style="margin-top:6px">Posts disappear automatically after the visible time. Leave “Show from” empty to post now.</div></div>
+ ${withAd(FEED(), (f, i) => `<div class="card" style="--a:${col(f.by)}"><div class="row">${av(f.by)}<div><b>${esc(f.by)}</b><div class="mu">${f.tm == "now" ? "just now" : f.tm + " ago"} · ⏳ ${left(f)}${f.from > NOW() ? " · 🕒 Scheduled" : ""}</div></div></div>${f.kind == "competition" ? `<span class="tag">🏆 Competition</span><h3>${esc(f.title)}</h3>${f.deadline ? `<div class="mu">Last date: ${fmt(f.deadline)}</div>` : ""}` : ""}<p>${esc(f.tx)}</p>${f.kind == "competition" && String(f.link).startsWith("https://") ? `<a class="btn s" target="_blank" rel="noopener" href="${esc(f.link)}">Register / details ↗</a> ` : ""}${f.img ? `<img class="pimg" src="${f.img}" alt="">` : ""}<button class="btn s g" data-a="like" data-i="${i}">${f.l ? "❤️" : "🤍"} ${f.lk}</button></div>`).join("")}</div>
+ <div class="col">${adsPanel()}${chk}
+ <div class="card" style="--a:#0ea5e9"><h3>📝 To-do list</h3><div class="row" style="flex-wrap:nowrap"><input id="td" placeholder="Add a task…"><button class="btn s" data-a="addtd">Add</button></div>${S.todo.map((t, i) => `<div class="it row sp"><label style="margin:0;display:flex;gap:8px;color:var(--tx)" class="${t.d ? "done" : ""}"><input type="checkbox" style="width:auto" data-a="td" data-i="${i}" ${t.d ? "checked" : ""}>${esc(t.t)}</label><button class="btn s g" data-a="deltd" data-i="${i}" aria-label="Delete">✕</button></div>`).join("") || '<div class="mu">Nothing to do. 🎉</div>'}</div>
+ <div class="card" style="--a:#60a5fa"><h3>📅 Today’s meetups</h3>${MEETS().filter(m => m.date == dd(0)).map(m => `<div class="it"><b>${esc(m.t)}</b><div class="mu">${fmt(m.date, m.time)} · ${m.kind}</div></div>`).join("") || '<div class="mu">None today.</div>'}</div></div></div>`
+            },
+            discover() {
+                const L = S.dtab == "Investors" ? (INVS().map((p, i) => `<div class="card col" style="--a:${col(p.n)}"><div class="row">${av(p.n, p.photo)}<div><b>${esc(p.n)}${vb(p.v)}</b><div class="mu">${esc(p.type)} · ${esc(p.loc || "")}</div></div></div><div class="mu">${esc(p.bio)}</div><div><b style="font-size:13px">Ticket size:</b> ${esc(p.ticket || "—")}</div><div>${p.sec.map(x => `<span class="tag">${esc(x)}</span>`).join("")}${p.stg.map(x => `<span class="tag">🚀 ${esc(x)}</span>`).join("")}</div>${p.port.length ? `<div class="mu"><b>Portfolio:</b> ${p.port.map(x => esc(x)).join(", ")}</div>` : ""}<div class="row"><button class="btn s ${p.c ? "g" : ""}" data-a="intro" data-i="${i}">${p.c ? "Intro requested ✓" : "Request intro"}</button><button class="btn s g" data-a="iv" data-i="${i}">View profile</button><button class="btn s g" data-a="ipv" data-i="${i}">View portfolio</button></div></div>`)) : S.dtab == "People" ? PEOPLE().map((p, i) => `<div class="card col" style="--a:${col(p.n)}"><div class="row">${av(p.n, p.photo)}<div><b>${esc(p.n)}${vb(p.v)}</b><div class="mu">${esc(p.r)} · ${esc(p.loc)}</div></div></div><div class="mu">${esc(p.bio)}</div><div><b style="font-size:13px">Looking for:</b> ${esc(p.look)}</div><div>${p.t.map(x => `<span class="tag">${x}</span>`).join("")}</div><div class="row"><button class="btn s ${p.c ? "g" : ""}" data-a="conp" data-i="${i}">${p.c ? "Requested ✓" : "Connect"}</button><button class="btn s g" data-a="pv" data-i="${i}">View profile</button></div></div>`)
+                    : allCos().map((p, i) => `<div class="card col" style="--a:${p.color}"><div class="row">${av(p.n, p.logo)}<div><b>${esc(p.n)}${vb(p.v)}</b>${p == S.company ? " <span class='tag'>You</span>" : ""}<div class="mu">${esc(p.tag)}</div></div></div><div class="mu">${esc(p.about)}</div><div>${p.svc.map(s => `<span class="tag">${esc(s)}</span>`).join("")}</div>${p.fund && p.fund != "Not raising" ? `<div><span class="tag">💰 Raising · ${esc(p.fund)}${p.raise ? " · " + esc(p.raise) : ""}</span></div>` : ""}<div class="row"><button class="btn s" data-a="visit" data-i="${i}">🌐 Visit site</button>${p.c == null ? "" : `<button class="btn s g" data-a="conc" data-i="${i}">${p.c ? "Following ✓" : "Follow"}</button>`}</div></div>`);
+                return `<h2>Discover</h2><div class="mu" style="margin-bottom:8px">✔ Verified accounts appear first and get higher daily connection limits. <a data-t="plans" style="cursor:pointer;text-decoration:underline">Get verified</a></div><input id="q" placeholder="Search founders, skills, companies…"><div class="sub">${["People", "Companies", "Investors"].map(x => `<button class="${S.dtab == x ? "on" : ""}" data-a="dt" data-v="${x}">${x}</button>`).join("")}</div>${S.dtab == "Investors" ? `<select data-a="fstg" style="max-width:220px;margin-bottom:12px">${["All", "Idea", "Pre-seed", "Seed", "Series A"].map(x => `<option ${S.fstg == x ? "selected" : ""}>${x}</option>`).join("")}</select>` : ""}<div class="grid">${adList(L).join("") || '<div class="mu">No investors match this stage yet.</div>'}</div>`
+            },
+            ideas() { return `<div class="row sp"><h2>Ideas & Projects</h2><button class="btn s" data-a="new" data-v="idea">+ Share idea</button></div><div class="grid">${IDEAS().map(i => `<div class="card col" style="--a:${col(i.t)}"><div><span class="tag">${i.type}</span></div><h3>${esc(i.t)}</h3><div>${esc(i.d)}</div><div class="mu">👤 ${esc(i.by)} · 📍 ${esc(i.from)}<br>👥 Team: ${esc(i.team)}</div><div><b style="font-size:13px">Wants:</b> ${esc(i.ask)}</div><div>${i.need.map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div><div class="row sp"><button class="btn s ${i.on ? "g" : ""}" data-a="join" data-i="${i.id}">${i.on ? "Request sent ✓" : "Join / Collaborate"}</button><span class="mu">${i.reqs} requests</span></div></div>`).join("")}</div>` },
+            meet() {
+                const t = dd(0), f = S.mf || "Upcoming", mine = m => (m.uid && m.uid == UID) || m.host == S.me.name;
+                let L = MEETS().filter(m => m.date >= t).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+                if (f == "Today") L = L.filter(m => m.date == t); if (f == "Joined") L = L.filter(m => m.on); if (f == "Hosting") L = L.filter(mine);
+                const day = m => new Date(m.date + "T12:00"), rel = m => { const d = Math.round((day(m) - new Date(t + "T12:00")) / 864e5); return d == 0 ? "Today" : d == 1 ? "Tomorrow" : "in " + d + " days" };
+                return `<div class="row sp"><h2>Meetups</h2><button class="btn s" data-a="new" data-v="meet">+ Schedule</button></div><div class="sub">${["Upcoming", "Today", "Joined", "Hosting"].map(x => `<button class="${f == x ? "on" : ""}" data-a="mf" data-v="${x}">${x}</button>`).join("")}</div><div class="grid">${L.map(m => { const host = mine(m), go = m.on || host; return `<div class="card col" style="--a:${m.kind == "Video call" ? "#38bdf8" : "#3b82f6"}"><div class="row" style="flex-wrap:nowrap;align-items:flex-start"><div class="dbox"><b>${day(m).getDate()}</b><span>${day(m).toLocaleDateString("en-IN", { month: "short" })}</span></div><div style="flex:1"><div class="row sp"><span class="tag">${m.kind}${m.plat ? " · " + esc(m.plat) : ""}</span><b style="font-size:12px;color:#7dd3fc">${rel(m)}</b></div><h3 style="margin:4px 0">${esc(m.t)}</h3><div class="mu">🕒 ${esc((fmt(m.date, m.time).split(", ")[1]) || "")} · Host: ${esc(m.host)}</div></div></div><div>${esc(m.desc)}</div><div class="row">${host ? '<span class="tag">You’re hosting</span>' : `<button class="btn s ${m.on ? "g" : ""}" data-a="apm" data-i="${m.id}">${m.on ? "Applied ✓" : "Apply to join"}</button>`}${go && m.kind == "Video call" ? (m.link ? `<a class="btn s" target="_blank" rel="noopener" href="${esc(m.link)}">🎥 Join on ${m.plat == "Zoom" ? "Zoom" : m.plat == "Other" ? "call" : "Google Meet"}</a>` : '<span class="mu">Link coming soon</span>') : ""}${go ? `<a class="btn s g" target="_blank" rel="noopener" href="${gcal(m)}">📆 Add to calendar</a>` : ""}</div></div>` }).join("") || '<div class="mu">No meetups here yet. Schedule one!</div>'}</div>`
+            },
+            hub() {
+                const ind = S.hi || "All", co = S.me.type == "Startup founder" || S.me.type == "Company owner", F = HUBLIST();
+                return `<div class="hero" style="--a:#3b82f6;margin-bottom:14px;padding:22px"><h1 style="font-size:26px;margin:0 0 4px">🤝 Founders Hub</h1><div>A community of founders. Create your founder card, meet peers, share what you are building and find help.</div></div>
+  ${co ? `<div class="card col" style="--a:#38bdf8"><div class="row sp"><h3 style="margin:0">Your founder card</h3>${S.me.hub ? '<span class="tag">✔ Member</span>' : '<span class="tag">Not joined</span>'}</div>${fcard(myFounder(), -1, 1)}<div class="row"><button class="btn s ${S.me.hub ? "g" : ""}" data-a="hubjoin">${S.me.hub ? "Leave the Hub" : "Join the Founders Hub"}</button><button class="btn s g" data-a="new" data-v="prof">Edit my details</button></div></div>` : `<div class="card"><div class="mu">Founder cards are made from company profiles. Create a company profile to join the Hub. You can still browse and connect with founders.</div></div>`}
+  <div class="row" style="margin:14px 0"><input id="hq" placeholder="Search founders, companies, cities…" style="max-width:320px"><select data-a="hind" style="width:auto">${["All"].concat(IND).map(x => `<option ${ind == x ? "selected" : ""}>${x}</option>`).join("")}</select><span class="mu">${F.length} founders</span></div>
+  <div class="grid">${F.map((f, i) => fcard(f, i)).join("") || '<div class="mu">No founders in this industry yet.</div>'}</div>`
+            },
+            work() {
+                const D = DOCS(); if (S.wd) { const d = D.mine.concat(D.shared).find(x => x.id == S.wd); if (d) return wedit(d); S.wd = "" }
+                return `<div class="row sp"><h2>Workspace</h2><button class="btn s" data-a="wnew">+ New document</button></div><div class="mu" style="margin-bottom:10px">Write plans, notes and updates, then share them with other members to view or edit.</div><div class="sub">${DT.map(([k, l]) => `<button data-a="wnew" data-v="${k}">${l}</button>`).join("")}</div><h3>My documents (${D.mine.length})</h3><div class="grid">${D.mine.map(dcard).join("") || '<div class="mu">No documents yet. Start from a template above.</div>'}</div>${D.shared.length ? `<h3 style="margin-top:18px">Shared with me (${D.shared.length})</h3><div class="grid">${D.shared.map(dcard).join("")}</div>` : ""}`
+            },
+            plans() {
+                const pro = isPro(), V = vItems(), done = V.filter(x => x[1]).length, all = done == V.length, fix = { prof: '<button class="btn s g" data-a="new" data-v="prof">Fix</button>', about: '<button class="btn s g" data-a="new" data-v="about">Fix</button>', inv: '<button class="btn s g" data-a="new" data-v="inv">Fix</button>', team: '<button class="btn s g" data-a="gct" data-v="Team">Fix</button>', photo: '<label class="btn s g" style="margin:0;cursor:pointer">Add<input type="file" accept="image/*" hidden data-a="pph"></label>', plan: '<button class="btn s" data-a="plan" data-v="pro">Get Pro</button>', logo: '<label class="btn s g" style="margin:0;cursor:pointer">Add<input type="file" accept="image/*" hidden data-a="clg"></label>' };
+                return `<h2>FounderBridge Pro</h2><div class="mu" style="margin-bottom:12px">Preview: no payment is taken. Real payments need the hosted backend and a gateway such as Razorpay.</div>
+ <div class="grid"><div class="card col" style="--a:#38bdf8"><div class="row sp"><h3 style="margin:0">Pro</h3>${pro ? '<span class="tag">Current plan</span>' : ""}</div><div style="font-size:34px;font-weight:700">₹199<span class="mu" style="font-size:14px"> / month</span></div><div class="mu">Everything below. The verification badge is included.</div>${["Verified badge once your details are complete", "A completely different Pro look: sidebar layout and glass cards", "9 company-page layouts, 9 profile layouts and 10 app colour schemes", "No sponsored cards between your updates", "15 connection requests a day (25 when verified)", "15 investor intros a month (30 when verified)", "Shown first in Discover when verified", "Profile analytics (coming soon)"].map(x => `<div>✅ ${x}</div>`).join("")}<button class="btn ${pro ? "g" : ""}" data-a="plan" data-v="${pro ? "free" : "pro"}">${pro ? "Cancel Pro (switch to Free)" : "Get Pro · ₹199 / month"}</button></div>
+ <div class="card col" style="--a:#64748b"><div class="row sp"><h3 style="margin:0">Free</h3>${!pro ? '<span class="tag">Current plan</span>' : ""}</div><div style="font-size:34px;font-weight:700">₹0</div>${["Profile, company page, posts and meetups", "Default look (layouts and colours cannot be changed)", "5 connection requests a day", "3 investor intros a month", "A small sponsored card after every 2 updates"].map(x => `<div>✔ ${x}</div>`).join("")}</div></div>
+ <div class="card col" style="margin-top:16px;--a:#3b82f6"><div class="row sp"><h3 style="margin:0">✔ Get your Verified badge</h3>${isVer() ? '<span class="tag">✔ Verified</span>' : `<span class="tag">${done}/${V.length} complete</span>`}</div><div class="bar"><i style="width:${Math.round(done / V.length * 100)}%"></i></div><div class="mu">The badge is included with Pro. It is approved when every item below is complete and in the right format. Verified accounts are shown first in Discover and get higher limits.</div>${V.map(([l, ok, f]) => `<div class="it row sp"><div>${ok ? "✅" : "⬜"} ${l}</div>${ok ? "" : (fix[f] || "")}</div>`).join("")}<div><button class="btn" data-a="vsubmit" ${all && !isVer() ? "" : 'disabled style="opacity:.5"'}>${isVer() ? "Verified ✔" : "Submit for verification"}</button></div><div class="mu">We check that details are complete and registration numbers match the official format (Udyam, CIN, GST). Live checks against government records need the hosted backend.</div></div>
+ <div class="card col" style="margin-top:16px;--a:#f59e0b"><h3 style="margin:0">📣 Advertise on FounderBridge</h3><div class="mu">Free and Pro accounts can both publish ads. Your ad shows in the Ads panel on Home for 7, 14 or 30 days, and as a small sponsored card after every 2 updates in free users’ feeds and in Discover.</div><div><button class="btn s" data-a="new" data-v="ad">Publish an ad</button></div></div>`},
+            company() {
+                const c = S.company, LGB = okImg(c.logo) ? "" : `<div class="card" style="--a:#ef4444;margin-bottom:12px"><b>🏢 Company logo is mandatory</b><div class="mu">Upload your logo to publish the page and join the Founders Hub.</div><label class="btn s" style="cursor:pointer;margin-top:8px">Upload logo<input type="file" accept="image/*" hidden data-a="clg"></label></div>`, T = ["Preview", "Dashboard", "Projects", "Edit page", "Jobs", "Applications", "Team", "Photos", "Mail"]; let b = "";
+                if (S.ctab == "Preview") b = themeBar(c.theme, "co") + `<div class="row sp" style="margin-bottom:12px"><span class="mu">${c.pub ? "✅ Published. Visible in Discover." : "Draft. Only you can see it."}</span><button class="btn s" data-a="pub">${c.pub ? "Unpublish" : "🚀 Publish site"}</button></div>` + site(c, 1);
+                if (S.ctab == "Dashboard") { const st = ["New", "Shortlisted", "Interview", "Hired", "Rejected"], n = k => c.resumes.filter(r => r.st == k).length, mx = Math.max(1, ...st.map(n)), cl = ["#3b82f6", "#38bdf8", "#0ea5e9", "#60a5fa", "#e2e8f0"]; b = `<div class="stat"><div style="background:linear-gradient(135deg,var(--pr),var(--pk))">${c.jobs.length}<small>Open jobs</small></div><div style="background:linear-gradient(135deg,var(--pk),var(--pr))">${c.resumes.length}<small>Applications</small></div><div style="background:linear-gradient(135deg,var(--p3,#1d4ed8),var(--pr))">${c.team.length}<small>Team members</small></div><div style="background:linear-gradient(135deg,var(--pr),var(--p3,#1d4ed8))">${c.pub ? "Live" : "Draft"}<small>Site status</small></div></div><h3>Hiring pipeline</h3>${st.map((k, i) => `<div class="row" style="flex-wrap:nowrap"><span style="width:90px" class="mu">${k}</span><div class="bar" style="flex:1"><i style="width:${n(k) / mx * 100}%;background:${cl[i]}"></i></div><b>${n(k)}</b></div>`).join("")}` }
+                if (S.ctab == "Projects") b = `<button class="btn s" data-a="new" data-v="proj">+ Add project</button><div class="grid" style="margin-top:12px">${(c.projects || []).map((p, i) => `<div class="card col"><span class="tag">${esc(p.st)}</span><h3>${esc(p.t)}</h3><div class="mu">${esc(p.d)}</div>${(p.imgs || []).map((x, k) => `<img class="pimg" src="${x}" alt="" data-a="lb" data-g="proj:${i}" data-i="${k}" style="cursor:zoom-in">`).join("")}<label class="btn s g" style="cursor:pointer;margin:0">📷 Add photo<input type="file" accept="image/*" hidden data-a="pp" data-i="${i}"></label></div>`).join("") || '<div class="mu">No projects yet. Add what you are building and what you have completed.</div>'}</div>`;
+                if (S.ctab == "Edit page") b = `<div class="row" style="margin:0 0 12px">${okImg(c.logo) ? `<img src="${c.logo}" alt="" style="width:64px;height:64px;border-radius:14px;object-fit:cover">` : '<span class="tag">Company logo missing</span>'}<label class="btn s g" style="cursor:pointer;margin:0">Upload company logo *<input type="file" accept="image/*" hidden data-a="clg"></label></div><button class="btn" data-a="new" data-v="about">Edit company page details</button><p class="mu">Change the name, tagline, about text, services, contact info and theme colour. Then check Preview.</p>`;
+                if (S.ctab == "Jobs") b = `<button class="btn s" data-a="new" data-v="job">+ Post job</button>` + c.jobs.map(j => `<div class="it"><b>${esc(j.t)}</b> <span class="tag">${esc(j.type)}</span><span class="tag">${esc(j.loc)}</span><div class="mu">${esc(j.desc)}</div></div>`).join("");
+                if (S.ctab == "Applications") b = c.resumes.map((r, i) => `<div class="it row sp">${av(r.n)}<div style="flex:1"><b>${esc(r.n)}</b><div class="mu">${esc(r.role)}</div></div><select style="width:auto" data-a="rs" data-i="${i}">${["New", "Shortlisted", "Interview", "Hired", "Rejected"].map(s => `<option ${s == r.st ? "selected" : ""}>${s}</option>`).join("")}</select></div>`).join("");
+                if (S.ctab == "Team") b = `<button class="btn s" data-a="new" data-v="emp">+ Add employee</button>` + c.team.map(t => `<div class="it row">${av(t.n)}<div><b>${esc(t.n)}</b> · ${esc(t.r)}<div class="mu">${esc(t.e || "")} ${esc(t.bio || "")}</div></div></div>`).join("");
+                if (S.ctab == "Photos") b = `<label>Upload photos (office, team, product)</label><input type="file" accept="image/*" multiple id="ph"><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-top:10px">${c.photos.map((p, k) => `<div class="ph" data-a="lb" data-g="gal" data-i="${k}" style="background-image:url(${p});cursor:zoom-in"></div>`).join("")}</div>`;
+                if (S.ctab == "Mail") b = `<button class="btn s" data-a="new" data-v="mail">✉ Compose</button><h3 style="margin-top:12px">Sent</h3>` + c.sent.map(m => `<div class="it"><b>${esc(m.s)}</b><div class="mu">To ${esc(m.to)}</div><div>${esc(m.b)}</div></div>`).join("");
+                return LGB + `<h2>My Company</h2><div class="sub">${T.map(t => `<button class="${S.ctab == t ? "on" : ""}" data-a="ct" data-v="${t}">${t}</button>`).join("")}</div>${b}`
+            },
+            msg() {
+                const cs = PEOPLE().filter(p => p.c);
+                if (!cs.length) return `<h2>Messages</h2><div class="card col"><div>No conversations yet.</div><div class="mu">Connect with people or investors in Discover, then chat and call from here.</div><div><button class="btn s" data-t="discover">Find people</button></div></div>`;
+                const p = cs.find(x => x.n == S.cw) || cs[0], thread = x => x.uid ? S.chats.filter(m => m.pair == [UID, x.uid].sort().join("_")).sort((a, b) => a.ts - b.ts) : (S.lc[x.n] || []), last = x => { const t = thread(x); return t.length ? t[t.length - 1].tx : "Say hello 👋" }, ms = thread(p), hm = t => t ? new Date(t).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" }) : "";
+                return `<h2>Messages</h2><div class="row" style="align-items:stretch;gap:14px"><div class="card col" style="flex:1 1 230px;max-height:600px;overflow:auto"><input id="mq" placeholder="Search chats…">${cs.map(x => `<button class="cv ${x == p ? "on" : ""}" data-a="chat" data-v="${esc(x.n)}">${av(x.n, x.photo)}<div style="min-width:0"><b>${esc(x.n)}${vb(x.v)}</b><div class="mu ell">${esc(last(x))}</div></div></button>`).join("")}</div>
+ <div class="card col" style="flex:3 1 320px"><div class="row sp"><div class="row">${av(p.n, p.photo)}<div><b>${esc(p.n)}${vb(p.v)}</b><div class="mu">${esc(p.r)}</div></div></div><div class="row"><a class="so2" target="_blank" rel="noopener" href="https://meet.google.com/new" title="Start Google Meet">📹</a><a class="so2" target="_blank" rel="noopener" href="https://zoom.us/meeting/schedule" title="Start Zoom">🎥</a></div></div>
+ <div class="mu">To call: start a meeting, paste its link below and tap 📞.</div>
+ <div class="col msgs" style="min-height:260px;max-height:380px;overflow:auto">${ms.map(m => { const me = m.from == UID || m.from == "me"; return `<div style="align-self:${me ? "flex-end" : "flex-start"};max-width:80%"><div style="background:${me ? "var(--pr)" : "var(--bg)"};color:${me ? "#fff" : "var(--tx)"};padding:7px 12px;border-radius:14px">${linkify(m.tx)}</div><div class="mu" style="font-size:11px;text-align:${me ? "right" : "left"}">${hm(m.ts)}</div></div>` }).join("") || '<div class="mu">No messages yet. Say hello 👋</div>'}</div>
+ <div class="row" style="gap:6px">${["👋 Hi!", "Can we schedule a call?", "Could you share your deck?", "Thank you!"].map(t => `<button class="chip" data-a="qr" data-v="${esc(t)}">${esc(t)}</button>`).join("")}</div>
+ <div class="row" style="flex-wrap:nowrap"><input id="cm" placeholder="Type a message… (Enter to send)"><button class="btn s" data-a="send">Send</button><button class="btn s g" data-a="invite" title="Send call invite">📞</button></div></div></div>`},
+            profile() { return (okImg(S.me.photo) ? "" : `<div class="card" style="--a:#ef4444;margin-bottom:12px"><b>📷 Profile photo is mandatory</b><div class="mu">Add a clear photo of yourself. It shows on your profile, in Discover and on cards.</div><label class="btn s" style="cursor:pointer;margin-top:8px">Upload photo<input type="file" accept="image/*" hidden data-a="pph"></label></div>`) + themeBar(S.me.theme, "me") + `<div class="row sp" style="margin-bottom:12px"><div class="mu">Your public profile · what others see</div><button class="btn s g" data-a="out">Sign out</button></div>` + psite(ownProf()) }
+        };
+        const F = {
+            idea: ["Share an idea or project", [["t", "Title"], ["d", "Short details", "ta"], ["from", "Where are you from?"], ["team", "Who is working on it?"], ["ask", "What do you want from collaborators?", "ta"], ["need", "Skills needed (comma separated)"]], f => { shareIdea({ id: Date.now(), by: S.me.name, uid: UID, ts: Date.now(), t: f.t, d: f.d, from: f.from, team: f.team, ask: f.ask, need: f.need.split(",").map(x => x.trim()).filter(Boolean), type: "Idea", reqs: 0, on: 0 }); S.tab = "ideas" }],
+            join: ["Request to join or collaborate", [["n", "Your name", , () => S.me.name], ["e", "Email"], ["r", "Your skills or role"], ["w", "Why do you want to join?", "ta"], ["l", "Link to your work (optional)"]], (f, id) => { const i = IDEAS().find(x => x.id == id); i.on = 1; i.reqs++; share("requests", { k: "idea", tid: String(id), to: i.uid || null, from: UID, n: f.n, msg: f.n + " wants to join your idea “" + i.t + "” (" + f.r + ")" }, () => { }); note("Your request to join “" + i.t + "” was sent to " + i.by) }],
+            meet: ["Schedule a meetup or call", [["t", "Title"], ["date", "Date", "date", () => dd(1)], ["time", "Time", "time", () => "18:00"], ["kind", "Type", "sel:Video call,In person"], ["plat", "Platform", "sel:Google Meet,Zoom,Other"], ["link", "Meeting link (https://…)"], ["desc", "Description", "ta"]], f => { shareMeet({ id: Date.now(), uid: UID, t: f.t, date: f.date, time: f.time, kind: f.kind, plat: f.plat, link: (f.link || "").startsWith("https://") ? f.link : "", host: S.me.name, desc: f.desc, on: 1 }); S.tab = "meet" }],
+            apm: ["Apply to join this meetup", [["n", "Your name", , () => S.me.name], ["e", "Email"], ["w", "What would you like to get from it?", "ta"]], (f, id) => { const m = MEETS().find(x => x.id == id); m.on = 1; ck(6); share("requests", { k: "meet", tid: String(id), to: m.uid || null, from: UID, n: f.n, msg: f.n + " applied to join “" + m.t + "”" }, () => { }); note("Applied to “" + m.t + "”. Host will confirm.") }],
+            job: ["Post a job", [["t", "Job title"], ["type", "Type", "sel:Full-time,Part-time,Internship,Contract"], ["loc", "Location"], ["desc", "Job description", "ta"]], f => { S.company.jobs.unshift(f); ck(2); S.ctab = "Jobs" }],
+            proj: ["Add project", [["t", "Project name"], ["st", "Status", "sel:Ongoing,Completed"], ["d", "Details", "ta"]], f => { (S.company.projects = S.company.projects || []).unshift({ ...f, imgs: [] }); ck(15); S.ctab = "Projects" }],
+            intro: ["Request an introduction", [["n", "Your name", , () => S.me.name], ["w", "Your pitch in 2–3 lines", "ta"], ["l", "Pitch deck or website link (https://…)"]], (f, id) => { const v = INVS()[id]; if (!useQ("i")) return; v.c = 1; share("requests", { k: "intro", tid: String(v.uid || v.n), to: v.uid || null, from: UID, n: f.n, msg: f.n + " (" + (S.me.type == "Investor" ? S.me.head : S.company.n) + ") asked " + v.n + " for an intro: " + f.w + (f.l.startsWith("https://") ? " · " + f.l : "") }, () => { }); note("Intro request sent to " + v.n) }],
+            inv: ["Investor details", [["firm", "Firm or investor name"], ["type", "Investor type", "sel:Angel investor,Venture capital,Family office,Corporate / CVC,Accelerator"], ["ticket", "Ticket size (e.g. ₹10L – ₹50L)"], ["sec", "Sectors (comma separated)"], ["stg", "Stages (comma separated)"], ["port", "Past investments (comma separated)"], ["thesis", "Investment thesis (40+ characters)", "ta"], ["site", "Website or LinkedIn (https://…)"]], f => { const L = x => (x || "").split(",").map(y => y.trim()).filter(Boolean); S.me.inv = { ...(S.me.inv || {}), firm: f.firm, type: f.type, ticket: f.ticket, sec: L(f.sec), stg: L(f.stg), port: L(f.port), thesis: f.thesis, site: f.site }; if (f.thesis) S.me.bio = S.me.bio || f.thesis }],
+            ad: ["Publish an ad", [["b", "Business name"], ["u", "Website (https://…)"], ["t", "Headline (max 60 characters)"], ["d", "Short description (max 120)", "ta"], ["c", "Button text (e.g. Learn more)"], ["days", "Run for", "sel:7 days,14 days,30 days"]], f => { if (!(f.u || "").startsWith("https://") || !f.b || !f.t) return note("Ad not published: add a business name, a headline and a website starting with https://"); const d = parseInt(f.days) || 7, n = Date.now(), ad = { b: f.b.slice(0, 40), t: f.t.slice(0, 60), d: (f.d || "").slice(0, 120), u: f.u, c: (f.c || "Learn more").slice(0, 20), from: n, until: n + d * 864e5 }; share("ads", { ...ad, uid: UID }, () => S.ads.push(ad)); note("✅ Your ad is published for " + d + " days. Free users now see it in the Home feed and Discover.") }],
+            emp: ["Add employee", [["n", "Name"], ["r", "Role"], ["bio", "What they do"], ["e", "Email"]], f => { S.company.team.push(f); S.ctab = "Team" }],
+            mail: ["Compose email", [["to", "To"], ["s", "Subject"], ["b", "Message", "ta"]], f => { S.company.sent.unshift(f); S.ctab = "Mail" }],
+            about: ["Edit company page", [["n", "Company name *"], ["tag", "Tagline"], ["about", "About * (min 20 characters)", "ta"], ["svc", "Services (comma separated)"], ["site", "Website"], ["email", "Email *"], ["phone", "Phone *"], ["addr", "Address"], ["vision", "Vision"], ["mission", "Mission"], ["ind", "Industry"], ["rst", "Registration status", "sel:Not registered,In process,Registered"], ["udyam", "Udyam / MSME no."], ["cin", "CIN / MCA no."], ["gst", "GST no."], ["dpiit", "DPIIT recognised?", "sel:No,Applied,Yes"], ["hl", "Key numbers (one per line, e.g. Users: 1,200)", "ta"], ["ach", "Achievements (one per line)", "ta"], ["fund", "Funding stage", "sel:Not raising,Idea,Pre-seed,Seed,Series A"], ["raise", "Raising (e.g. ₹1 Cr)"], ["deck", "Pitch deck link (https://…)"], ["color", "Theme colour", "sel:#2563eb,#0ea5e9,#38bdf8,#1d4ed8,#6366f1"]], f => { if (!f.n || (f.about || "").length < 20 || !/@/.test(f.email || "") || (f.phone || "").replace(/\D/g, "").length < 10) return note("Company name, about (20+ characters), a valid email and a phone number are mandatory."); f.svc = f.svc.split(",").map(x => x.trim()).filter(Boolean); Object.assign(S.company, f) }],
+            prof: ["Edit profile", [["name", "Name *"], ["head", "Headline *"], ["bio", "Bio", "ta"], ["loc", "Location"], ["edu", "Education"], ["exp", "Experience"], ["int", "Interests"], ["links", "LinkedIn / portfolio link (https://…)"], ["email", "Email"], ["phone", "Contact number"], ["type", "Account type", "sel:Startup founder,Company owner,Individual"]], f => { if (!f.name || !f.head) return note("Name and headline are mandatory."); Object.assign(S.me, f) }],
+            apply: ["Apply for this job", [["n", "Your name", , () => S.me.name], ["e", "Email"], ["w", "Short note", "ta"]], (f, id) => { const q = id.split("|"); share("requests", { k: "job", tid: q[0], to: q[2] || null, from: UID, n: f.n, role: q[1], msg: f.n + " applied for " + q[1] }, () => { }); note("Application sent to " + q[0] + " for " + q[1]) }],
+            msg: ["Send a message", [["n", "Your name", , () => S.me.name], ["w", "Message", "ta"]], (f, id) => { const q = id.split("|"); share("requests", { k: "msg", tid: q[0], to: q[1] || null, from: UID, n: f.n, msg: f.n + " messaged " + q[0] + ": " + f.w }, () => { }); note("Message sent to " + q[0]) }]
+        };
+        function open(k, id) {
+            const [t, fs, fn] = F[k]; const src = k == "about" ? S.company : k == "prof" ? S.me : k == "inv" ? (S.me.inv || {}) : {};
+            $("#mbox").innerHTML = `<h2>${t}</h2>` + fs.map(([n, l, ty, df]) => { const v = src[n] ?? (df ? df() : ""); ty = ty || ""; return `<label>${l}</label>` + (ty == "ta" ? `<textarea name="${n}" rows="3">${esc(v)}</textarea>` : ty.startsWith("sel") ? `<select name="${n}">${ty.slice(4).split(",").map(o => `<option ${o == v ? "selected" : ""}>${o}</option>`).join("")}</select>` : `<input type="${ty || "text"}" name="${n}" value="${esc(v)}">`) }).join("") + (k == "meet" ? `<div class="row" style="margin-top:8px"><a class="btn s g" target="_blank" rel="noopener" href="https://meet.google.com/new">+ New Google Meet</a><a class="btn s g" target="_blank" rel="noopener" href="https://zoom.us/meeting/schedule">+ New Zoom</a></div><div class="mu">Create the meeting there, then paste its link above.</div>` : "") + `<div class="row" style="margin-top:14px"><button class="btn" id="ok">Save</button><button class="btn g" id="no">Cancel</button></div>`;
+            $("#modal").classList.add("on"); $("#no").onclick = () => $("#modal").classList.remove("on");
+            $("#ok").onclick = () => { const f = {}; $("#mbox").querySelectorAll("[name]").forEach(e => f[e.name] = e.value.trim()); fn(f, id); $("#modal").classList.remove("on"); draw() }
+        }
+        document.addEventListener("click", e => {
+            if (e.target.id == "lbx") { LB.L = []; return lbShow() }
+            { const t = e.target.closest(".web img,.web .wph[data-g],img.pimg"); if (t && !e.target.closest("#lbx")) { const U = el => el.tagName == "IMG" ? el.src : ((el.style.backgroundImage || "").match(/url\(["']?(.*?)["']?\)$/) || [])[1]; const box = t.closest(".wg") || t.parentElement, sib = [...box.querySelectorAll("img,.wph[data-g]")].filter(x => U(x) && !x.closest("#lbx")); const L = sib.map(U); LB.L = L.length ? L : [U(t)].filter(Boolean); LB.i = Math.max(0, sib.indexOf(t)); if (LB.L.length) return lbShow() } }
+            const b = e.target.closest("[data-t],[data-a],#bell,#fab,#palb"); if (!b) return;
+            if (b.id == "palb") { if (!isPro()) { S.tab = "plans"; S.view = null; return note("App colours are a Pro feature (₹199/month).") } $("#palp").classList.toggle("on"); $("#pop").classList.remove("on"); return }
+            if (b.id == "bell") { $("#pop").classList.toggle("on"); S.notes.forEach(n => n.u = 0); setTimeout(draw, 50); return }
+            if (b.id == "fab") { $("#mbox").innerHTML = `<h2>Create</h2><div class="col">${[["idea", "💡 Idea / project"], ["meet", "📅 Meetup or call"], ["job", "💼 Job post"], ["mail", "✉ Email"], ["emp", "👤 Employee"]].map(([k, l]) => `<button class="btn g" data-a="new" data-v="${k}">${l}</button>`).join("")}<button class="btn g" id="no">Close</button></div>`; $("#modal").classList.add("on"); $("#no").onclick = () => $("#modal").classList.remove("on"); return }
+            if (b.dataset.t) { S.tab = b.dataset.t; S.view = null; $("#pop").classList.remove("on"); return draw() }
+            const a = b.dataset.a, i = b.dataset.i, v = b.dataset.v;
+            if (a == "hubjoin") { if (!S.me.hub) { if (!okImg(S.me.photo)) return note("Add a profile photo first (Profile → 📷)."); S.me.hub = 1; return note("You are in the Founders Hub 🎉") } S.me.hub = 0; return note("You left the Founders Hub.") }
+            if (a == "fcn") { const f = HUBLIST()[i]; if (!f || f.c) return; if (!useQ("c")) return; f.c = 1; share("requests", { k: "connect", tid: f.uid || f.n, to: f.uid || null, from: UID, n: S.me.name, msg: S.me.name + " sent you a connection request (Founders Hub)" }, () => { }); return note("Connection request sent to " + f.n) }
+            if (a == "vcn") { const c = allCos().find(x => x.n == v); if (c) { S.view = c; return draw() } return note("This company has not published a page yet.") }
+            if (a == "wnew") { const T = TPL[v || "blank"], d = { id: "d" + Date.now().toString(36), t: T[0], b: T[1], upd: Date.now(), sh: [] }; S.docs.unshift(d); S.wd = d.id; return draw() }
+            if (a == "wopen") { S.wd = v; return draw() }
+            if (a == "wback") { S.wd = ""; return draw() }
+            if (a == "wdel") { const id = S.wd; S.docs = S.docs.filter(x => x.id != id); if (DB) DB.doc("docs/" + id).delete().catch(() => { }); S.wd = ""; return note("Document deleted") }
+            if (a == "wshare") return shareModal();
+            if (a == "wcopy") { const t = $("#wb"); if (!t) return; t.select(); try { navigator.clipboard.writeText(t.value).then(() => note("Copied to clipboard"), () => { document.execCommand("copy"); note("Copied") }) } catch (e) { document.execCommand("copy"); note("Copied") } return }
+            if (a == "wfmt") {
+                const t = $("#wb"); if (!t) return; const s0 = t.selectionStart, e0 = t.selectionEnd, v0 = t.value, sel = v0.slice(s0, e0); let ins = sel, pre = "", post = "";
+                if (v == "b") { pre = "**"; post = "**"; ins = sel || "bold" } else if (v == "i") { pre = "*"; post = "*"; ins = sel || "italic" } else if (v == "h") { pre = "\n## "; ins = sel || "Heading" } else if (v == "ul") { pre = "\n- "; ins = sel || "item" } else if (v == "ck") { pre = "\n- [ ] "; ins = sel || "task" } else if (v == "ln") { ins = sel || "https://" }
+                t.value = v0.slice(0, s0) + pre + ins + post + v0.slice(e0); t.focus(); t.setSelectionRange(s0 + pre.length, s0 + pre.length + ins.length); $("#wp").innerHTML = md(t.value); wsave(); return
+            }
+            if (a == "pcv") { const d = PD[v] || {}; $("#mbox").innerHTML = `<h2>${esc(v)}</h2><div class="mu">${esc(d.d || "Portfolio company")}</div><div style="margin:10px 0">${d.s ? `<span class="tag">${esc(d.s)}</span>` : ""}${d.g ? `<span class="tag">🚀 ${esc(d.g)}</span>` : ""}${d.y ? `<span class="tag">Invested ${esc(d.y)}</span>` : ""}</div><button class="btn g" id="no">Close</button>`; $("#modal").classList.add("on"); $("#no").onclick = () => $("#modal").classList.remove("on"); return }
+            if (a == "ipv") { const p = INVS()[i]; S.view = { _pf: { ...p, ii: i } }; return draw() }
+            if (a == "lb") { const c = curCo(), g = b.dataset.g; LB.L = (g == "gal" ? (c.photos || []) : (((c.projects || [])[+g.split(":")[1]] || {}).imgs || [])).filter(okImg); LB.i = +i || 0; return lbShow() }
+            if (a == "lbx") { if (v == "x") LB.L = []; else LB.i = (LB.i + (v == "n" ? 1 : -1) + LB.L.length) % LB.L.length; return lbShow() }
+            if (a == "th") { const w = b.dataset.w, T = THEMES[v]; if (!isPro()) { S.tab = "plans"; S.view = null; note("Colour themes are a Pro feature (₹199/month)."); return } (w == "me" ? S.me : S.company).theme = v; return draw() }
+            if (a == "pal") { if (!isPro()) return; S.me.pal = v; applyPal(); return draw() }
+            if (a == "plan") { S.me.plan = v; return note(v == "pro" ? "🎉 Pro activated: new look, themes, no ads (preview, no payment taken)" : "Switched to Free. Pro look, themes and your badge are hidden.") }
+            if (a == "vsubmit") { if (vItems().some(x => !x[1])) return note("Complete every item first."); S.me.verified = 1; S.me.vdate = dd(0); return note("✔ You are verified! Your badge is now live.") }
+            if (a == "gct") { S.tab = "company"; S.ctab = v; S.view = null; return draw() }
+            if (a == "mf") { S.mf = v; return draw() }
+            if (a == "qr") { $("#cm").value = v; document.querySelector("[data-a=send]").click(); return }
+            if (a == "pv") { const p = PEOPLE()[i]; S.view = { _p: toProf({ n: p.n, head: p.r, bio: p.bio, loc: p.loc, skills: p.t, photo: p.photo, look: p.look, uid: p.uid, pi: i, theme: p.theme, v: p.v }) }; return draw() }
+            if (a == "iv") { const p = INVS()[i]; S.view = { _p: toProf({ n: p.n, head: p.type + " · " + (p.loc || ""), bio: p.bio, loc: p.loc, photo: p.photo, isInv: 1, sec: p.sec, stg: p.stg, ticket: p.ticket, port: p.port, uid: p.uid, ii: i, theme: p.theme, v: p.v }) }; return draw() }
+            if (a == "gomsg") { S.cw = v; S.view = null; S.tab = "msg"; return draw() }
+            if (a == "goinv") { S.tab = "discover"; S.dtab = "Investors"; S.view = null; return draw() }
+            if (a == "scr") { const e = document.getElementById(v); if (e) e.scrollIntoView({ behavior: "smooth", block: "start" }); if (document.activeElement) document.activeElement.blur(); return }
+            if (a == "intro") return open("intro", i);
+            if (a && a.startsWith("au_")) return authAct(a.slice(3), v);
+            if (a == "tk") { S.tasks[i][1] = +!S.tasks[i][1]; return draw() }
+            if (a == "dly") { if (S.daily.d != dd(0)) S.daily = { d: dd(0), done: [0, 0, 0, 0, 0] }; S.daily.done[i] = +!S.daily.done[i]; return draw() }
+            if (a == "new") { return open(v) }
+            if (a == "join" || a == "apm") { const o = (a == "join" ? IDEAS() : MEETS()).find(x => x.id == i); if (o.on) return; if (UID && o.uid == UID) return note("This one is yours 🙂"); return open(a, i) }
+            if (a == "apply" || a == "msg") return open(a, v);
+            if (a == "back") { S.view = null; return draw() }
+            if (a == "visit") { S.view = allCos()[i]; return draw() }
+            if (a == "post") {
+                const x = P.tx.trim(), co = P.kind == "competition"; if (!x && !P.img && !(co && P.title)) return; const n = Date.now(); let fr = P.from ? new Date(P.from).getTime() : n; if (isNaN(fr) || fr < n) fr = n; let ut = P.dur == "deadline" && P.deadline ? new Date(P.deadline + "T23:59:59").getTime() : fr + (+P.dur || 24) * 36e5; if (!(ut > fr)) ut = fr + 864e5;
+                const doc = { by: S.me.name, uid: UID, tx: x, img: P.img, ts: n, from: fr, until: ut, kind: P.kind, title: co ? P.title : "", deadline: co ? P.deadline : "", link: (P.link || "").startsWith("https://") ? P.link : "", lk: 0 };
+                share("posts", doc, () => S.feed.unshift({ ...doc, tm: "now", l: 0 })); if (fr > n + 6e4) note("Post scheduled for " + new Date(fr).toLocaleString("en-IN"));
+                Object.assign(P, { tx: "", img: "", kind: "update", title: "", deadline: "", link: "", from: "", dur: "24" }); ck(5); return draw()
+            }
+            if (a == "like") { const f = FEED()[i]; if (f.id) { const on = !S.liked.has(f.id); on ? S.liked.add(f.id) : S.liked.delete(f.id); DB && DB.doc("posts/" + f.id).update({ lk: f.lk + (on ? 1 : -1) }).catch(() => { }); return draw() } f.l = +!f.l; f.lk += f.l ? 1 : -1; return draw() }
+            if (a == "addtd") { const x = $("#td").value.trim(); if (x) S.todo.unshift({ t: x, d: 0 }); return draw() }
+            if (a == "deltd") { S.todo.splice(i, 1); return draw() }
+            if (a == "dt") { S.dtab = v; return draw() }
+            if (a == "conp") { const p = PEOPLE()[i]; if (p.c) return; if (!useQ("c")) return; p.c = 1; if (PEOPLE().filter(q => q.c).length >= 2) ck(4); share("requests", { k: "connect", tid: p.uid || p.n, to: p.uid || null, from: UID, n: S.me.name, msg: S.me.name + " sent you a connection request" }, () => { }); return note("Connection request sent to " + p.n) }
+            if (a == "conc") { const c = allCos()[i]; c.c = 1; return note("You now follow " + c.n) }
+            if (a == "call") { const m = MEETS().find(x => x.id == i); return note("Joining “" + m.t + "” (connect your video link here)") }
+            if (a == "ct") { S.ctab = v; return draw() }
+            if (a == "chat") { S.cw = v; return draw() }
+            if (a == "out") { S.gate = true; S.au.mode = "login"; AK = ""; return draw() }
+            if (a == "send" || a == "invite") { let x = $("#cm").value.trim(); if (!x) return; if (a == "invite") { if (!x.startsWith("https://")) return note("Paste a Meet or Zoom link in the box first"); x = "📞 Join my call: " + x } const cs = PEOPLE().filter(q => q.c), p = cs.find(q => q.n == S.cw) || cs[0]; if (p.uid && DB) share("chats", { pair: [UID, p.uid].sort().join("_"), from: UID, to: p.uid, n: S.me.name, tx: x, ts: Date.now() }, () => { }); else { (S.lc[p.n] = S.lc[p.n] || []).push({ from: "me", tx: x, ts: Date.now() }); draw() } return }
+            if (a == "pub") { if (!S.company.pub) { const c = S.company; if (!okImg(c.logo)) return note("Company logo is mandatory. Upload it in Edit page before publishing."); if (!c.n || (c.about || "").length < 20 || !/@/.test(c.email || "") || (c.phone || "").replace(/\D/g, "").length < 10) return note("Fill the mandatory details first: name, about, email and phone (Edit page).") } S.company.pub = +!S.company.pub; if (S.company.pub) { ck(7); S.company.uid = UID || undefined } else if (DB && UID) DB.doc("sites/" + UID).delete().catch(() => { }); return draw() }
+        });
+        document.addEventListener("change", e => {
+            const t = e.target, rd = (f, fn) => shrink(f, 720, fn);
+            if (t.dataset.pf == "kind") { P.kind = t.value; if (t.value != "competition" && P.dur == "deadline") P.dur = "24"; draw() }
+            if (t.dataset.a == "pph" && t.files[0]) shrink(t.files[0], 520, x => { S.me.photo = x; draw() });
+            if (t.dataset.a == "hind") { S.hi = t.value; draw() }
+            if (t.dataset.a == "fstg") { S.fstg = t.value; draw() }
+            if (t.dataset.a == "rs") S.company.resumes[+t.dataset.i].st = t.value;
+            if (t.dataset.a == "pp" && t.files[0]) rd(t.files[0], x => { const q = S.company.projects[+t.dataset.i]; q.imgs = (q.imgs || []).concat(x).slice(0, 4); draw() });
+            if ((t.id == "alogo" || t.id == "aphoto") && t.files[0]) { document.querySelectorAll("#abox [name]").forEach(e => S.au.d[e.name] = e.value.trim()); const lg = t.id == "alogo"; shrink(t.files[0], lg ? 300 : 520, x => { S.au.d[lg ? "logo" : "photo"] = x; AK = ""; draw() }, lg ? "image/png" : "") }
+            if (t.dataset.a == "clg" && t.files[0]) shrink(t.files[0], 300, x => { S.company.logo = x; draw() }, "image/png");
+            if (t.id == "apimg" && t.files[0]) { document.querySelectorAll("#abox [name]").forEach(e => S.au.d[e.name] = e.value.trim()); shrink(t.files[0], 600, x => { S.au.d.pimg = x; AK = ""; draw() }) }
+            if (t.dataset.a == "td") { S.todo[+t.dataset.i].d = +t.checked; draw() }
+            if (t.id == "pf" && t.files[0]) rd(t.files[0], x => { P.img = x; draw() });
+            if (t.id == "ph") [...t.files].slice(0, 8).forEach(f => rd(f, x => { if (S.company.photos.length >= 8) return; S.company.photos.push(x); if (S.company.photos.length >= 3) ck(3); draw() }))
+        });
+        document.addEventListener("keydown", e => {
+            if (LB.L.length) { if (e.key == "Escape") LB.L = []; else if (e.key == "ArrowRight") LB.i = (LB.i + 1) % LB.L.length; else if (e.key == "ArrowLeft") LB.i = (LB.i - 1 + LB.L.length) % LB.L.length; lbShow(); return }
+            if (e.key == "Enter" && e.target.id == "cm") { e.preventDefault(); document.querySelector("[data-a=send]").click() }
+        });
+        document.addEventListener("input", e => {
+            if (e.target.id == "wb") { $("#wp").innerHTML = md(e.target.value); wsave() } if (e.target.id == "wt") wsave();
+            if (e.target.id == "hq") { const q = e.target.value.toLowerCase(); document.querySelectorAll(".fc").forEach(c => c.style.display = c.textContent.toLowerCase().includes(q) ? "" : "none") }
+            if (e.target.id == "mq") { const q = e.target.value.toLowerCase(); document.querySelectorAll(".cv").forEach(c => c.style.display = c.textContent.toLowerCase().includes(q) ? "" : "none") }
+            if (e.target.id == "up") P.tx = e.target.value;
+            if (e.target.dataset.pf && e.target.dataset.pf != "kind") P[e.target.dataset.pf] = e.target.value;
+            if (e.target.id == "q") { const q = e.target.value.toLowerCase(); document.querySelectorAll(".grid .card").forEach(c => c.style.display = c.textContent.toLowerCase().includes(q) ? "" : "none") }
+        });
+
+        /* ===== SUPABASE BACKEND =====
+         Fill these two values (Supabase dashboard > Project Settings > API). The anon key is safe in the app; Row Level Security protects data. */
+        const SBCFG = { url: "", key: "" };
+        async function sbInit() {
+            const sb = window.supabase.createClient(SBCFG.url, SBCFG.key);
+            let { data: { session } } = await sb.auth.getSession();
+            if (!session) { const r = await sb.auth.signInAnonymously(); if (r.error) throw r.error; session = r.data.session }
+            const user = session.user, coll = p => p.split("/").slice(0, -1).join("/"), row = r => ({ exists: !!r, id: r && r.path.split("/").pop(), data: () => r.data });
+            const doc = path => ({
+                async get() { const { data } = await sb.from("fb_docs").select("path,data").eq("path", path).maybeSingle(); return row(data) },
+                async set(d) { const { error } = await sb.from("fb_docs").upsert({ path, coll: coll(path), data: d }); if (error) throw error },
+                async update(d) { const { data, error } = await sb.from("fb_docs").select("data").eq("path", path).maybeSingle(); if (error || !data) throw error || new Error("missing"); const r = await sb.from("fb_docs").update({ data: { ...data.data, ...d } }).eq("path", path); if (r.error) throw r.error },
+                async delete() { const { error } = await sb.from("fb_docs").delete().eq("path", path); if (error) throw error }
+            });
+            const collection = c => ({
+                async add(d) { const id = crypto.randomUUID(), { error } = await sb.from("fb_docs").insert({ path: c + "/" + id, coll: c, data: d }); if (error) throw error; return { id } },
+                onSnapshot(ok, bad) {
+                    const load = async () => { const { data, error } = await sb.from("fb_docs").select("path,data").eq("coll", c).order("updated_at", { ascending: false }).limit(300); if (error) return bad && bad(error); ok({ docs: data.map(r => ({ id: r.path.split("/").pop(), data: () => r.data })) }) }; load();
+                    sb.channel("fb_" + c).on("postgres_changes", { event: "*", schema: "public", table: "fb_docs", filter: "coll=eq." + c }, load).subscribe(); return () => { }
+                }
+            });
+            return { u: { id: async () => user.id, me: async () => ({ email: user.email || "", name: (user.user_metadata && user.user_metadata.name) || "" }) }, db: { doc, collection } }
+        }
+        let DB = null, UID = null, LOADED = 0, H1 = "", H2 = "", H3 = "", H4 = "", H5 = "", T;
+        function shrink(f, max, cb, t) { const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement("canvas"); c.width = im.width * k; c.height = im.height * k; c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); cb(c.toDataURL(t || "image/jpeg", .7)) }; im.src = r.result }; r.readAsDataURL(f) }
+        const ago = t => { const m = Math.round((Date.now() - t) / 6e4); return m < 1 ? "now" : m < 60 ? m + "m" : m < 1440 ? Math.round(m / 60) + "h" : Math.round(m / 1440) + "d" };
+        const mine = (k, id) => S.reqs.some(r => r.from == UID && r.k == k && String(r.tid) == String(id));
+        const linkify = t => esc(t).replace(/https:\/\/[^\s<]+/g, u => `<a href="${u}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">${u}</a>`);
+        const toProf = (x, o) => Object.assign({ n: "", head: "", bio: "", loc: "", skills: [], photo: "", edu: "", exp: "", int: "", links: "", look: "", port: [], sec: [], stg: [], ticket: "", own: 0, isInv: 0 }, x, o);
+        const ownProf = () => { const m = S.me; return toProf({ n: m.name, head: m.head, bio: m.bio, loc: m.loc, skills: m.skills || [], photo: m.photo, edu: m.edu, exp: m.exp, int: m.int, links: m.links, email: m.email, phone: m.phone, uid: m.uid, own: 1, theme: isPro() ? m.theme : "noir", isInv: m.type == "Investor" }, m.inv ? { port: m.inv.port || [], sec: m.inv.sec || [], stg: m.inv.stg || [], ticket: m.inv.ticket } : { projects: m.type == "Individual" ? [] : (S.company.projects || []) }) };
+        function psite(p) {
+            const TH = thFor(p.theme, "pf"); const nm = p.n || "Member", sp = [nm.slice(0, 3), nm.slice(3)], go = (id, t) => `<button class="nb" data-a="scr" data-v="sx-${id}">${t}</button>`;
+            const roles = [p.head].concat(p.isInv ? (p.sec || []).slice(0, 3) : (p.skills || []).slice(0, 3)).filter(Boolean).slice(0, 4);
+            const ph = okImg(p.photo) ? `background-image:url(${p.photo})` : "";
+            const ic = p.own ? `<label class="so" title="Change photo">📷<input type="file" accept="image/*" hidden data-a="pph"></label><button class="so" data-a="new" data-v="prof" title="Edit profile">✏️</button>` : `${p.isInv ? (p.ii !== undefined ? `<button class="so" data-a="intro" data-i="${p.ii}" title="Request intro">🤝</button>` : "") : (p.pi !== undefined ? `<button class="so" data-a="conp" data-i="${p.pi}" title="Connect">➕</button>` : "")}<button class="so" data-a="gomsg" data-v="${esc(nm)}" title="Message">💬</button>${String(p.links).startsWith("https://") ? `<a class="so" href="${esc(p.links)}" target="_blank" rel="noopener" title="Link">🔗</a>` : ""}`;
+            const facts = [["Location", p.loc], ["Education", p.edu], ["Experience", p.exp], ["Interests", p.int], ["Looking for", p.look], ["Ticket size", p.ticket], ["Stages", (p.stg || []).join(", ")], ["User ID", p.own ? p.uid : ""], ["Email", p.own ? p.email : ""], ["Phone", p.own ? p.phone : ""]].filter(x => x[1]).map(x => `<div class="wfa"><span>${x[0]}</span><b style="font-weight:600;text-align:right">${esc(x[1])}</b></div>`).join("");
+            const sv = p.isInv ? (p.sec || []) : (p.skills || []), pf = p.isInv ? (p.port || []).map(x => ({ t: x, st: "Portfolio", d: "", imgs: [] })) : (p.projects || []);
+            const heroStd = `<div class="ph2" id="sx-top"><div class="pt" style="${ph}">${ph ? "" : `<div class="pin">${esc(nm[0])}</div>`}</div><div class="pr"><div class="hl1">Hello,</div><div class="hl2">I’m ${esc(nm.split(" ")[0])}${(p.v || p.own && isVer()) ? vb(1) : ""}<span class="cur"></span></div><div class="rl">${roles.map(r => `<span>• ${esc(r)}</span>`).join("")}</div><div>${ic}</div></div></div>`;
+            const hero = (HP[TH.hero] || (() => heroStd))({ p, nm, ph, ic, photo: okImg(p.photo), role: (p.head || "Member").split(" · ")[0].split(" at ")[0] });
+            return `<div class="web pf" style="--a:${TH.ac};${thv(TH)}"><div class="wn"><span class="lo" style="font-size:24px;letter-spacing:0;text-transform:none">${esc(sp[0])}<span style="opacity:.55">${esc(sp[1])}</span><span style="color:var(--ac)">.</span></span><div class="lk">${go("top", "Home")}${go("about", "About")}${sv.length ? go("services", p.isInv ? "Focus" : "Services") : ""}${pf.length ? go("portfolio", "Portfolio") : ""}${go("contact", "Contact")}</div></div>
+ ${hero}
+ <section class="ws d" id="sx-about"><div class="wg2"><div><h2>About me</h2><p style="font-size:20px;line-height:1.55;margin:0">${esc(p.bio || "This member hasn’t added a bio yet.")}</p></div><div>${facts || '<div class="mu">No details yet.</div>'}</div></div></section>
+ ${sv.length ? `<section class="ws" id="sx-services"><h2>${p.isInv ? "What I invest in" : "What I do"}</h2>${TH.cards ? `<div class="wg">${sv.map(x => `<div class="wcard"><div style="font-size:22px;color:var(--ac)">✦</div><b>${esc(x)}</b></div>`).join("")}</div>` : sv.map((x, i) => `<div class="wsv"><i>0${i + 1}</i>${esc(x)}</div>`).join("")}</section>` : ""}
+ ${pf.length ? `<section class="ws d" id="sx-portfolio"><h2>Portfolio</h2><div class="wg">${pf.map(q => `<div class="wt">${(q.imgs || []).find(okImg) ? `<img src="${q.imgs.find(okImg)}" alt="">` : `<div class="wph" style="border-radius:0">${esc((q.t || "?")[0])}</div>`}<div class="tx"><span class="tag" style="background:#ffffff1f;color:#fff">${esc(q.st || "")}</span><h3 style="margin:8px 0 4px;font-size:20px">${esc(q.t)}</h3><div class="mu" style="color:#b9bfd6">${esc(q.d || "")}</div></div></div>`).join("")}</div></section>` : ""}
+ <section class="ws l" id="sx-contact"><h2>Let’s connect.</h2><div class="wg2"><div style="font-size:18px;line-height:1.8">${p.own ? "This is how your profile looks to others." : "Send a message or a connection request to start a conversation."}</div><div>${p.own ? `<button class="wb k" data-a="new" data-v="prof">Edit my profile</button>` : `<button class="wb k" data-a="gomsg" data-v="${esc(nm)}">Message ${esc(nm.split(" ")[0])}</button>`}</div></div></section>
+ <div style="padding:22px 28px;color:#8b8b95;font-size:13px;background:#000">© ${esc(nm)} · Built on FounderBridge</div></div>`
+        }
+        const T0 = { bg: "#000", bg2: "#0c0c11", cd: "#16161c", fg: "#fff", mu2: "#b9bfd6", bd: "#ffffff22", lt: "#fff", ltx: "#000", ac: "#3b82f6", ac2: "#7dd3fc", ac3: "#0a1f5c", hg1: "#02040c", hg2: "#0a1f5c" };
+        const mk = o => Object.assign({}, T0, o);
+        const THEMES = {
+            classic: mk({ n: "Classic Midnight", k: "co", free: 1, hero: "std" }),
+            poseify: mk({ n: "Pink Noir", k: "co", hero: "center", bg: "#0b0b0b", bg2: "#141414", cd: "#1a1a1a", ac: "#e91e8c", ac2: "#ff7ab8", ac3: "#4a0f2f", hg1: "#000", hg2: "#4a0f2f", ff: "'Work Sans',system-ui,sans-serif", fh: "'Jost','Work Sans',system-ui,sans-serif", tt: "uppercase", ls: "1px", bt: "999px", ltx: "#0b0b0b" }),
+            brivon: mk({ n: "Neon Studio", k: "co", hero: "neon", bg: "#0a0a0c", bg2: "#101014", cd: "#17171c", ac: "#d4ff3a", ac2: "#e6ff7a", ac3: "#2c3a00", hg1: "#0a0a0c", hg2: "#2c3a00", fh: "'Anton','Impact',sans-serif", tt: "uppercase", ls: "0", bt: "999px", lt: "#f4f4ef", ltx: "#0a0a0c" }),
+            lustro: mk({ n: "Aurora Slides", k: "co", hero: "aurora", bg: "#090a1c", bg2: "#0e1030", cd: "#151846", ac: "#b48cff", ac2: "#7dd3fc", ac3: "#2a1a6e", hg1: "#090a1c", hg2: "#3b2a9e", fh: "'Space Grotesk',system-ui,sans-serif", ff: "'Space Grotesk',system-ui,sans-serif", bt: "999px", ls: "-1px", ltx: "#090a1c", rd: "18px" }),
+            editorial: mk({ n: "Editorial Cream", k: "co", hero: "side", bg: "#faf6ef", bg2: "#f1eadc", cd: "#ebe2d0", fg: "#1b1b1b", mu2: "#5c5648", bd: "#1b1b1b22", lt: "#1b1b1b", ltx: "#faf6ef", mul: "#b8b09c", lbd: "#faf6ef33", ac: "#c2410c", ac2: "#ea580c", ac3: "#fde4d0", hg1: "#1b1b1b", hg2: "#7c2d12", fh: "'Playfair Display',Georgia,serif", ff: "Georgia,serif", bt: "4px", rd: "6px" }),
+            split: mk({ n: "Emerald Split", k: "co", hero: "side", bg: "#04110c", bg2: "#082017", cd: "#0d2e22", ac: "#34d399", ac2: "#6ee7b7", ac3: "#064e3b", hg1: "#04110c", hg2: "#047857", ltx: "#04110c", bt: "999px", rd: "26px" }),
+            noir: mk({ n: "Noir Portrait", k: "pf", hero: "std", free: 1 }),
+            soft: mk({ n: "Soft Blue", k: "pf", hero: "soft", bg: "#cdd6e6", bg2: "#bcc7dc", cd: "#e4eaf5", fg: "#17213a", mu2: "#4a5878", bd: "#17213a22", lt: "#17213a", ltx: "#eef2fa", mul: "#aebbd6", lbd: "#ffffff33", ac: "#ef476f", ac2: "#ff7a9a", ac3: "#f9c6d3", hg1: "#17213a", hg2: "#3b4a78", fh: "'Poppins',system-ui,sans-serif", ff: "'Poppins',system-ui,sans-serif", bt: "4px", rd: "14px" }),
+            mono: mk({ n: "Mono Bridge", k: "pf", hero: "mono", bg: "#6d6d6d", bg2: "#5e5e5e", cd: "#4f4f4f", mu2: "#e4e4e4", bd: "#ffffff33", ltx: "#262626", ac: "#ffffff", ac2: "#e5e5e5", ac3: "#3a3a3a", hg1: "#2a2a2a", hg2: "#6d6d6d", fh: "'Open Sans',system-ui,sans-serif", ff: "'Open Sans',system-ui,sans-serif", tt: "uppercase", ls: "2px", bt: "999px" }),
+            lavender: mk({ n: "Lavender Profile", k: "pf", hero: "lav", bg: "#e8ebf8", bg2: "#dde1f3", cd: "#ffffff", fg: "#1f2440", mu2: "#5a6285", bd: "#1f244022", lt: "#1f2440", ltx: "#f3f4fc", mul: "#aab2d6", lbd: "#ffffff22", ac: "#e11d74", ac2: "#f472b6", ac3: "#fbcfe8", hg1: "#1f2440", hg2: "#4338ca", fh: "'Syne','Poppins',system-ui,sans-serif", ff: "'Poppins',system-ui,sans-serif", bt: "10px", rd: "16px", cards: 1 }),
+            gold: mk({ n: "Executive Gold", k: "pf", hero: "gold", bg: "#070604", bg2: "#100d07", cd: "#1a150a", ac: "#d4a017", ac2: "#fde68a", ac3: "#3b2f0b", hg1: "#070604", hg2: "#6b4e0a", lt: "#fff8e1", ltx: "#1a1400", fh: "'Playfair Display',Georgia,serif", bt: "999px" }),
+            mint: mk({ n: "Mint Clean", k: "pf", hero: "side", bg: "#effaf5", bg2: "#dff3ea", cd: "#ffffff", fg: "#0f2a22", mu2: "#4a6a60", bd: "#0f2a2222", lt: "#0f2a22", ltx: "#effaf5", mul: "#a8d0c0", lbd: "#ffffff22", ac: "#059669", ac2: "#10b981", ac3: "#bbf7d0", hg1: "#0f2a22", hg2: "#047857", fh: "'Poppins',system-ui,sans-serif", ff: "'Poppins',system-ui,sans-serif", bt: "999px", rd: "20px", cards: 1 })
+        };
+        Object.assign(THEMES, {
+            sunrise: mk({ n: "Sunrise Agency", k: "co", hero: "side", bg: "#1a0f0a", bg2: "#241510", cd: "#2f1c14", ac: "#ff7a45", ac2: "#ffb08a", ac3: "#5a2410", hg1: "#1a0f0a", hg2: "#8a3a14", ltx: "#1a0f0a", bt: "10px", rd: "20px" }),
+            oceantech: mk({ n: "Ocean Tech", k: "co", hero: "aurora", bg: "#041218", bg2: "#071d26", cd: "#0c2b38", ac: "#22d3ee", ac2: "#67e8f9", ac3: "#0c4a5c", hg1: "#041218", hg2: "#0e7490", fh: "'Space Grotesk',system-ui,sans-serif", ff: "'Space Grotesk',system-ui,sans-serif", bt: "999px", ltx: "#041218", rd: "18px" }),
+            paperco: mk({ n: "Clean Paper", k: "co", hero: "center", bg: "#f7f8fb", bg2: "#eceff6", cd: "#ffffff", fg: "#101828", mu2: "#546075", bd: "#10182822", lt: "#101828", ltx: "#f7f8fb", mul: "#b9c1d3", lbd: "#ffffff33", ac: "#2563eb", ac2: "#60a5fa", ac3: "#dbeafe", hg1: "#101828", hg2: "#1e40af", bt: "8px", rd: "16px" }),
+            rose: mk({ n: "Rose Studio", k: "pf", hero: "soft", bg: "#fbe9ee", bg2: "#f6d6df", cd: "#fff5f8", fg: "#3a1220", mu2: "#7a4a5a", bd: "#3a122022", lt: "#3a1220", ltx: "#fff5f8", mul: "#e0a9b8", lbd: "#ffffff33", ac: "#d6336c", ac2: "#f06595", ac3: "#ffd6e3", hg1: "#3a1220", hg2: "#9c2a55", fh: "'Poppins',system-ui,sans-serif", ff: "'Poppins',system-ui,sans-serif", bt: "999px", rd: "18px" }),
+            inkblue: mk({ n: "Ink Blue", k: "pf", hero: "std", bg: "#06101f", bg2: "#0a1a33", cd: "#10244a", ac: "#4f9dff", ac2: "#93c5fd", ac3: "#12305f", hg1: "#06101f", hg2: "#1d4ed8", bt: "10px", rd: "16px" }),
+            sunsetpf: mk({ n: "Sunset Glow", k: "pf", hero: "lav", bg: "#fff1e6", bg2: "#ffe2cc", cd: "#ffffff", fg: "#3b1d0f", mu2: "#7a5340", bd: "#3b1d0f22", lt: "#3b1d0f", ltx: "#fff1e6", mul: "#f0bf9e", lbd: "#ffffff22", ac: "#f97316", ac2: "#fb923c", ac3: "#fed7aa", hg1: "#3b1d0f", hg2: "#c2410c", bt: "999px", rd: "20px" })
+        });
+        const thFor = (k, kd) => { const T = THEMES[k]; return T && T.k == kd ? T : THEMES[kd == "co" ? "classic" : "noir"] };
+        const thv = T => `--bg:${T.bg};--bg2:${T.bg2};--cd:${T.cd};--fg:${T.fg};--mu2:${T.mu2};--mul:${T.mul || "#555"};--bd:${T.bd};--lbd:${T.lbd || "#00000022"};--lt:${T.lt};--ltx:${T.ltx};--ac:${T.ac};--ac2:${T.ac2};--ac3:${T.ac3};--hg1:${T.hg1};--hg2:${T.hg2};--ff:${T.ff || "system-ui,sans-serif"};--fh:${T.fh || T.ff || "system-ui,sans-serif"};--tt:${T.tt || "none"};--ls:${T.ls || "-.5px"};--bt:${T.bt || "6px"};--rd:${T.rd || "14px"}`;
+        const themeBar = (cur, w) => { const kd = w == "co" ? "co" : "pf", c0 = thFor(cur, kd); return `<div class="row" style="margin-bottom:10px"><span class="mu">${isPro() ? "Layout & colours:" : "🔒 Layouts (Pro):"}</span>${Object.entries(THEMES).filter(([k, T]) => T.k == kd).map(([k, T]) => `<button class="thd ${isPro() && c0 == T ? "on" : ""}" style="background:linear-gradient(135deg,${T.bg},${T.ac});${isPro() || T.free ? "" : "opacity:.55"}" data-a="th" data-v="${k}" data-w="${w}" title="${T.n}${T.free ? "" : " (Pro)"}"></button>`).join("")}<span class="mu">${isPro() ? c0.n : "Change layouts and colours with Pro · ₹199/month"}</span></div>` };
+        const PAL = {
+            aurora: { n: "Indigo Night", pr: "#818cf8", pk: "#22d3ee", p3: "#3730a3", h: "#0b1020,#1e2a6b 55%,#4f46e5", bg: "#0a0f1f", card: "#121a33", tx: "#f1f5ff", mu: "#a5b4d4", br: "#26335f" },
+            noirpink: { n: "Noir Rose", pr: "#f43f8e", pk: "#fb9ac4", p3: "#9d174d", h: "#0a0a0a,#4a0f2f 55%,#f43f8e", bg: "#0c0a0b", card: "#17131a", tx: "#fff7fb", mu: "#b4a3ad", br: "#2e2229" },
+            neonlime: { n: "Lime Graphite", pr: "#a3e635", pk: "#facc15", p3: "#4d7c0f", h: "#0c0f08,#2a3a08 55%,#84cc16", bg: "#0b0d09", card: "#14180f", tx: "#f7fbea", mu: "#aab396", br: "#262d1b", bx: "#0b0d09" },
+            lavender: { n: "Lavender Day", pr: "#6d4aff", pk: "#ec4899", p3: "#4c1d95", h: "#2e1065,#5b3fd6 55%,#8b5cf6", bg: "#f1f0fb", card: "#ffffff", tx: "#1b1a33", mu: "#5d5b80", br: "#dcd8f3" },
+            slate: { n: "Cloud Slate", pr: "#e11d48", pk: "#fb7185", p3: "#9f1239", h: "#0f172a,#334155 55%,#e11d48", bg: "#e7ecf4", card: "#ffffff", tx: "#0f172a", mu: "#51607a", br: "#cfd8e6" },
+            forest: { n: "Emerald Deep", pr: "#34d399", pk: "#2dd4bf", p3: "#065f46", h: "#03140e,#0b4a36 55%,#10b981", bg: "#05130e", card: "#0c241a", tx: "#ecfdf5", mu: "#97c9b4", br: "#17402f", bx: "#05130e" },
+            gold: { n: "Royal Gold", pr: "#e0b030", pk: "#fcd34d", p3: "#92400e", h: "#0b0905,#47360d 55%,#d4a017", bg: "#0d0a05", card: "#19140b", tx: "#fff8e1", mu: "#cdbf94", br: "#352a12", bx: "#1a1400" },
+            ocean: { n: "Ocean Teal", pr: "#14b8c4", pk: "#60a5fa", p3: "#0e7490", h: "#02131a,#0b4a5c 55%,#06b6d4", bg: "#061218", card: "#0d2029", tx: "#ecfeff", mu: "#8fb9c6", br: "#173947", bx: "#061218" },
+            sunset: { n: "Sunset Coral", pr: "#fb7a52", pk: "#f472b6", p3: "#b4380f", h: "#1a0a06,#6b2410 55%,#f97316", bg: "#140a07", card: "#221410", tx: "#fff4ee", mu: "#c7a99c", br: "#3d2419", bx: "#140a07" },
+            paper: { n: "Paper White", pr: "#2563eb", pk: "#0ea5e9", p3: "#1e40af", h: "#0f172a,#1e40af 55%,#2563eb", bg: "#f6f8fc", card: "#ffffff", tx: "#0f172a", mu: "#556078", br: "#dde4f0" }
+        };
+        const PVARS = ["--pr", "--pk", "--p3", "--hdr", "--bg", "--card", "--tx", "--mu", "--br", "--bx"];
+        function applyPal() {
+            const r = document.documentElement.style; if (!isPro()) { PVARS.forEach(v => r.removeProperty(v)); return } const P = PAL[S.me.pal] || PAL.aurora;
+            r.setProperty("--pr", P.pr); r.setProperty("--pk", P.pk); r.setProperty("--p3", P.p3); r.setProperty("--hdr", "linear-gradient(100deg," + P.h + ")");["bg", "card", "tx", "mu", "br"].forEach(k => r.setProperty("--" + k, P[k])); r.setProperty("--bx", P.bx || "#fff")
+        }
+        const HC = {
+            center: X => { const c = X.c; return `<div class="wh hc" style="background:${X.bg};background-size:cover;background-position:center"><div class="hln"><span>WELCOME</span></div><h1>${esc(c.n)}</h1><div class="hln2"></div><p>${esc((c.tag || c.about || "").slice(0, 150))}</p><button class="wb o" data-a="scr" data-v="sx-${X.P.length ? "projects" : "about"}">Explore more</button><span class="har l">‹</span><span class="har r">›</span></div>` },
+            aurora: X => { const c = X.c, w = (c.n || "").split(" "); return `<div class="wh ha" style="background:${X.bg};background-size:cover;background-position:center"><span class="pill2">${esc(c.ckind || "Company")}${c.ind ? " · " + esc(c.ind) : ""}</span><h1><span class="gt">${esc(w[0])}</span> ${esc(w.slice(1).join(" "))} is here.<br>${esc((c.tag || "").slice(0, 70))}</h1><p>${esc((c.about || "").slice(0, 150))}</p><div><button class="wb" data-a="scr" data-v="sx-${X.P.length ? "projects" : "about"}">Explore our work →</button><button class="wb o" data-a="msg" data-v="${X.msgv}">Contact us</button></div><div class="mono">${X.stats.map(([v, l]) => esc(v) + " " + esc(l)).join(" · ")}</div></div>` },
+            neon: X => { const c = X.c, w = (c.tag || c.n || "").toUpperCase().split(" "), k = Math.max(1, Math.ceil(w.length / 2)); return `<div class="hn"><div><div class="mono">● ${esc(c.addr || c.ind || "Company")} · EST. ${esc(c.yr || "2026")}</div><h1>${w.slice(0, k).map(x => esc(x)).join(" ")} <em>${w.slice(k).map(x => esc(x)).join(" ")}</em></h1><p>${esc((c.about || "").slice(0, 170))}</p><div><button class="wb" data-a="scr" data-v="sx-${X.P.length ? "projects" : "about"}">See our work →</button><button class="wb o" data-a="msg" data-v="${X.msgv}">Contact</button></div><div class="mono hst">${X.stats.map(([v, l]) => `<b>${esc(v)}</b> · ${esc(l)}`).join(" &nbsp;·&nbsp; ")}</div></div><div class="hn2" style="${X.cover ? `background-image:url(${X.cover})` : ""}"><span class="chip2">NO. 001 · ${esc(c.n)}</span></div></div>` },
+            side: X => { const c = X.c; return `<div class="hs"><div><div class="ey">${esc(c.ckind || "Company")}${c.ind ? " · " + esc(c.ind) : ""}</div><h1>${esc(c.tag || c.n)}</h1><p>${esc((c.about || "").slice(0, 170))}</p><button class="wb" data-a="scr" data-v="sx-${X.P.length ? "projects" : "about"}">Explore our work</button><button class="wb o2" data-a="msg" data-v="${X.msgv}">Get in touch</button><div class="wst">${X.stats.map(([v, l]) => `<div><b>${esc(v)}</b><small>${esc(l)}</small></div>`).join("")}</div></div><div class="hsi" style="${X.cover ? `background-image:url(${X.cover});color:transparent` : ""}">${esc((c.n || "?")[0])}</div></div>` }
+        };
+        const HP = {
+            soft: Y => `<div class="ph3" id="sx-top"><div><div class="eyl">I AM A</div><h1>${esc(Y.role.toUpperCase())}</h1><p>${esc((Y.p.bio || "").slice(0, 150))}</p><div>${Y.ic}</div></div><div class="pp"><div class="circ"></div>${Y.photo ? `<div class="pimg2" style="${Y.ph}"></div>` : `<div class="pin2">${esc(Y.nm[0])}</div>`}</div></div>`,
+            lav: Y => `<div class="ph3" id="sx-top"><div><div class="mu" style="letter-spacing:2px;font-size:12px">WELCOME TO MY WORLD</div><h1>Hi, I’m <span style="color:var(--ac)">${esc(Y.nm.split(" ")[0])}</span> <span style="font-size:.6em;font-weight:700">a ${esc(Y.role)}</span></h1><p>${esc((Y.p.bio || "").slice(0, 170))}</p><div class="mu" style="margin:14px 0 8px;font-size:12px">FIND ME</div><div>${Y.ic}</div></div><div class="pp">${Y.photo ? `<div class="pimg2" style="${Y.ph};aspect-ratio:1"></div>` : `<div class="pin2">${esc(Y.nm[0])}</div>`}</div></div>`,
+            side: Y => `<div class="ph3" id="sx-top"><div><div class="mu" style="letter-spacing:2px;font-size:12px">${esc(Y.role.toUpperCase())}</div><h1>Hello, I’m ${esc(Y.nm.split(" ")[0])}</h1><p>${esc((Y.p.bio || "").slice(0, 170))}</p><div style="margin-top:14px">${Y.ic}</div></div><div class="pp"><div class="circ"></div>${Y.photo ? `<div class="pimg2" style="${Y.ph}"></div>` : `<div class="pin2">${esc(Y.nm[0])}</div>`}</div></div>`,
+            mono: Y => `<div class="ph3 mono" id="sx-top" style="${Y.photo ? `--ph:url(${Y.p.photo})` : ""}"><div><div style="font-size:22px;letter-spacing:2px">Hi</div><h1>MY NAME IS ${esc(Y.nm.toUpperCase())}</h1><div style="font-size:20px;letter-spacing:2px;margin-bottom:12px">${esc(Y.role)}</div><p style="color:#eee">${esc((Y.p.bio || "").slice(0, 170))}</p><div style="margin-top:14px">${Y.ic}</div></div><div class="pp">${Y.photo ? `<div class="pimg2" style="${Y.ph}"></div>` : `<div class="pin2">${esc(Y.nm[0])}</div>`}</div></div>`,
+            gold: Y => `<div class="ph3 gold" id="sx-top">${Y.photo ? `<div class="pimg2" style="${Y.ph}"></div>` : `<div class="pin2" style="font-size:120px">${esc(Y.nm[0])}</div>`}<div><div class="mu" style="letter-spacing:4px;font-size:12px">${esc(Y.role.toUpperCase())}</div><h1>${esc(Y.nm)}</h1><p style="margin:0 auto 14px">${esc((Y.p.bio || "").slice(0, 170))}</p><div>${Y.ic}</div></div></div>`
+        };
+        const vb = x => x ? '<span class="vf" title="Verified">✔</span>' : "";
+        const LIM = () => isVer() ? { conn: 25, intro: 30 } : isPro() ? { conn: 15, intro: 15 } : { conn: 5, intro: 3 };
+        function useQ(k) {
+            const t = dd(0), mo = t.slice(0, 7); if (S.q.d != t) { S.q.d = t; S.q.c = 0 } if (S.q.m != mo) { S.q.m = mo; S.q.i = 0 } const L = LIM();
+            if (k == "c") { if (S.q.c >= L.conn) { note("Daily limit of " + L.conn + " connection requests reached." + (isVer() ? "" : " Verified accounts get more.")); return false } S.q.c++ }
+            else { if (S.q.i >= L.intro) { note("Monthly limit of " + L.intro + " intro requests reached. Upgrade to Pro for more."); return false } S.q.i++ } return true
+        }
+        const vsort = (a, b) => (b.v || 0) - (a.v || 0);
+        const PEOPLE = () => PEOPLE0().sort(vsort), INVS = () => INVS0().sort(vsort), allCos = () => allCos0().sort(vsort);
+        const SPONS = [{ b: "CloudBase", t: "₹10 lakh cloud credits for early startups", d: "Apply in 5 minutes.", u: "https://example.com/cloudbase", c: "Claim credits" }, { b: "TaxEasy", t: "Udyam, GST and company registration in 3 days", d: "One flat fee.", u: "https://example.com/taxeasy", c: "Get started" }, { b: "DeckKit", t: "Pitch deck templates investors love", d: "20 editable templates.", u: "https://example.com/deckkit", c: "Browse" }];
+        const isPro = () => !!S.me.plan && S.me.plan != "free", isVer = () => !!S.me.verified && isPro(), noAds = () => isPro();
+        const IC = { home: "🏠", discover: "🧭", ideas: "💡", meet: "📅", company: "🏢", msg: "💬", plans: "⭐", profile: "👤", hub: "🤝", work: "🗂️" };
+        const adPool = () => { const n = NOW(); return SPONS.concat(S.dbAds.filter(a => a.from <= n && a.until > n && String(a.u).startsWith("https://")), S.ads.filter(a => a.until > n)) };
+        let adN = 0;
+        const adCard = () => { const P = adPool(), a = P[(adN++ + new Date().getDate()) % P.length]; return `<div class="card col ad" style="--a:#64748b"><div class="row sp"><span class="mu" style="font-size:11px;letter-spacing:1px">SPONSORED</span><a data-t="plans" class="mu" style="cursor:pointer;text-decoration:underline;font-size:12px">Remove ads</a></div><div class="row sp"><div style="flex:1;min-width:180px"><b>${esc(a.b)}</b> · ${esc(a.t)}<div class="mu">${esc(a.d || "")}</div></div><a class="btn s" target="_blank" rel="sponsored noopener" href="${esc(a.u)}">${esc(a.c || "Learn more")} ↗</a></div></div>` };
+        const withAd = (arr, fn) => { adN = 0; const h = []; arr.forEach((x, i) => { h.push(fn(x, i)); if (!noAds() && (i + 1) % 2 == 0) h.push(adCard()) }); return h };
+        const adList = L => { if (noAds() || !L.length) return L; adN = 3; const h = []; L.forEach((x, i) => { h.push(x); if ((i + 1) % 6 == 0) h.push(adCard()) }); return h };
+        const isWeb = x => /^(https?:\/\/)?[\w-]+(\.[\w-]+)+/.test(x || ""), isUrl = x => /^https:\/\/\S+\.\S+/.test(x || "");
+        const regOk = c => /^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/i.test((c.udyam || "").trim()) || /^[LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}$/i.test((c.cin || "").trim()) || /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/i.test((c.gst || "").trim());
+        function vItems() {
+            const m = S.me, c = S.company, t = m.type, I = [], add = (l, ok, f) => I.push([l, !!ok, f]);
+            add("Active Pro plan (₹199/month)", isPro(), "plan"); add("Full name", (m.name || "").trim().length >= 3, "prof"); add("Valid email", /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m.email || ""), "prof");
+            add("Contact number (10 digits)", String(m.phone || "").replace(/\D/g, "").length >= 10, "prof"); add("Profile photo", okImg(m.photo), "photo"); add("Headline", (m.head || "").length >= 5, "prof");
+            add("Bio (at least 40 characters)", (m.bio || "").length >= 40, "prof"); add("City / location", (m.loc || "").length >= 2, "prof");
+            if (t == "Individual") { add("Education or experience", (m.edu || m.exp || "").length >= 3, "prof"); add("LinkedIn or portfolio link (https://…)", isUrl(m.links), "prof") }
+            else if (t == "Investor") { const v = m.inv || {}; add("Firm name", (v.firm || "").length >= 2, "inv"); add("Ticket size", (v.ticket || "").length >= 2, "inv"); add("Sectors you invest in", (v.sec || []).length > 0, "inv"); add("Stages", (v.stg || []).length > 0, "inv"); add("Investment thesis (at least 40 characters)", (v.thesis || "").length >= 40, "inv"); add("Website or LinkedIn (https://…)", isUrl(v.site), "inv") }
+            else { add("Company logo", okImg(c.logo), "logo"); add("Company name", (c.n || "").length >= 2, "about"); add("Company description (at least 40 characters)", (c.about || "").length >= 40, "about"); add("Company phone and email", (c.phone || "").replace(/\D/g, "").length >= 10 && /@/.test(c.email || ""), "about"); add("Company address", (c.addr || "").length >= 8, "about"); add("Vision and mission", !!(c.vision && c.mission), "about"); add("Valid registration number (Udyam, CIN or GST)", regOk(c), "about"); add("Website", isWeb(c.site), "about"); add("At least one team member", (c.team || []).length >= 1, "team") }
+            return I
+        }
+        const gcal = m => { const s = new Date(m.date + "T" + (m.time || "09:00")), e = new Date(+s + 36e5), z = n => String(n).padStart(2, "0"), f = d => d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + "T" + z(d.getHours()) + z(d.getMinutes()) + "00"; return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(m.t) + "&dates=" + f(s) + "/" + f(e) + "&details=" + encodeURIComponent((m.desc || "") + (m.link ? "\nJoin: " + m.link : "")) + (m.link ? "&location=" + encodeURIComponent(m.link) : "") };
+        const QUOTES = {
+            founder: ["Ship the small thing today; the big thing is just small things stacked.", "Talk to one customer before you write one more line of code.", "Revenue is the loudest form of feedback.", "Hire slowly, thank loudly, fix mistakes quickly.", "Your first version should embarrass you a little.", "Fundraising is a side effect of building something people want.", "Say no to good ideas so you can say yes to the right one.", "A clear mission makes every hard decision shorter.", "Consistency beats intensity: show up for your startup daily.", "Protect your runway, your health and your co-founder.", "Great teams are built on honest conversations, not perfect plans.", "Solve a problem you can’t stop thinking about.", "Every ‘no’ from a customer is a free lesson.", "Build in public, learn in public, grow in public.", "Today’s tiny improvement is tomorrow’s moat."],
+            investor: ["Back the founder first; the idea will change.", "Patience is a portfolio strategy.", "The best term sheets start with trust.", "Look for earned insight, not just a big market.", "Great returns often hide inside uncomfortable early bets.", "Diligence respects the founder’s time and your capital.", "A fast, honest ‘no’ is a gift to a founder.", "Follow the traction, then ask why it’s happening.", "Diversify your bets, concentrate your support.", "Know what you won’t invest in; clarity saves everyone time.", "Help before you’re asked; founders remember.", "The next big company usually looks small and strange today.", "Measure founders by how they handle bad news.", "Return capital, and return the favour too.", "Good investors ask better questions, not louder opinions."],
+            person: ["Your profile is your first handshake; make it warm.", "Small skills, shown daily, become a big reputation.", "Share what you’re learning; someone needs it today.", "Opportunity often arrives as a conversation.", "Ask for feedback early; it saves months.", "One genuine connection beats a hundred cold requests.", "Build a portfolio of proof, not promises.", "Curiosity is a career superpower.", "Help someone today and your network grows by itself.", "Start before you feel ready.", "Your story is your edge; tell it clearly.", "Learn in the open, fail in the open, improve in the open.", "Great collaborators are made by listening first.", "Be the person you’d want to work with.", "Every expert was once a beginner who kept going."]
+        };
+        const dailyQuote = () => { const t = S.me.type, a = QUOTES[t == "Investor" ? "investor" : t == "Individual" ? "person" : "founder"]; return a[Math.floor((Date.now() + 198e5) / 864e5) % a.length] };
+        const adsPanel = () => { const P = adPool(), n = new Date().getDate(), pick = [0, 1, 2].map(i => P[(n + i) % P.length]).filter((a, i, r) => r.indexOf(a) == i); return `<div class="card col" style="--a:#f59e0b"><div class="row sp"><h3 style="margin:0">📣 Ads</h3><span class="mu" style="font-size:11px;letter-spacing:1px">SPONSORED</span></div>${pick.map(a => `<div class="it"><b>${esc(a.b)}</b> · ${esc(a.t)}<div class="mu">${esc(a.d || "")}</div><a class="btn s" style="margin-top:6px" target="_blank" rel="sponsored noopener" href="${esc(a.u)}">${esc(a.c || "Learn more")} ↗</a></div>`).join("")}<button class="btn s g" data-a="new" data-v="ad">+ Publish your ad (free &amp; Pro)</button></div>` };
+        const PD = { PayLoop: { s: "Fintech", g: "Seed", y: 2023, d: "Payments for small shops." }, TaskNest: { s: "SaaS", g: "Pre-seed", y: 2024, d: "Team task management." }, KiranaOS: { s: "Retail tech", g: "Seed", y: 2023, d: "Operating system for kirana stores." }, MediLink: { s: "Healthtech", g: "Seed", y: 2022, d: "Connects clinics with labs." }, Cortexa: { s: "AI", g: "Series A", y: 2022, d: "Enterprise AI assistants." }, StackPilot: { s: "B2B SaaS", g: "Seed", y: 2024, d: "DevOps for small teams." }, FarmNest: { s: "Agritech", g: "Pre-seed", y: 2025, d: "Direct farm-to-market app." }, LearnLoop: { s: "Edtech", g: "Idea", y: 2025, d: "Peer learning circles." }, GreenCart: { s: "D2C", g: "Pre-seed", y: 2025, d: "Farm to door groceries." }, EduSpark: { s: "Edtech", g: "Idea", y: 2025, d: "Peer learning platform." } };
+        const ipfView = v => `<div class="card col"><div class="row sp"><div class="row">${av(v.n, v.photo)}<div><h2 style="margin:0">${esc(v.n)} · Portfolio</h2><div class="mu">${esc(v.type)} · ${esc(v.loc || "")} · ${v.port.length} investments · Ticket ${esc(v.ticket || "—")}</div></div></div><button class="btn s" data-a="intro" data-i="${v.ii}">Request intro</button></div><div>${v.sec.map(x => `<span class="tag">${esc(x)}</span>`).join("")}${v.stg.map(x => `<span class="tag">🚀 ${esc(x)}</span>`).join("")}</div></div><div class="grid" style="margin-top:14px">${v.port.map(n => { const d = PD[n] || {}; return `<div class="card col" style="--a:${col(n)}"><div class="row">${av(n)}<div><b>${esc(n)}</b><div class="mu">${esc(d.d || "Portfolio company")}</div></div></div><div><button class="btn s g" data-a="pcv" data-v="${esc(n)}">View</button> ${d.s ? `<span class="tag">${d.s}</span>` : ""}${d.g ? `<span class="tag">🚀 ${d.g}</span>` : ""}${d.y ? `<span class="tag">Invested ${d.y}</span>` : ""}</div></div>` }).join("") || '<div class="mu">No investments listed yet.</div>'}</div>`;
+        const SEEDF = [{ n: "Dev Patel", r: "CEO", co: "FinPilot", ind: "Technology", stg: "Seed", loc: "Bengaluru", bio: "Building AI bookkeeping for small businesses. Ex-banker. Happy to mentor first-time founders.", li: "https://example.com/devpatel", v: 1, c: 0 }, { n: "Lakshmi R", r: "Founder", co: "GreenCart", ind: "Agriculture", stg: "Pre-seed", loc: "Hyderabad", bio: "Farm-to-door groceries with 40 partner farms. Looking for logistics partners.", li: "", c: 0 }, { n: "Kiran Rao", r: "Co-founder & CTO", co: "EduSpark", ind: "Education", stg: "Idea", loc: "Pune", bio: "Peer learning for college students. Need a growth marketer.", li: "", c: 0 }, { n: "Meera Iyer", r: "Founder", co: "PayLoop", ind: "Finance", stg: "Seed", loc: "Mumbai", bio: "Payments for kirana stores. Raised our seed from angels.", li: "https://example.com/meera", c: 0 }];
+        const FOUNDERS = () => SEEDF.concat(S.dbFounders.filter(f => f.id != UID).map(f => ({ n: f.name, r: f.role, co: f.co, ind: f.ind, stg: f.stage, loc: f.loc, bio: f.bio, li: f.li, photo: f.photo, uid: f.id, c: mine("connect", f.id) ? 1 : 0 }))).sort(vsort);
+        const HUBLIST = () => FOUNDERS().filter(f => (S.hi || "All") == "All" || f.ind == S.hi);
+        const myFounder = () => { const c = S.company, t = (c.team || [])[0] || {}; return { n: S.me.name, r: t.r || "Founder", co: c.n, ind: c.ind || "Technology", stg: c.ckind == "Startup" ? (c.fund && c.fund != "Not raising" ? c.fund : "Startup") : "Established", loc: ((c.addr || S.me.loc || "").split(",").pop() || "").trim(), bio: S.me.bio || c.about || "", li: S.me.links, photo: S.me.photo, v: isVer() } };
+        const fcard = (f, i, own) => `<div class="card col fc" style="--a:${col(f.co || f.n)}"><div class="row" style="flex-wrap:nowrap">${av(f.n, f.photo)}<div style="min-width:0"><b>${esc(f.n)}${vb(f.v)}</b><div class="mu">${esc(f.r || "Founder")} · <b>${esc(f.co || "")}</b></div></div></div><div class="mu">${esc(f.bio || "")}</div><div><span class="tag">${esc(f.ind || "Startup")}</span><span class="tag">🚀 ${esc(f.stg || "Early")}</span>${f.loc ? `<span class="tag">📍 ${esc(f.loc)}</span>` : ""}</div>${own ? "" : `<div class="row">${f.c ? '<span class="tag">Requested ✓</span>' : `<button class="btn s" data-a="fcn" data-i="${i}">Connect</button>`}${String(f.li).startsWith("https://") ? `<a class="btn s g" target="_blank" rel="noopener" href="${esc(f.li)}">LinkedIn ↗</a>` : ""}<button class="btn s g" data-a="vcn" data-v="${esc(f.co || "")}">View company</button></div>`}</div>`;
+        const md = t => esc(t).split("\n").map(l => { if (/^### /.test(l)) return "<h4>" + l.slice(4) + "</h4>"; if (/^## /.test(l)) return "<h3>" + l.slice(3) + "</h3>"; if (/^# /.test(l)) return "<h2>" + l.slice(2) + "</h2>"; if (/^- \[( |x)\] /i.test(l)) return `<div>${/\[x\]/i.test(l) ? "☑" : "☐"} ${l.slice(6)}</div>`; if (/^- /.test(l)) return "<div>• " + l.slice(2) + "</div>"; return l.trim() ? "<p style='margin:6px 0'>" + l + "</p>" : "<br>" }).join("").replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*(.+?)\*/g, "<i>$1</i>").replace(/https:\/\/[^\s<]+/g, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
+        const TPL = { blank: ["Untitled document", ""], pitch: ["Pitch deck outline", "# Pitch deck outline\n\n## 1. Problem\n- Who has the problem?\n- Why does it hurt?\n\n## 2. Solution\n\n## 3. Product\n\n## 4. Market size\n\n## 5. Business model\n\n## 6. Traction\n\n## 7. Team\n\n## 8. The ask\n- Amount:\n- Use of funds:\n"], plan: ["Business plan", "# Business plan\n\n## Summary\n\n## Customers\n\n## Product and pricing\n\n## Marketing plan\n\n## Operations\n\n## Finance (12 months)\n\n## Risks\n"], notes: ["Meeting notes", "# Meeting notes\n\n**Date:**\n**Attendees:**\n\n## Agenda\n- \n\n## Decisions\n- \n\n## Action items\n- [ ] \n"], update: ["Investor update", "# Investor update\n\n## Highlights\n- \n\n## Metrics\n- Revenue:\n- Users:\n- Runway:\n\n## Challenges\n\n## Asks\n- [ ] Introductions needed:\n"] };
+        const DT = [["blank", "Blank"], ["pitch", "Pitch deck outline"], ["plan", "Business plan"], ["notes", "Meeting notes"], ["update", "Investor update"]];
+        const DOCS = () => { const mine = S.docs.map(d => { const x = d.sh && d.sh.length ? S.dbDocs.find(y => y.id == d.id && y.uid == UID) : null; return Object.assign({ own: 1 }, d, x && x.upd > d.upd ? { t: x.t, b: x.b, upd: x.upd } : {}) }); const shared = S.dbDocs.filter(d => d.uid != UID && (d.sh || []).some(x => x.u == UID)).map(d => ({ ...d, perm: (d.sh.find(x => x.u == UID) || {}).p, sharedBy: d.by })); return { mine, shared } };
+        const dcard = d => `<div class="card col" style="--a:${col(d.t)}"><div class="row sp"><b>${esc(d.t)}</b>${d.own ? (d.sh && d.sh.length ? `<span class="tag">👥 ${d.sh.length}</span>` : "") : `<span class="tag">${d.perm == "edit" ? "Can edit" : "View only"}</span>`}</div><div class="mu ell">${esc((d.b || "").replace(/[#*\-\[\]]/g, "").trim().slice(0, 90)) || "Empty document"}</div><div class="mu" style="font-size:12px">${d.own ? "" : "From " + esc(d.sharedBy || "") + " · "}Updated ${new Date(d.upd).toLocaleDateString("en-IN")}</div><div><button class="btn s" data-a="wopen" data-v="${d.id}">Open</button></div></div>`;
+        const wedit = d => { const ed = d.own || d.perm == "edit"; return `<div class="row sp"><button class="btn s g" data-a="wback">← All documents</button><div class="row">${d.own ? '<button class="btn s" data-a="wshare">👥 Share</button>' : `<span class="tag">Shared by ${esc(d.sharedBy || "")} · ${ed ? "can edit" : "view only"}</span>`}<button class="btn s g" data-a="wcopy">Copy text</button>${d.own ? '<button class="btn s g" data-a="wdel">Delete</button>' : ""}</div></div><input id="wt" value="${esc(d.t)}" ${ed ? "" : "disabled"} style="font-size:20px;font-weight:700;margin:12px 0">${ed ? `<div class="row" style="gap:6px;margin-bottom:8px">${[["h", "H"], ["b", "B"], ["i", "I"], ["ul", "• List"], ["ck", "☐ Task"], ["ln", "🔗 Link"]].map(([k, l]) => `<button class="chip" data-a="wfmt" data-v="${k}">${l}</button>`).join("")}</div>` : ""}<div class="row" style="align-items:stretch;gap:14px"><textarea id="wb" ${ed ? "" : "disabled"} style="flex:1 1 320px;min-height:380px;font-family:ui-monospace,monospace">${esc(d.b)}</textarea><div class="card" id="wp" style="flex:1 1 320px;min-height:380px;overflow:auto">${md(d.b)}</div></div><div class="mu" id="wsv">${ed ? "Saved automatically" : "View only"} · updated ${new Date(d.upd).toLocaleString("en-IN")}</div>` };
+        let WT; function wsave() {
+            clearTimeout(WT); WT = setTimeout(() => {
+                const t = $("#wt"), bd = $("#wb"); if (!t || !bd || !S.wd) return; const D = DOCS(), d = D.mine.concat(D.shared).find(x => x.id == S.wd); if (!d || !(d.own || d.perm == "edit")) return; const up = { t: t.value.slice(0, 120) || "Untitled", b: bd.value.slice(0, 100000), upd: Date.now() };
+                if (d.own) { const m = S.docs.find(x => x.id == d.id); Object.assign(m, up); if (m.sh && m.sh.length && DB) DB.doc("docs/" + m.id).set({ id: m.id, uid: UID, by: S.me.name, ...up, sh: m.sh }).catch(() => { }) } else if (DB) DB.doc("docs/" + d.id).update(up).catch(() => note("Could not save: you do not have edit access"));
+                persist(); const sv = $("#wsv"); if (sv) sv.textContent = "Saved · " + new Date().toLocaleTimeString("en-IN")
+            }, 500)
+        }
+        function shareModal() {
+            const d = S.docs.find(x => x.id == S.wd); if (!d) return; const M = S.members.filter(m => m.id != UID);
+            $("#mbox").innerHTML = `<h2>Share “${esc(d.t)}”</h2>${DB ? "" : '<div class="mu">Sharing needs the live database (open the app while signed in to claude.ai).</div>'}${M.length ? `<div class="mu" style="margin-bottom:8px">Choose members and what they can do.</div>${M.map(m => { const x = (d.sh || []).find(y => y.u == m.id); return `<div class="row sp it"><label style="margin:0;display:flex;gap:8px;color:var(--tx)"><input type="checkbox" style="width:auto" data-sh="${m.id}" ${x ? "checked" : ""}> ${esc(m.name || "Member")}</label><select data-sp="${m.id}" style="width:auto"><option value="view" ${x && x.p == "view" ? "selected" : ""}>Can view</option><option value="edit" ${x && x.p == "edit" ? "selected" : ""}>Can edit</option></select></div>` }).join("")}` : '<div class="mu">No other members have joined yet. They appear here as soon as they create an account.</div>'}<div class="row" style="margin-top:14px"><button class="btn" id="shok">Save sharing</button><button class="btn g" id="no">Cancel</button></div>`;
+            $("#modal").classList.add("on"); $("#no").onclick = () => $("#modal").classList.remove("on");
+            $("#shok").onclick = () => {
+                const sh = []; document.querySelectorAll("#mbox [data-sh]").forEach(c => { if (c.checked) { const id = c.dataset.sh, m = M.find(x => x.id == id); sh.push({ u: id, n: m.name || "Member", p: document.querySelector(`#mbox [data-sp="${id}"]`).value }) } }); d.sh = sh;
+                if (DB) { if (sh.length) DB.doc("docs/" + d.id).set({ id: d.id, uid: UID, by: S.me.name, t: d.t, b: d.b, upd: Date.now(), sh }).catch(() => { }); else DB.doc("docs/" + d.id).delete().catch(() => { }) }
+                $("#modal").classList.remove("on"); persist(); note(sh.length ? "Shared with " + sh.length + " member" + (sh.length > 1 ? "s" : "") : "Sharing turned off")
+            }
+        }
+        const NOW = () => Date.now();
+        const curCo = () => S.view && !S.view._p && !S.view._pf ? S.view : S.company;
+        const LB = { L: [], i: 0 };
+        function lbShow() { const l = $("#lbx"); if (!LB.L.length) { l.classList.remove("on"); return } l.classList.add("on"); l.innerHTML = `<button class="lbb" style="top:18px;right:18px" data-a="lbx" data-v="x">✕</button><button class="lbb" style="left:14px;top:50%" data-a="lbx" data-v="p">‹</button><div style="text-align:center"><img class="lbi" src="${LB.L[LB.i]}" alt=""><div style="color:#ccc;margin-top:8px">${LB.i + 1} / ${LB.L.length}</div></div><button class="lbb" style="right:14px;top:50%" data-a="lbx" data-v="n">›</button>` }
+        const vis = p => { const n = NOW(); return (p.uid && p.uid == UID && n < p.until) || (n >= p.from && n < p.until) };
+        const left = p => { const h = Math.max(1, Math.round((p.until - NOW()) / 36e5)); return h >= 48 ? Math.round(h / 24) + "d left" : h + "h left" };
+        const FEED = () => S.posts.map(p => ({ ...p, from: p.from || p.ts, until: p.until || p.ts + 864e5, tm: ago(p.ts), l: S.liked.has(p.id) ? 1 : 0 })).concat(S.feed).filter(vis);
+        const SUG = () => { const L = PEOPLE().map((p, i) => [p, i]).filter(x => !x[0].c).slice(0, 3); return L.length ? `<div class="card" style="--a:#38bdf8"><h3>👥 People you may know</h3>${L.map(([p, i]) => `<div class="it row sp"><div class="row" style="flex-wrap:nowrap">${av(p.n)}<div><b>${esc(p.n)}</b><div class="mu">${esc(p.r)}</div></div></div><button class="btn s" data-a="conp" data-i="${i}">Connect</button></div>`).join("")}</div>` : "" };
+        const IDEAS = () => S.dbIdeas.concat(S.ideas).map(i => { if (i.uid) { i.on = mine("idea", i.id) ? 1 : 0; i.reqs = S.reqs.filter(r => r.k == "idea" && String(r.tid) == String(i.id)).length } return i });
+        const MEETS = () => S.dbMeets.concat(S.meets).map(m => { if (m.uid) m.on = mine("meet", m.id) ? 1 : 0; return m });
+        const PEOPLE0 = () => S.people.concat(S.members.filter(m => m.id != UID).map(m => ({ n: m.name || "Member", r: m.head || "", loc: m.loc || "", bio: m.bio || "", look: m.int || "Open to connect", t: m.skills || [], photo: m.photo || "", theme: m.theme, c: mine("connect", m.id) ? 1 : 0, uid: m.id })));
+        const allCos0 = () => S.cos.concat(S.sites.filter(s => s.uid != UID)).concat(S.company.pub ? [S.company] : []);
+        function share(c, d, fb) { if (!DB) return fb(); DB.collection(c).add(d).catch(() => { fb(); note("Saved on this device only (no write access)") }) }
+        const shareIdea = o => { const { id, ...r } = o; share("ideas", r, () => S.ideas.unshift(o)) };
+        const shareMeet = o => { const { id, on, ...r } = o; share("meets", r, () => S.meets.push(o)) };
+        function soft() { const a = document.activeElement; if (a && a.id == "cm") { const v = a.value; draw(); const n = $("#cm"); if (n) { n.value = v; n.focus() } return } if (a && a.closest && a.closest("#app") && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return; draw() }
+        function persist() {
+            clearTimeout(T); T = setTimeout(() => {
+                saveLocal(); if (!DB || !LOADED) return;
+                const a = JSON.stringify({ me: S.me, company: S.company, tasks: S.tasks, todo: S.todo, people: S.people.map(p => p.c), cos: S.cos.map(p => p.c), seen: S.seen, acct: S.acct, daily: S.daily, q: S.q, docs: S.docs });
+                if (a != H1) { H1 = a; DB.doc("data/users/" + UID + "/app").set(JSON.parse(a)).then(() => { $("#dbs").textContent = "☁ Saved" }).catch(() => { $("#dbs").textContent = "⚠ Not saved" }) }
+                const m = JSON.stringify({ theme: isPro() ? (S.me.theme || "noir") : "noir", name: S.me.name, head: S.me.head, bio: S.me.bio, loc: S.me.loc, int: S.me.int, skills: S.me.skills, type: S.me.type, photo: S.me.photo || "", edu: S.me.edu || "" });
+                if (m != H2) { H2 = m; DB.doc("members/" + UID).set(JSON.parse(m)).catch(() => { }) }
+                if (S.company.pub) { const { resumes, sent, ...pc } = S.company; const j = JSON.stringify({ ...pc, theme: isPro() ? pc.theme : "classic", uid: UID, pub: 1 }); if (j != H3) { H3 = j; DB.doc("sites/" + UID).set(JSON.parse(j)).catch(() => { }) } } else H3 = "";
+                if (S.me.type == "Investor" && S.me.inv) { const j = JSON.stringify({ theme: isPro() ? (S.me.theme || "noir") : "noir", name: S.me.name, photo: S.me.photo || "", ...S.me.inv }); if (j != H4) { H4 = j; DB.doc("investors/" + UID).set(JSON.parse(j)).catch(() => { }) } }
+                if (S.me.hub && S.me.type != "Individual" && S.me.type != "Investor") { const f = myFounder(), j = JSON.stringify({ name: f.n, role: f.r, co: f.co, ind: f.ind, stage: f.stg, loc: f.loc, bio: f.bio, li: f.li || "", photo: f.photo || "" }); if (j != H5) { H5 = j; DB.doc("founders/" + UID).set(JSON.parse(j)).catch(() => { }) } } else if (H5) { H5 = ""; DB.doc("founders/" + UID).delete().catch(() => { }) }
+            }, 900)
+        }
+        function inbox() { S.reqs.forEach(r => { if (r.to != UID || r.from == UID || S.seen.includes(r.id)) return; S.seen.push(r.id); S.notes.unshift({ x: r.msg, u: 1 }); if (r.k == "job") S.company.resumes.unshift({ n: r.n, role: r.role, st: "New" }) }) }
+        async function initDB() {
+            try {
+                let u, db; if (SBCFG.url && SBCFG.key && window.supabase) { const x = await sbInit(); u = x.u; db = x.db } else { if (typeof claude == "undefined") return; u = await claude.use("user"); db = await claude.use("db") } if (!db || !u) return; const id = await u.id(); if (!id) return; DB = db; UID = id; try { const cm = await u.me(); S.cmail = cm.email; S.cid = cm.email || cm.name; if (cm.name) { S.me.name = cm.name; S.au.d.name = cm.name } } catch (e) { }
+                const d = await DB.doc("data/users/" + UID + "/app").get();
+                if (d.exists) { const x = JSON.parse(JSON.stringify(d.data())); Object.assign(S.me, x.me || {}); Object.assign(S.company, x.company || {}); if (x.tasks) S.tasks = x.tasks; if (x.todo) S.todo = x.todo; (x.people || []).forEach((c, i) => S.people[i] && (S.people[i].c = c)); (x.cos || []).forEach((c, i) => S.cos[i] && (S.cos[i].c = c)); S.seen = x.seen || []; H1 = JSON.stringify(x); S.acct = x.acct || null; if (x.daily) S.daily = x.daily; if (x.q) S.q = x.q; if (x.docs) S.docs = x.docs; while (S.tasks.length < 16) S.tasks.push([NT[S.tasks.length - 8], 0]) }
+                LOADED = 1; $("#dbs").textContent = "☁ Live";
+                const sub = (c, fn) => DB.collection(c).onSnapshot(q => { fn(q.docs.map(d => ({ ...d.data(), id: d.id }))); soft() }, () => { });
+                sub("posts", a => S.posts = a.sort((x, y) => y.ts - x.ts));
+                sub("ideas", a => S.dbIdeas = a.sort((x, y) => y.ts - x.ts));
+                sub("meets", a => S.dbMeets = a);
+                sub("sites", a => S.sites = a.map(s => Object.assign(s, { c: (S.sites.find(o => o.id == s.id) || {}).c || 0 })));
+                sub("members", a => S.members = a);
+                sub("requests", a => { S.reqs = a; inbox() });
+                sub("chats", a => S.chats = a);
+                sub("investors", a => S.dbInv = a);
+                sub("ads", a => S.dbAds = a);
+                sub("founders", a => S.dbFounders = a);
+                sub("docs", a => S.dbDocs = a);
+                draw()
+            } catch (e) { } finally { S.chk = 0; S.au.mode = "login"; draw() }
+        }
+        let AK = "", LS = "", LC = "";
+        function saveLocal() { if (S.chk) return; try { const j = JSON.stringify({ acct: S.acct, me: S.me, tasks: S.tasks, todo: S.todo, daily: S.daily, docs: S.docs }); if (j != LS) { localStorage.setItem("fb_local", j); LS = j } } catch (e) { } try { const c = JSON.stringify(S.company); if (c != LC) { localStorage.setItem("fb_co", c); LC = c } } catch (e) { } }
+        try { const L = JSON.parse(localStorage.getItem("fb_local") || "null"); if (L) { if (L.acct) S.acct = L.acct; Object.assign(S.me, L.me || {}); if (L.tasks) S.tasks = L.tasks; if (L.todo) S.todo = L.todo; if (L.daily) S.daily = L.daily; if (L.docs) S.docs = L.docs } const C = JSON.parse(localStorage.getItem("fb_co") || "null"); if (C) S.company = C } catch (e) { }
+        const genId = d => { const f = (d.name || "user").trim().split(/\s+/)[0].toLowerCase().replace(/[^a-z0-9]/g, "") || "user"; return f + "_" + (d.phone || "").replace(/\D/g, "").slice(-4) };
+        const hl = c => (c.hl || "").split("\n").map(x => x.split(":")).filter(a => a[1] && a[0].trim()).map(a => [a[0].trim(), a.slice(1).join(":").trim()]);
+        const SEEDINV = [{ v: 1, n: "Mehta Angels", type: "Angel investor", ticket: "₹10L – ₹50L", sec: ["SaaS", "Fintech"], stg: ["Pre-seed", "Seed"], loc: "Mumbai", bio: "Backed 14 startups. Looks for strong founders with early traction.", port: ["PayLoop", "TaskNest", "KiranaOS"], c: 0 }, { v: 1, n: "Blue Ridge Ventures", type: "Venture capital", ticket: "₹1 Cr – ₹8 Cr", sec: ["AI", "Healthtech", "B2B SaaS"], stg: ["Seed", "Series A"], loc: "Bengaluru", bio: "Early-stage fund backing India-first AI and health products.", port: ["MediLink", "Cortexa", "StackPilot"], c: 0 }, { n: "Lakshmi Family Office", type: "Family office", ticket: "₹25L – ₹1 Cr", sec: ["Agritech", "D2C", "Edtech"], stg: ["Idea", "Pre-seed"], loc: "Hyderabad", bio: "Patient capital for founders building outside the big metros.", port: ["FarmNest", "LearnLoop"], c: 0 }, { n: "T-Hub Angel Network", type: "Accelerator", ticket: "₹5L – ₹30L", sec: ["Deeptech", "SaaS", "Climate"], stg: ["Idea", "Pre-seed"], loc: "Hyderabad", bio: "Mentorship plus first cheques for student and first-time founders.", port: ["GreenCart", "EduSpark"], c: 0 }];
+        const INVS0 = () => SEEDINV.concat(S.dbInv.filter(v => v.id != UID).map(v => ({ n: v.firm || v.name, type: v.type, ticket: v.ticket, sec: v.sec || [], stg: v.stg || [], loc: v.loc, bio: v.thesis || "", port: v.port || [], photo: v.photo || "", theme: v.theme, uid: v.id, c: mine("intro", v.id) ? 1 : 0 }))).filter(v => S.fstg == "All" || v.stg.some(x => x.toLowerCase() == S.fstg.toLowerCase()));
+        const validPw = p => typeof p == "string" && p.length >= 8 && /[A-Za-z]/.test(p) && /\d/.test(p);
+        const hp = async (pw, salt) => { const e = new TextEncoder(), k = await crypto.subtle.importKey("raw", e.encode(pw), "PBKDF2", false, ["deriveBits"]); const b = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: e.encode(salt), iterations: 150000, hash: "SHA-256" }, k, 256); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("") };
+        const PU = (id, l, v) => `<label>${l}</label><input type="file" accept="image/*" id="${id}">${v ? `<img src="${v}" alt="" style="width:84px;height:84px;object-fit:cover;border-radius:${id == "alogo" ? "14px" : "50%"};margin-top:8px">` : ""}`;
+        const BACK = { s1: "login", s2: "s1", p3: "s2", c3a: "s2", c3b: "c3a", c3c: "c3b", i3: "s2" };
+        const IND = ["Technology", "Education", "Healthcare", "Finance", "Retail", "Manufacturing", "Agriculture", "Other"];
+        async function authAct(a, v) {
+            const au = S.au, d = au.d; document.querySelectorAll("#abox [name]").forEach(e => d[e.name] = e.value.trim()); au.err = ""; au.msg = "";
+            const fail = m => { au.err = m; AK = ""; draw() };
+            if (a == "go") { au.mode = v; return draw() }
+            if (a == "back") { au.mode = BACK[au.mode] || "login"; return draw() }
+            if (a == "kind") { au.kind = v; au.mode = v == "company" ? "c3a" : v == "investor" ? "i3" : "p3"; return draw() }
+            if (a == "login") { const id = (d.lid || "").toLowerCase(), A = S.acct; if (!A) return fail("No account found. Create one first."); if ((id != A.uid.toLowerCase() && id != A.email.toLowerCase()) || await hp(d.lpw || "", A.salt) != A.hash) return fail("Wrong user ID or password."); d.lpw = ""; S.gate = false; return draw() }
+            if (a == "reset") { if (!UID || !S.acct) return fail("Password reset needs a saved account."); if (!validPw(d.np)) return fail("Password needs 8+ characters with letters and numbers."); if (d.np != d.np2) return fail("Passwords do not match."); const salt = crypto.randomUUID(); S.acct.salt = salt; S.acct.hash = await hp(d.np, salt); au.mode = "login"; au.msg = "Password updated. Please log in."; return draw() }
+            if (a == "next") {
+                if (au.mode == "s1") { if ((d.name || "").length < 2) return fail("Enter your full name."); if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email || "")) return fail("Enter a valid email."); if (!/^\+?[0-9 ]{8,15}$/.test(d.phone || "")) return fail("Enter a valid contact number."); if (!validPw(d.pw)) return fail("Password needs 8+ characters with letters and numbers."); if (d.pw != d.pw2) return fail("Passwords do not match."); d.uid = genId(d); au.mode = "s2" }
+                else if (au.mode == "c3a") { if (!d.logo) return fail("Please upload your company logo."); if (!d.cn) return fail("Enter your company name."); if (!(d.what || "").trim()) return fail("Tell us what the company does."); au.mode = "c3b" }
+                else if (au.mode == "c3b") { if (!d.cphone || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.cemail || "") || !(d.addr || "").trim()) return fail("Company phone, a valid company email and the address are required."); au.mode = "c3c" }
+                return draw()
+            }
+            if (a == "enter") { S.gate = false; return draw() }
+            if (a == "finish") {
+                if (au.mode == "p3" && !d.head) return fail("Tell us who you are."); if (au.mode == "i3" && (!d.firm || !d.ticket || !d.sec)) return fail("Firm name, ticket size and sectors are required."); if (au.mode == "c3c" && (!d.role || !(d.fbio || "").trim())) return fail("Add your role and what you do in the company."); if (!d.photo) return fail("Please upload your profile photo.");
+                const salt = crypto.randomUUID(), m = S.me; S.acct = { uid: d.uid, email: d.email, phone: d.phone, salt, hash: await hp(d.pw, salt) };
+                Object.assign(m, { name: d.name, email: d.email, phone: d.phone, uid: d.uid, setup: 1, photo: d.photo, links: d.fli || "" });
+                if (au.kind == "company") {
+                    m.type = d.ckind == "Startup" ? "Startup founder" : "Company owner"; m.head = (d.role || "Founder & CEO") + " at " + d.cn; m.bio = d.fbio || "";
+                    const team = [{ n: d.name, r: d.role || "Founder & CEO", bio: d.fbio, e: d.email, photo: d.photo }]; m.hub = d.hub == "No" ? 0 : 1; if (d.t2n) team.push({ n: d.t2n, r: d.t2r || "Team member" });
+                    const c = S.company = { logo: d.logo, n: d.cn, tag: d.tag || "", about: d.what || "", svc: [], color: "#2563eb", site: d.site || "", email: d.cemail || d.email, phone: d.cphone || d.phone, addr: d.addr || "", pub: 0, ckind: d.ckind, ind: d.ind, yr: d.yr, rst: d.rst, udyam: d.udyam, cin: d.cin, gst: d.gst, dpiit: d.dpiit, vision: d.vis, mission: d.mis, jobs: [], resumes: [], team, photos: [], sent: [], projects: d.pt ? [{ t: d.pt, st: d.ps, d: d.pd, imgs: d.pimg ? [d.pimg] : [] }] : [] };
+                    const tk = [+(c.rst == "Registered"), +!!c.udyam, +!!c.gst, +(c.dpiit == "Yes"), 0, +!!(c.vision && c.mission), 1, +!!(c.projects.length && c.projects[0].imgs.length)];
+                    S.tasks = [["Create company page", 1], ["Add contact info", +!!(c.addr || c.phone)], ["Post your first job", 0], ["Upload 3 photos", 0], ["Connect with 5 people", 0], ["Post a daily update", 0], ["Join a meetup", 0], ["Publish your company site", 0]].concat(NT.map((t, i) => [t, tk[i]]))
+                }
+                else if (au.kind == "investor") { const L = x => (x || "").split(",").map(y => y.trim()).filter(Boolean); m.type = "Investor"; m.head = d.itype + " · " + d.firm; m.bio = d.thesis || ""; m.loc = d.loc || ""; m.inv = { firm: d.firm, type: d.itype, ticket: d.ticket || "", sec: L(d.sec), stg: L(d.stg), loc: d.loc || "", thesis: d.thesis || "", port: L(d.port), site: d.site || "" } }
+                else { m.type = "Individual"; m.head = d.head; m.bio = d.bio || ""; m.loc = d.loc || ""; m.edu = d.edu || ""; m.int = d.int || ""; m.skills = (d.skills || "").split(",").map(x => x.trim()).filter(Boolean) }
+                S.tab = "home"; d.pw = d.pw2 = ""; au.mode = "done"; return draw()
+            }
+        }
+        function auth() {
+            const a = $("#auth"); a.classList.toggle("on", !!S.gate); if (!S.gate) { AK = ""; return }
+            const au = S.au, d = au.d, m = au.mode, k = [m, S.chk, au.err, au.msg, d.pimg ? 1 : 0, d.logo ? 1 : 0, d.photo ? 1 : 0, au.kind].join(); if (k == AK) return; AK = k;
+            const v = n => esc(d[n] || ""), I = (n, l, t) => `<label>${l}</label><input name="${n}" type="${t || "text"}" value="${v(n)}">`, T = (n, l) => `<label>${l}</label><textarea name="${n}" rows="2">${v(n)}</textarea>`, Sl = (n, l, o) => `<label>${l}</label><select name="${n}">${o.map(x => `<option ${d[n] == x ? "selected" : ""}>${x}</option>`).join("")}</select>`;
+            const N = au.kind == "company" ? 5 : 3, hd = (i, t, s) => `<h2>${t}</h2><div class="stp">${Array.from({ length: N }, (_, j) => `<i class="${j < i ? "on" : ""}"></i>`).join("")}</div><div class="mu">Step ${i} of ${N} · ${s}</div>`;
+            const nav = (nx, l) => `<div class="row" style="margin-top:16px;flex-wrap:nowrap"><button class="btn g" data-a="au_back">← Back</button><button class="btn" style="flex:1" data-a="${nx}">${l}</button></div>`;
+            const er = au.err ? `<div class="msg err">${esc(au.err)}</div>` : "", ms = au.msg ? `<div class="mu" style="color:#7dd3fc;margin-top:8px">${esc(au.msg)}</div>` : "", lk = (t, g) => `<a data-a="au_go" data-v="${g}" style="cursor:pointer;color:#7dd3fc">${t}</a>`;
+            let h = "";
+            if (S.chk) h = "<h2>Loading…</h2>";
+            else if (m == "done") h = `<h2>🎉 Account created</h2><div class="mu">Your User ID is</div><div style="font-size:28px;font-weight:800;letter-spacing:1px;margin:6px 0;color:#7dd3fc">${esc(S.acct.uid)}</div><div class="mu">Log in with this ID (or your email) and your password. Please note it down.</div><div class="row" style="margin-top:18px"><button class="btn" style="flex:1" data-a="au_enter">Enter FounderBridge</button></div>`;
+            else if (m == "login") h = `<h2>Welcome back 👋</h2><div class="mu">Log in to FounderBridge${UID ? "" : " (demo mode: nothing is saved)"}</div>${I("lid", "User ID or email")}${I("lpw", "Password", "password")}${er}${ms}<div class="row" style="margin-top:16px"><button class="btn" style="flex:1" data-a="au_login">Log in</button></div><p class="mu" style="text-align:center">${lk("Forgot password?", "reset")}</p><div class="mu" style="text-align:center;margin-top:14px">New to FounderBridge?</div><button class="btn g" style="width:100%;margin-top:8px" data-a="au_go" data-v="s1">Create new account</button>`;
+            else if (m == "reset") h = `<h2>Reset password</h2><div class="mu">${UID ? "You are signed in with claude.ai, so you can set a new password." : "Resetting needs a saved account (sign in to claude.ai)."}</div>${I("np", "New password", "password")}${I("np2", "Confirm new password", "password")}${er}<div class="row" style="margin-top:16px"><button class="btn g" data-a="au_go" data-v="login">Cancel</button><button class="btn" style="flex:1" data-a="au_reset">Save</button></div>`;
+            else if (m == "s1") h = hd(1, "Create your account", "Account details") + I("name", "Full name") + I("email", "Email", "email") + I("phone", "Contact number", "tel") + I("pw", "Password (8+ with letters and numbers)", "password") + I("pw2", "Confirm password", "password") + er + `<div class="row" style="margin-top:16px"><button class="btn" style="flex:1" data-a="au_next">Next →</button></div>` + `<p class="mu" style="text-align:center">${lk("Already have an account? Log in", "login")}</p>`;
+            else if (m == "s2") h = hd(2, "Choose your profile", "Who is this for?") + `<div class="mu" style="margin-top:6px">Your User ID: <b style="color:#7dd3fc">${esc(d.uid || "")}</b> (created for you)</div>` + `<button class="opt" data-a="au_kind" data-v="personal"><b>👤 Personal profile</b><div class="mu">For individuals: tell people who you are and what you do.</div></button><button class="opt" data-a="au_kind" data-v="company"><b>🏢 Company profile</b><div class="mu">For startups and existing companies: company page, registrations, team and projects.</div></button><button class="opt" data-a="au_kind" data-v="investor"><b>💼 Investor profile</b><div class="mu">For angels, VCs and funds: set your ticket size, sectors and portfolio so startups can find you.</div></button><div class="row" style="margin-top:16px"><button class="btn g" data-a="au_back">← Back</button></div>`;
+            else if (m == "p3") h = hd(3, "About you", "Personal profile") + PU("aphoto", "Profile photo *", d.photo) + I("head", "Who are you? (e.g. Final-year engineering student) *") + T("bio", "What do you do?") + I("loc", "City") + I("edu", "Education") + I("skills", "Skills (comma separated)") + I("int", "Interests") + er + nav("au_finish", "Finish ✓");
+            else if (m == "i3") h = hd(3, "Investor details", "Investor profile") + PU("aphoto", "Profile photo *", d.photo) + I("firm", "Firm or investor name *") + Sl("itype", "Investor type", ["Angel investor", "Venture capital", "Family office", "Corporate / CVC", "Accelerator"]) + I("ticket", "Ticket size (e.g. ₹10L – ₹50L) *") + I("sec", "Sectors you invest in (comma separated) *") + I("stg", "Stages (e.g. Pre-seed, Seed)") + I("loc", "Location") + T("thesis", "Investment thesis: what you look for") + I("port", "Past investments / portfolio (comma separated)") + I("site", "Website or LinkedIn") + er + nav("au_finish", "Finish ✓");
+            else if (m == "c3a") h = hd(3, "Company basics", "Company profile") + Sl("ckind", "Company type", ["Startup", "Existing company"]) + PU("alogo", "Company logo *", d.logo) + I("cn", "Company name *") + I("tag", "Tagline") + Sl("ind", "Industry", IND) + I("yr", "Year started") + T("what", "What does the company do? *") + Sl("rst", "Registration status", ["Not registered", "In process", "Registered"]) + I("udyam", "Udyam / MSME number") + I("cin", "CIN / MCA number") + I("gst", "GST number") + Sl("dpiit", "DPIIT Startup India recognition", ["No", "Applied", "Yes"]) + `<div class="mu" style="margin-top:8px">Startups get a launch checklist (registrations, MSME, GST, DPIIT…) and a daily checklist on Home.</div>` + er + nav("au_next", "Next →");
+            else if (m == "c3b") h = hd(4, "Contact, vision & mission", "Company profile") + I("cphone", "Company phone *") + I("cemail", "Company email *", "email") + I("site", "Website") + T("addr", "Address *") + T("vis", "Vision") + T("mis", "Mission") + er + nav("au_next", "Next →");
+            else if (m == "c3c") h = hd(5, "Team & projects", "Company profile") + PU("aphoto", "Your photo (used on your founder card) *", d.photo) + I("role", "Your role (e.g. Founder & CEO) *") + T("fbio", "What do you do in the company? *") + I("fli", "Your LinkedIn (https://…, optional)") + Sl("hub", "Join the Founders Hub?", ["Yes", "No"]) + I("t2n", "Another team member (optional)") + I("t2r", "Their role") + `<h3 style="margin-top:14px">Project</h3>` + I("pt", "Project name") + Sl("ps", "Status", ["Completed", "Ongoing"]) + T("pd", "Project details") + `<label>Project photo</label><input type="file" accept="image/*" id="apimg">${d.pimg ? `<img class="pimg" src="${d.pimg}" alt="" style="margin-top:8px">` : ""}` + er + nav("au_finish", "Finish ✓");
+            $("#abox").innerHTML = h
+        }
+        setTimeout(() => { const x = $("#splash"); x.classList.add("off"); setTimeout(() => x.remove(), 700) }, 3600);
+        draw(); initDB();
+    </script>
+</body>
+
+</html>

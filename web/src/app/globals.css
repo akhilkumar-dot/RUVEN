@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+/* ============================================================
+   FOUNDERBRIDGE DESIGN TOKENS
+   Source of truth: design/reference.png
+   ============================================================ */
+
+@layer base {
+  :root {
+    /* ── Base colours ──────────────────────────────────────── */
+    --color-bg:          #000000;
+    --color-surface-1:   #121212;
+    --color-surface-2:   #1C1C1E;
+    --color-hairline:    #2A2A2D;
+    --color-text:        #FFFFFF;
+    --color-text-sec:    #A1A1A6;
+    --color-text-muted:  #6E6E73;
+
+    /* ── Signature gradient (purple → pink → orange) ────── */
+    --gradient-ring: linear-gradient(135deg, #A24BFF 0%, #FF3D81 50%, #FF8A3D 100%);
+    --color-ring-1: #A24BFF;
+    --color-ring-2: #FF3D81;
+    --color-ring-3: #FF8A3D;
+
+    /* ── Card pastels (deterministic by entity) ─────────── */
+    --card-tan:      #C48E69;
+    --card-pink:     #D68FA6;
+    --card-teal:     #5E9C8A;
+    --card-mustard:  #D8BF4A;
+    --card-coral:    #D9694A;
+    --card-lavender: #9A6BB8;
+
+    /* ── Radius ──────────────────────────────────────────── */
+    --radius-card:  28px;
+    --radius-pill:  9999px;
+    --radius-icon:  50%;
+
+    /* ── Typography ──────────────────────────────────────── */
+    --font-sans: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
+
+    /* ── Motion ──────────────────────────────────────────── */
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --duration-fast: 150ms;
+    --duration-base: 250ms;
+    --duration-slow: 400ms;
+
+    /* ── Z-index layers ──────────────────────────────────── */
+    --z-dock:    10;
+    --z-topbar:  20;
+    --z-sheet:   30;
+    --z-modal:   40;
+    --z-toast:   50;
+    --z-splash:  100;
+  }
+}
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior-y: none;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100dvh;
+  }
+
+  /* Focus rings — visible on keyboard only */
+  :focus-visible {
+    outline: 2px solid var(--color-ring-1);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ============================================================
+   UTILITY CLASSES (supplement Tailwind)
+   ============================================================ */
+
+@layer utilities {
+  /* Gradient ring border — the signature element */
+  .gradient-ring {
+    position: relative;
+    background: var(--color-bg);
+  }
+  .gradient-ring::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: var(--gradient-ring);
+    z-index: -1;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: var(--gradient-ring);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Bento card pastel backgrounds */
+  .card-tan     { background-color: var(--card-tan); }
+  .card-pink    { background-color: var(--card-pink); }
+  .card-teal    { background-color: var(--card-teal); }
+  .card-mustard { background-color: var(--card-mustard); }
+  .card-coral   { background-color: var(--card-coral); }
+  .card-lavender{ background-color: var(--card-lavender); }
+
+  /* Line-art texture overlay (subtle) */
+  .texture-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.06'%3E%3Ccircle cx='30' cy='30' r='25'/%3E%3Ccircle cx='30' cy='30' r='15'/%3E%3Ccircle cx='30' cy='30' r='5'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 120px 120px;
+  }
+
+  /* Safe area padding */
+  .safe-top    { padding-top: env(safe-area-inset-top, 0px); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+  /* Typography helpers */
+  .text-display { font-size: clamp(40px, 10vw, 48px); font-weight: 500; line-height: 1.05; letter-spacing: -0.02em; }
+  .text-hero    { font-size: clamp(32px, 8vw, 40px);  font-weight: 500; line-height: 1.1;  letter-spacing: -0.015em; }
+  .text-title   { font-size: 21px;  font-weight: 600; line-height: 1.25; }
+  .text-body    { font-size: 15px;  font-weight: 400; line-height: 1.5; }
+  .text-meta    { font-size: 12px;  font-weight: 400; color: var(--color-text-muted); }
+}
+
+/* ============================================================
+   SCROLLBARS — thin dark style
+   ============================================================ */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-hairline); border-radius: 2px; }
