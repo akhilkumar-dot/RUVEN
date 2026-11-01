@@ -1,12 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Users } from "lucide-react";
 import { TopBar } from "@/ui/TopBar";
 import { BentoGrid, BentoCard } from "@/ui/BentoCard";
-import { BottomDock } from "@/ui/BottomDock";
-import { FloatingActionStack } from "@/ui/BottomDock";
-import { StatPill } from "@/ui/StatPill";
+import { BottomDock, FloatingActionStack } from "@/ui/BottomDock";
 
 // ── Mock data — replaced by real API in Phase 1 ──────────────
 const MOCK_FEATURED = {
@@ -28,21 +25,8 @@ const HOME_TABS = [
   { key: "founders", label: "Founders" },
 ];
 
-const SECTIONS = [
-  { key: "home",     label: "Home" },
-  { key: "discover", label: "Discover" },
-  { key: "hub",      label: "Founders Hub" },
-  { key: "ideas",    label: "Ideas & Projects" },
-  { key: "meet",     label: "Meetups" },
-  { key: "msg",      label: "Messages" },
-  { key: "work",     label: "Workspace" },
-  { key: "plans",    label: "Plans" },
-  { key: "profile",  label: "Profile" },
-];
-
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("feed");
-  const [_section, setSection] = useState("home");
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">

@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Plus, Zap, Shield, Clock } from "lucide-react";
+import { Zap, Shield, Clock } from "lucide-react";
 import { Avatar } from "./Avatar";
 
 interface FloatingActionStackProps {

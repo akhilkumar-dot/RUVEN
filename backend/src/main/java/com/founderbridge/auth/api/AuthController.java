@@ -1,12 +1,19 @@
 ﻿package com.founderbridge.auth.api;
 
 import com.founderbridge.auth.dto.*;
+import com.founderbridge.auth.service.AuthService;
+import com.founderbridge.shared.CookieUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @Tag(name = "Auth", description = "Authentication and session management")
 @RestController
@@ -14,72 +21,71 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    // AuthService injected in Phase 1 when full business logic is wired
-    // private final AuthService authService;
+    private final AuthService authService;
 
     @Operation(summary = "Register a new account")
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(
-            @Valid @RequestBody RegisterRequest req,
-            jakarta.servlet.http.HttpServletResponse response) {
-        // Phase 1 implementation
-        throw new UnsupportedOperationException("Phase 1 — auth service not wired yet");
+    @ResponseStatus(HttpStatus.CREATED)
+    public AuthResponse register(@Valid @RequestBody RegisterRequest req,
+                                  HttpServletResponse response) {
+        return authService.register(req, response);
     }
 
     @Operation(summary = "Login with email/userHandle + password")
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(
-            @Valid @RequestBody LoginRequest req,
-            jakarta.servlet.http.HttpServletResponse response) {
-        // Phase 1 implementation
-        throw new UnsupportedOperationException("Phase 1 — auth service not wired yet");
+    public AuthResponse login(@Valid @RequestBody LoginRequest req,
+                               HttpServletRequest request,
+                               HttpServletResponse response) {
+        String ua = request.getHeader("User-Agent");
+        String ip = request.getRemoteAddr();
+        return authService.login(req, response, ua, ip);
     }
 
     @Operation(summary = "Refresh access token using rotating refresh token cookie")
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(
+    public AuthResponse refresh(
             @CookieValue(name = "rt", required = false) String refreshToken,
-            jakarta.servlet.http.HttpServletResponse response) {
-        if (refreshToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        // Phase 1 implementation
-        throw new UnsupportedOperationException("Phase 1 — auth service not wired yet");
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        return authService.refresh(refreshToken, response,
+            request.getHeader("User-Agent"), request.getRemoteAddr());
     }
 
-    @Operation(summary = "Logout and revoke refresh token")
+    @Operation(summary = "Logout and revoke current session")
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(
-            @CookieValue(name = "rt", required = false) String refreshToken,
-            jakarta.servlet.http.HttpServletResponse response) {
-        // Clear the cookie immediately
-        var cookie = new jakarta.servlet.http.Cookie("rt", "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(@CookieValue(name = "rt", required = false) String refreshToken,
+                       HttpServletResponse response) {
+        authService.logout(refreshToken, response);
+    }
+
+    @Operation(summary = "Logout all devices")
+    @PostMapping("/logout-all")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logoutAll(@AuthenticationPrincipal String userId,
+                          HttpServletResponse response) {
+        authService.logoutAll(UUID.fromString(userId), response);
     }
 
     @Operation(summary = "Request password reset email")
     @PostMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPassword(
-            @RequestBody @Valid ForgotPasswordRequest req) {
-        // Always 200 — never reveal whether email exists
-        return ResponseEntity.ok().build();
+    @ResponseStatus(HttpStatus.OK)
+    public void forgotPassword(@RequestBody @Valid ForgotPasswordRequest req) {
+        authService.forgotPassword(req.email());
+        // Always 200 — see AuthService for why
     }
 
     @Operation(summary = "Reset password with one-time token")
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(
-            @RequestBody @Valid ResetPasswordRequest req) {
-        throw new UnsupportedOperationException("Phase 1 — not wired yet");
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void resetPassword(@RequestBody @Valid ResetPasswordRequest req) {
+        authService.resetPassword(req.token(), req.newPassword());
     }
 
-    @Operation(summary = "Verify email address with one-time token")
+    @Operation(summary = "Verify email address")
     @GetMapping("/verify-email")
-    public ResponseEntity<Void> verifyEmail(@RequestParam String token) {
-        throw new UnsupportedOperationException("Phase 1 — not wired yet");
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void verifyEmail(@RequestParam String token) {
+        authService.verifyEmail(token);
     }
 }
