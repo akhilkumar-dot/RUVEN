@@ -70,7 +70,7 @@ Git: conventional commits (feat: fix: test: chore: docs:)
 
 ## 6. Phase Status
 
-  Phase 0 - Foundation (scaffold, docs, design system, 3 reference screens)  IN PROGRESS
+  Phase 0 - Foundation (scaffold, docs, design system, 3 reference screens)  DONE
   Phase 1 - Auth & onboarding                                                PENDING
   Phase 2 - Media, profiles, themes                                          PENDING
   Phase 3 - Companies                                                        PENDING
