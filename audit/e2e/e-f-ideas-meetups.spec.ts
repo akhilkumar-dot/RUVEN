@@ -26,7 +26,7 @@ test.describe("Section E & F: Ideas & Meetups Audit", () => {
     await page.goto("http://localhost:3000/meetups");
     await page.waitForLoadState("networkidle");
 
-    const hostBtn = page.locator("button:has-text('Host')");
+    const hostBtn = page.locator("button:has-text('Host')").first();
     console.log("F1 Host button visible:", await hostBtn.isVisible().catch(() => false));
     await takeAuditScreenshot(page, "F1");
   });
