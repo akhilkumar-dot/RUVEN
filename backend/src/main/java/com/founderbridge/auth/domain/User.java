@@ -2,90 +2,43 @@
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
-import java.time.*;
-import java.util.*;
-
-@Entity
-@Table(name = "users")
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Entity @Table(name = "users")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class User {
+    @Id @GeneratedValue(strategy = GenerationType.UUID) private UUID id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(name = "user_handle", nullable = false, unique = true, length = 50)
+    @Column(name = "user_handle", length = 30, unique = true, nullable = false)
     private String userHandle;
 
-    @Column(nullable = false, unique = true, length = 255)
-    private String email;
+    @Column(length = 255, unique = true, nullable = false) private String email;
+    @Column(name = "password_hash", length = 255)         private String passwordHash;
+    @Column(length = 15)                                   private String phone;
+    @Column(length = 100)                                  private String name;
+    @Column(name = "google_id", length = 255, unique = true) private String googleId;
+    @Column(name = "avatar_url", columnDefinition = "TEXT") private String avatarUrl;
 
-    @Column(name = "phone_encrypted")
-    private byte[] phoneEncrypted;
+    @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20)
+    @Builder.Default private Role role = Role.USER;
 
-    @Column(name = "password_hash", length = 255)
-    private String passwordHash;
+    @Enumerated(EnumType.STRING) @Column(nullable = false, length = 30)
+    @Builder.Default private AccountType type = AccountType.INDIVIDUAL;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private AccountType type;
+    @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20)
+    @Builder.Default private UserStatus status = UserStatus.ACTIVE;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    @Builder.Default
-    private Role role = Role.USER;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    @Builder.Default
-    private UserStatus status = UserStatus.ACTIVE;
-
-    @Column(name = "email_verified_at")
-    private OffsetDateTime emailVerifiedAt;
-
-    @Column(name = "last_login_at")
-    private OffsetDateTime lastLoginAt;
-
-    @Column(name = "is_demo", nullable = false)
-    @Builder.Default
-    private boolean demo = false;
-
-    @Column(name = "deleted_at")
-    private OffsetDateTime deletedAt;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @UpdateTimestamp @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
-    // ── Convenience helpers ─────────────────────────────────────
+    @Column(name = "last_login_at") private OffsetDateTime lastLoginAt;
 
-    public boolean isEmailVerified() {
-        return emailVerifiedAt != null;
-    }
-
-    public boolean isActive() {
-        return status == UserStatus.ACTIVE && deletedAt == null;
-    }
-
-    public enum AccountType {
-        INDIVIDUAL, INVESTOR, STARTUP_FOUNDER, COMPANY_OWNER
-    }
-
-    public enum Role {
-        USER, MODERATOR, ADMIN
-    }
-
-    public enum UserStatus {
-        ACTIVE, SUSPENDED, DELETED
-    }
+    public enum Role         { USER, ADMIN, MODERATOR }
+    public enum AccountType  { INDIVIDUAL, INVESTOR, STARTUP_FOUNDER, COMPANY_OWNER }
+    public enum UserStatus   { ACTIVE, SUSPENDED, DELETED }
 }

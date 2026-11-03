@@ -17,6 +17,7 @@ export interface AuthUser {
 
 interface AuthState {
   user: AuthUser | null;
+  accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
 
@@ -33,16 +34,28 @@ interface AuthState {
   logoutAll: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
   setUser: (user: AuthUser | null) => void;
+  /** Called by OAuth callback page to hydrate session from redirect params */
+  setAuth: (opts: { accessToken: string; userHandle: string }) => void;
 }
 
 // ── Store ─────────────────────────────────────────────────────
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
+  accessToken: null,
   isAuthenticated: false,
   isLoading: false,
 
   setUser: (user) =>
     set({ user, isAuthenticated: user !== null }),
+
+  setAuth: ({ accessToken, userHandle }) => {
+    setAccessToken(accessToken);
+    set({
+      accessToken,
+      isAuthenticated: true,
+      user: { id: "", userHandle, email: "", type: "INDIVIDUAL" },
+    });
+  },
 
   login: async (payload) => {
     set({ isLoading: true });
