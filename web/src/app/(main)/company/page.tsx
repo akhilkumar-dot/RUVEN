@@ -135,51 +135,53 @@ export default function CompanyPage() {
         className="sticky top-0 z-20 bg-black/90 backdrop-blur-xl border-b border-[#1C1C1E]"
         style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
       >
-        <div className="flex items-center justify-between px-4 pb-3">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-            <BridgeLogo size={22} strokeColor="#000" accentColor="#000" />
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="flex items-center justify-between px-4 pb-3">
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+              <BridgeLogo size={22} strokeColor="#000" accentColor="#000" />
+            </div>
+
+            <div className="text-center">
+              <p className="text-white font-semibold text-[16px]">{company.name}</p>
+              <p className="text-[#6E6E73] text-[12px]">{company.industry}</p>
+            </div>
+
+            {/* Publish / Unpublish Toggle Action */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleTogglePublish}
+                id="btn-publish-company"
+                className={cn(
+                  "px-3.5 py-1.5 rounded-full text-[12px] font-semibold border transition-all flex items-center gap-1.5",
+                  company.isPublished
+                    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/25"
+                    : "bg-[#A24BFF]/15 border-[#A24BFF]/40 text-[#A24BFF] hover:bg-[#A24BFF]/25"
+                )}
+              >
+                <CheckCircle2 size={13} />
+                {company.isPublished ? "Published ✓" : "Publish"}
+              </button>
+            </div>
           </div>
 
-          <div className="text-center">
-            <p className="text-white font-semibold text-[16px]">{company.name}</p>
-            <p className="text-[#6E6E73] text-[12px]">{company.industry}</p>
+          {/* Tab bar — scrollable */}
+          <div className="flex overflow-x-auto scrollbar-hide gap-0 px-2 pb-0">
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-2.5 text-[13px] font-medium whitespace-nowrap border-b-2 transition-colors",
+                  activeTab === tab.key
+                    ? "border-[#A24BFF] text-white"
+                    : "border-transparent text-[#6E6E73] hover:text-[#A1A1A6]"
+                )}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
           </div>
-
-          {/* Publish / Unpublish Toggle Action */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleTogglePublish}
-              id="btn-publish-company"
-              className={cn(
-                "px-3.5 py-1.5 rounded-full text-[12px] font-semibold border transition-all flex items-center gap-1.5",
-                company.isPublished
-                  ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/25"
-                  : "bg-[#A24BFF]/15 border-[#A24BFF]/40 text-[#A24BFF] hover:bg-[#A24BFF]/25"
-              )}
-            >
-              <CheckCircle2 size={13} />
-              {company.isPublished ? "Published ✓" : "Publish"}
-            </button>
-          </div>
-        </div>
-
-        {/* Tab bar — scrollable */}
-        <div className="flex overflow-x-auto scrollbar-hide gap-0 px-2 pb-0">
-          {TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-2.5 text-[13px] font-medium whitespace-nowrap border-b-2 transition-colors",
-                activeTab === tab.key
-                  ? "border-[#A24BFF] text-white"
-                  : "border-transparent text-[#6E6E73] hover:text-[#A1A1A6]"
-              )}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -220,7 +222,7 @@ export default function CompanyPage() {
       </AnimatePresence>
 
       {/* Content */}
-      <div className="px-4 py-4 max-w-[460px] mx-auto">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-5xl mx-auto w-full">
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, y: 8 }}
@@ -299,15 +301,19 @@ export default function CompanyPage() {
               >
                 <Plus size={14} /> Add Project
               </button>
-              {projects.map(p => (
-                <div key={p.id} className="bg-[#101012] border border-[#1E1E22] rounded-2xl p-4 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-white font-semibold text-[15px]">{p.title}</h3>
-                    <span className="px-2 py-0.5 rounded-full bg-[#18181C] text-[#A24BFF] text-[11px] font-medium">{p.status}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {projects.map(p => (
+                  <div key={p.id} className="bg-[#101012] border border-[#1E1E22] rounded-2xl p-4 space-y-1.5 h-full flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-white font-semibold text-[15px]">{p.title}</h3>
+                        <span className="px-2 py-0.5 rounded-full bg-[#18181C] text-[#A24BFF] text-[11px] font-medium">{p.status}</span>
+                      </div>
+                      <p className="text-[#8E8E93] text-[13px] leading-relaxed mt-1">{p.desc}</p>
+                    </div>
                   </div>
-                  <p className="text-[#8E8E93] text-[13px] leading-relaxed">{p.desc}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
@@ -425,27 +431,29 @@ export default function CompanyPage() {
           {activeTab === "applications" && (
             <div className="space-y-3">
               <p className="text-[#8E8E93] text-[12px]">Candidate Applications ({applications.length})</p>
-              {applications.map((a) => (
-                <div key={a.id} className="flex items-center gap-3 bg-[#101012] rounded-2xl p-4 border border-[#1E1E22]">
-                  <Avatar name={a.name} size="md" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold text-[15px]">{a.name}</p>
-                    <p className="text-[#6E6E73] text-[12px]">{a.role}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {applications.map((a) => (
+                  <div key={a.id} className="flex items-center gap-3 bg-[#101012] rounded-2xl p-4 border border-[#1E1E22] h-full">
+                    <Avatar name={a.name} size="md" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-[15px]">{a.name}</p>
+                      <p className="text-[#6E6E73] text-[12px]">{a.role}</p>
+                    </div>
+                    {/* Status Dropdown conforming to PDF Spec */}
+                    <select
+                      value={a.status}
+                      onChange={(e) => handleApplicationStatusChange(a.id, e.target.value)}
+                      className="bg-[#18181C] text-white text-[12px] font-semibold border border-[#2A2A2E] rounded-xl px-2.5 py-1.5 outline-none"
+                      style={{ color: a.color }}
+                    >
+                      <option value="New">New</option>
+                      <option value="Shortlisted">Shortlisted</option>
+                      <option value="Hired">Hired</option>
+                      <option value="Rejected">Rejected</option>
+                    </select>
                   </div>
-                  {/* Status Dropdown conforming to PDF Spec */}
-                  <select
-                    value={a.status}
-                    onChange={(e) => handleApplicationStatusChange(a.id, e.target.value)}
-                    className="bg-[#18181C] text-white text-[12px] font-semibold border border-[#2A2A2E] rounded-xl px-2.5 py-1.5 outline-none"
-                    style={{ color: a.color }}
-                  >
-                    <option value="New">New</option>
-                    <option value="Shortlisted">Shortlisted</option>
-                    <option value="Hired">Hired</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
@@ -464,23 +472,25 @@ export default function CompanyPage() {
               >
                 <Plus size={14} /> Add Team Member
               </button>
-              {team.map((m) => (
-                <div key={m.id} className="flex items-center justify-between bg-[#101012] border border-[#1E1E22] rounded-2xl p-3.5">
-                  <div className="flex items-center gap-3">
-                    <Avatar name={m.name} size="md" />
-                    <div>
-                      <p className="text-white font-medium text-[14px]">{m.name}</p>
-                      <p className="text-[#6E6E73] text-[12px]">{m.role}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {team.map((m) => (
+                  <div key={m.id} className="flex items-center justify-between bg-[#101012] border border-[#1E1E22] rounded-2xl p-3.5 h-full">
+                    <div className="flex items-center gap-3">
+                      <Avatar name={m.name} size="md" />
+                      <div>
+                        <p className="text-white font-medium text-[14px]">{m.name}</p>
+                        <p className="text-[#6E6E73] text-[12px]">{m.role}</p>
+                      </div>
                     </div>
+                    <button
+                      onClick={() => setTeam(prev => prev.filter(x => x.id !== m.id))}
+                      className="text-[#6E6E73] hover:text-red-400 p-2"
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setTeam(prev => prev.filter(x => x.id !== m.id))}
-                    className="text-[#6E6E73] hover:text-red-400 p-2"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
@@ -488,7 +498,7 @@ export default function CompanyPage() {
           {activeTab === "photos" && (
             <div className="space-y-3">
               <p className="text-[#8E8E93] text-[12px]">Company Photos & Gallery (tap to open full lightbox)</p>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
                   "https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&auto=format&fit=crop&q=80",
                   "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&auto=format&fit=crop&q=80",

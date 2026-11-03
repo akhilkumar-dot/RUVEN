@@ -140,8 +140,8 @@ export default function FoundersHubPage() {
     <div className="min-h-dvh bg-black flex flex-col">
       <TopBar unreadCount={3} />
 
-      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))]">
-        <div className="px-4 pt-3 max-w-[480px] mx-auto w-full">
+      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24">
+        <div className="px-4 sm:px-6 lg:px-8 pt-4 max-w-6xl mx-auto w-full">
           {/* Header Title & Hub Status */}
           <div className="mb-4">
             <div className="flex items-center justify-between">
@@ -210,7 +210,7 @@ export default function FoundersHubPage() {
           </div>
 
           {/* Founders Card List */}
-          <div className="space-y-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredFounders.map((founder) => {
               const isConnected = connectedIds.includes(founder.id);
               return (
@@ -218,7 +218,7 @@ export default function FoundersHubPage() {
                   key={founder.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-[#0D0D10] border border-[#1E1E22] rounded-2xl p-4.5 space-y-3 hover:border-[#2C2C32] transition-colors"
+                  className="bg-[#0D0D10] border border-[#1E1E22] rounded-2xl p-4.5 space-y-3 hover:border-[#2C2C32] transition-colors h-full flex flex-col justify-between"
                 >
                   {/* Top: Avatar, Name, Company, Verified */}
                   <div className="flex items-start justify-between gap-3">

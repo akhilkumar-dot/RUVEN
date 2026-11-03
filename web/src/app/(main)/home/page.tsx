@@ -693,62 +693,65 @@ function HomePageContent() {
 
       {/* Main Content */}
       <main
-        className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))]"
+        className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24"
         id="main-content"
       >
-        <div className="px-3 pt-3 max-w-[440px] mx-auto w-full">
-          {/* ══════════ SINGLE ACCOUNT CLASS HEADER ══════════ */}
-          <div className="mb-4 p-3.5 rounded-2xl bg-[#0F0F12] border border-[#1E1E22] relative overflow-hidden">
-            {/* Subtle ambient role glow */}
-            <div
-              className="pointer-events-none absolute -top-10 -right-10 w-36 h-36 rounded-full blur-3xl opacity-20"
-              style={{ background: config.accentColor }}
-            />
+        <div className="px-3 sm:px-6 lg:px-8 pt-4 max-w-[440px] md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto w-full">
+          {/* ══════════ TOP ROW: ACCOUNT CLASS + DAILY QUOTE (B1) ══════════ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {/* Single Account Class Header */}
+            <div className="p-3.5 rounded-2xl bg-[#0F0F12] border border-[#1E1E22] relative overflow-hidden flex flex-col justify-center">
+              {/* Subtle ambient role glow */}
+              <div
+                className="pointer-events-none absolute -top-10 -right-10 w-36 h-36 rounded-full blur-3xl opacity-20"
+                style={{ background: config.accentColor }}
+              />
 
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <Avatar name={user?.userHandle ? `@${user.userHandle}` : "Founder"} size="md" />
-                <div className="min-w-0">
-                  <p className="text-white font-semibold text-[15px] truncate">
-                    {user?.userHandle ? `@${user.userHandle}` : "Welcome back"}
-                  </p>
-                  <p className="text-[#8E8E93] text-[12px] truncate mt-0.5">
-                    {config.roleDescription}
-                  </p>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar name={user?.userHandle ? `@${user.userHandle}` : "Founder"} size="md" />
+                  <div className="min-w-0">
+                    <p className="text-white font-semibold text-[15px] truncate">
+                      {user?.userHandle ? `@${user.userHandle}` : "Welcome back"}
+                    </p>
+                    <p className="text-[#8E8E93] text-[12px] truncate mt-0.5">
+                      {config.roleDescription}
+                    </p>
+                  </div>
                 </div>
+
+                {/* Single Account Class Badge */}
+                <span
+                  className={cn(
+                    "text-[11px] font-semibold px-2.5 py-1 rounded-full border flex items-center gap-1.5 shrink-0 shadow-sm",
+                    config.badgeColorClass
+                  )}
+                >
+                  {config.icon}
+                  <span>{config.badgeLabel}</span>
+                </span>
               </div>
-
-              {/* Single Account Class Badge */}
-              <span
-                className={cn(
-                  "text-[11px] font-semibold px-2.5 py-1 rounded-full border flex items-center gap-1.5 shrink-0 shadow-sm",
-                  config.badgeColorClass
-                )}
-              >
-                {config.icon}
-                <span>{config.badgeLabel}</span>
-              </span>
             </div>
-          </div>
 
-          {/* ══════════ DAILY QUOTE WIDGET (B1) ══════════ */}
-          <div data-testid="daily-quote" className="mb-4 p-4 rounded-2xl bg-[#0F0F12] border border-[#1E1E22] relative overflow-hidden">
-            <div className="flex items-center justify-between text-[11px] text-[#8E8E93] mb-1.5">
-              <span className="uppercase tracking-wider font-semibold text-[#A24BFF]">
-                {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: "numeric" })}
-              </span>
-              <span className="text-[11px] text-[#6E6E73]">Daily Inspiration</span>
+            {/* Daily Quote Widget (B1) */}
+            <div data-testid="daily-quote" className="p-4 rounded-2xl bg-[#0F0F12] border border-[#1E1E22] relative overflow-hidden flex flex-col justify-between">
+              <div className="flex items-center justify-between text-[11px] text-[#8E8E93] mb-1.5">
+                <span className="uppercase tracking-wider font-semibold text-[#A24BFF]">
+                  {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: "numeric" })}
+                </span>
+                <span className="text-[11px] text-[#6E6E73]">Daily Inspiration</span>
+              </div>
+              <blockquote className="text-white text-[13px] italic font-medium leading-relaxed">
+                "{ROLE_QUOTES[activeRole]?.quote || "Build relentlessly."}"
+              </blockquote>
+              <p className="text-[#8E8E93] text-[11px] mt-1.5 text-right font-medium">
+                — {ROLE_QUOTES[activeRole]?.author || "Founder"}
+              </p>
             </div>
-            <blockquote className="text-white text-[13px] italic font-medium leading-relaxed">
-              "{ROLE_QUOTES[activeRole]?.quote || "Build relentlessly."}"
-            </blockquote>
-            <p className="text-[#8E8E93] text-[11px] mt-1.5 text-right font-medium">
-              — {ROLE_QUOTES[activeRole]?.author || "Founder"}
-            </p>
           </div>
 
           {/* Top Switcher Tabs */}
-          <div className="flex items-center bg-[#1C1C1E] p-1 rounded-2xl mb-4 w-full">
+          <div className="flex items-center bg-[#1C1C1E] p-1 rounded-2xl mb-5 w-full max-w-md mx-auto">
             <button
               onClick={() => setActiveTab("dashboard")}
               className={cn(
@@ -793,11 +796,11 @@ function HomePageContent() {
               </div>
 
               {/* 4 Dedicated Stats Cards */}
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {config.stats.map((s, idx) => (
                   <div
                     key={idx}
-                    className="p-3 rounded-2xl bg-[#121214] border border-[#1E1E22] hover:border-[#2A2A2E] transition-colors"
+                    className="p-3.5 rounded-2xl bg-[#121214] border border-[#1E1E22] hover:border-[#2A2A2E] transition-colors"
                   >
                     <div className="flex items-center justify-between text-[11px] text-[#71717A] mb-1">
                       <span>{s.label}</span>
@@ -822,7 +825,7 @@ function HomePageContent() {
               </div>
 
               {/* Quick Actions Bar */}
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1 -mx-1 px-1">
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1 -mx-1 px-1 md:flex-wrap">
                 {config.quickActions.map((qa, i) => (
                   <button
                     key={i}
@@ -856,51 +859,87 @@ function HomePageContent() {
                 ))}
               </div>
 
-              {/* Hero Bento Profile / Entity */}
-              <div
-                className="rounded-3xl p-5 relative overflow-hidden"
-                style={{ backgroundColor: config.featuredProfile.color }}
-              >
-                <div className="relative z-10 flex flex-col justify-between min-h-[170px]">
-                  <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-black/70 px-2 py-0.5 rounded-full bg-black/10">
-                      {config.label} Spotlight
-                    </span>
-                    <h2 className="text-black font-bold text-[22px] leading-tight tracking-tight mt-2">
-                      {config.featuredProfile.name}
-                    </h2>
-                    <p className="text-black/80 text-[13px] font-medium mt-1">
-                      {config.featuredProfile.role}
-                    </p>
-                    <p className="text-black/60 text-[12px] flex items-center gap-1 mt-0.5">
-                      <MapPin size={12} />
-                      <span>{config.featuredProfile.location}</span>
-                    </p>
-                  </div>
-
-                  <div className="flex items-end justify-between pt-3 border-t border-black/10">
+              {/* Hero Bento Profile & Opportunity row */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Hero Bento Profile / Entity */}
+                <div
+                  className="rounded-3xl p-5 relative overflow-hidden h-full flex flex-col justify-between"
+                  style={{ backgroundColor: config.featuredProfile.color }}
+                >
+                  <div className="relative z-10 flex flex-col justify-between min-h-[170px] h-full">
                     <div>
-                      <p className="text-black font-extrabold text-[24px] leading-none">
-                        {config.featuredProfile.statValue}
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-black/70 px-2 py-0.5 rounded-full bg-black/10">
+                        {config.label} Spotlight
+                      </span>
+                      <h2 className="text-black font-bold text-[22px] leading-tight tracking-tight mt-2">
+                        {config.featuredProfile.name}
+                      </h2>
+                      <p className="text-black/80 text-[13px] font-medium mt-1">
+                        {config.featuredProfile.role}
                       </p>
-                      <p className="text-black/70 text-[11px] font-medium mt-0.5">
-                        {config.featuredProfile.statLabel}
+                      <p className="text-black/60 text-[12px] flex items-center gap-1 mt-0.5">
+                        <MapPin size={12} />
+                        <span>{config.featuredProfile.location}</span>
+                      </p>
+                    </div>
+
+                    <div className="flex items-end justify-between pt-3 border-t border-black/10 mt-4">
+                      <div>
+                        <p className="text-black font-extrabold text-[24px] leading-none">
+                          {config.featuredProfile.statValue}
+                        </p>
+                        <p className="text-black/70 text-[11px] font-medium mt-0.5">
+                          {config.featuredProfile.statLabel}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => { window.location.href = "/discover"; }}
+                        className="px-3 py-1.5 rounded-xl bg-black text-white text-[12px] font-semibold flex items-center gap-1 hover:bg-black/80 transition-colors"
+                      >
+                        <span>Connect</span>
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tailored Opportunity Banner */}
+                <div
+                  className="rounded-3xl p-5 text-white relative overflow-hidden h-full flex flex-col justify-between"
+                  style={{ backgroundColor: config.featuredOpportunity.color }}
+                >
+                  <div className="relative z-10 flex flex-col justify-between min-h-[170px] h-full">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-white/80 px-2 py-0.5 rounded-full bg-black/20">
+                          {config.featuredOpportunity.organization}
+                        </span>
+                        <span className="text-white font-extrabold text-[15px]">
+                          {config.featuredOpportunity.statValue}
+                        </span>
+                      </div>
+                      <h3 className="text-white font-bold text-[18px] leading-snug mt-2">
+                        {config.featuredOpportunity.headline}
+                      </h3>
+                      <p className="text-white/80 text-[13px] mt-1">
+                        {config.featuredOpportunity.meta}
                       </p>
                     </div>
 
                     <button
-                      onClick={() => { window.location.href = "/discover"; }}
-                      className="px-3 py-1.5 rounded-xl bg-black text-white text-[12px] font-semibold flex items-center gap-1 hover:bg-black/80 transition-colors"
+                      onClick={() => { window.location.href = "/plans"; }}
+                      className="self-start mt-4 px-3.5 py-2 bg-black text-white text-[12px] font-semibold rounded-xl flex items-center gap-1.5 hover:bg-black/80 transition-colors"
                     >
-                      <span>Connect</span>
-                      <ChevronRight size={14} />
+                      <span>View Application Details</span>
+                      <ExternalLink size={13} />
                     </button>
                   </div>
                 </div>
               </div>
 
               {/* 4 Bento Items Tailored to this Role */}
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {config.bentoGrid.map((item, idx) => (
                   <div
                     key={idx}
@@ -931,36 +970,6 @@ function HomePageContent() {
                 ))}
               </div>
 
-              {/* Tailored Opportunity Banner */}
-              <div
-                className="rounded-2xl p-4 text-white relative overflow-hidden"
-                style={{ backgroundColor: config.featuredOpportunity.color }}
-              >
-                <div className="relative z-10 flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-white/80 px-2 py-0.5 rounded-full bg-black/20">
-                      {config.featuredOpportunity.organization}
-                    </span>
-                    <span className="text-white font-extrabold text-[15px]">
-                      {config.featuredOpportunity.statValue}
-                    </span>
-                  </div>
-                  <h3 className="text-white font-bold text-[16px] leading-snug mt-1">
-                    {config.featuredOpportunity.headline}
-                  </h3>
-                  <p className="text-white/80 text-[12px] mt-0.5">
-                    {config.featuredOpportunity.meta}
-                  </p>
-                  <button
-                    onClick={() => { window.location.href = "/plans"; }}
-                    className="self-start mt-2 px-3 py-1.5 bg-black text-white text-[12px] font-semibold rounded-xl flex items-center gap-1 hover:bg-black/80 transition-colors"
-                  >
-                    <span>View Application Details</span>
-                    <ExternalLink size={12} />
-                  </button>
-                </div>
-              </div>
-
               {/* ══════════ LAUNCH CHECKLIST (B10) ══════════ */}
               <div className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
@@ -983,7 +992,7 @@ function HomePageContent() {
                   />
                 </div>
 
-                <div className="space-y-2 pt-1 text-[12px]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1 text-[12px]">
                   {[
                     { label: "Complete founder profile & headline", done: true },
                     { label: "Publish company profile & verification", done: true },
@@ -991,7 +1000,7 @@ function HomePageContent() {
                     { label: "Share your startup ask or idea in Ecosystem", done: false, href: "/ideas" },
                     { label: "Connect with 3 verified founders or investors", done: false, href: "/hub" },
                   ].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 rounded-xl bg-[#141416] border border-[#1E1E22]">
+                    <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-[#141416] border border-[#1E1E22]">
                       <div className="flex items-center gap-2.5">
                         <span
                           className={cn(
@@ -1017,116 +1026,125 @@ function HomePageContent() {
                 </div>
               </div>
 
-              {/* ══════════ TODAY'S MEETUPS BLOCK (B9) ══════════ */}
-              <div className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-white font-bold text-[15px]">Today's Meetups</h3>
-                  <Link href="/meetups" className="text-[12px] text-[#A24BFF] hover:underline">
-                    View All →
-                  </Link>
-                </div>
-                <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] flex items-center justify-between">
+              {/* Lower 3-column widgets row on tablet/desktop */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* ══════════ TODAY'S MEETUPS BLOCK (B9) ══════════ */}
+                <div className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-3 flex flex-col justify-between">
                   <div>
-                    <p className="text-white font-semibold text-[13px]">Bengaluru AI Founders Mixer</p>
-                    <p className="text-[#8E8E93] text-[11px]">Today · 6:30 PM IST · Koramangala, Bengaluru</p>
-                    <span className="inline-block mt-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                      18 founders attending
-                    </span>
-                  </div>
-                  <Link
-                    href="/meetups"
-                    className="px-3 py-1.5 bg-[#A24BFF] text-white text-[12px] font-medium rounded-xl hover:bg-[#8e3eee] transition-colors shrink-0"
-                  >
-                    RSVP
-                  </Link>
-                </div>
-              </div>
-
-              {/* ══════════ ADS PANEL (B4) ══════════ */}
-              <div data-testid="ads-panel" className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#A1A1A6] px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-                    Sponsored
-                  </span>
-                  <span className="text-[11px] text-[#6E6E73]">Promoted Ecosystem Partner</span>
-                </div>
-                <div>
-                  <h4 className="text-white font-bold text-[15px]">$25,000 in Cloud Credits · AWS for Startups</h4>
-                  <p className="text-[#8E8E93] text-[12px] mt-1">
-                    Scale your AI inference workflows with dedicated Nvidia H100 clusters and credits.
-                  </p>
-                </div>
-                <div className="pt-2 flex items-center justify-between">
-                  <span className="text-[#D4FF3A] text-[12px] font-medium">AWS for Startups</span>
-                  <a
-                    href="https://aws.amazon.com/startups"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1 bg-white text-black text-[11px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
-                  >
-                    Claim Credits
-                  </a>
-                </div>
-              </div>
-
-              {/* ══════════ PRIVATE TO-DO LIST (B7) ══════════ */}
-              <div data-testid="todo-list" className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[13px] font-semibold text-white flex items-center gap-2">
-                    <CheckSquare size={15} className="text-[#A24BFF]" /> Private To-do List
-                  </span>
-                  <span className="text-[11px] text-[#6E6E73]">
-                    {todos.filter((t) => t.done).length}/{todos.length} done
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    value={newTodo}
-                    onChange={(e) => setNewTodo(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleAddTodo();
-                    }}
-                    placeholder="Add private founder task…"
-                    className="flex-1 bg-[#161618] text-white rounded-xl px-3 py-1.5 text-[12px] border border-[#26262A] outline-none focus:border-[#A24BFF]"
-                  />
-                  <button
-                    onClick={handleAddTodo}
-                    className="px-3 py-1.5 bg-[#A24BFF] text-white text-[12px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
-                  >
-                    Add
-                  </button>
-                </div>
-                <div className="space-y-1.5 max-h-[160px] overflow-y-auto">
-                  {todos.map((todo) => (
-                    <div
-                      key={todo.id}
-                      className="flex items-center justify-between p-2 rounded-xl bg-[#141416] border border-[#1E1E22] text-[12px]"
-                    >
-                      <button
-                        onClick={() => handleToggleTodo(todo.id)}
-                        className={cn(
-                          "flex items-center gap-2 text-left flex-1 min-w-0",
-                          todo.done ? "line-through text-[#6E6E73]" : "text-white"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "w-4 h-4 rounded border flex items-center justify-center shrink-0",
-                            todo.done ? "bg-[#A24BFF] border-[#A24BFF]" : "border-[#3A3A3E]"
-                          )}
-                        >
-                          {todo.done && <Check size={11} className="text-white" />}
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-white font-bold text-[15px]">Today's Meetups</h3>
+                      <Link href="/meetups" className="text-[12px] text-[#A24BFF] hover:underline">
+                        View All →
+                      </Link>
+                    </div>
+                    <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] flex items-center justify-between">
+                      <div>
+                        <p className="text-white font-semibold text-[13px]">Bengaluru AI Founders Mixer</p>
+                        <p className="text-[#8E8E93] text-[11px]">Today · 6:30 PM IST · Koramangala, Bengaluru</p>
+                        <span className="inline-block mt-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                          18 founders attending
                         </span>
-                        <span className="truncate">{todo.text}</span>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTodo(todo.id)}
-                        className="text-[#6E6E73] hover:text-red-400 p-1"
+                      </div>
+                      <Link
+                        href="/meetups"
+                        className="px-3 py-1.5 bg-[#A24BFF] text-white text-[12px] font-medium rounded-xl hover:bg-[#8e3eee] transition-colors shrink-0 ml-2"
                       >
-                        <Trash2 size={13} />
+                        RSVP
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ══════════ ADS PANEL (B4) ══════════ */}
+                <div data-testid="ads-panel" className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-2.5 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#A1A1A6] px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+                        Sponsored
+                      </span>
+                      <span className="text-[11px] text-[#6E6E73]">Promoted Ecosystem Partner</span>
+                    </div>
+                    <div className="mt-2">
+                      <h4 className="text-white font-bold text-[15px]">$25,000 in Cloud Credits · AWS for Startups</h4>
+                      <p className="text-[#8E8E93] text-[12px] mt-1">
+                        Scale your AI inference workflows with dedicated Nvidia H100 clusters and credits.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pt-2 flex items-center justify-between border-t border-[#1E1E22]">
+                    <span className="text-[#D4FF3A] text-[12px] font-medium">AWS for Startups</span>
+                    <a
+                      href="https://aws.amazon.com/startups"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1 bg-white text-black text-[11px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
+                    >
+                      Claim Credits
+                    </a>
+                  </div>
+                </div>
+
+                {/* ══════════ PRIVATE TO-DO LIST (B7) ══════════ */}
+                <div data-testid="todo-list" className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-3 flex flex-col justify-between md:col-span-2 lg:col-span-1">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[13px] font-semibold text-white flex items-center gap-2">
+                        <CheckSquare size={15} className="text-[#A24BFF]" /> Private To-do List
+                      </span>
+                      <span className="text-[11px] text-[#6E6E73]">
+                        {todos.filter((t) => t.done).length}/{todos.length} done
+                      </span>
+                    </div>
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        value={newTodo}
+                        onChange={(e) => setNewTodo(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleAddTodo();
+                        }}
+                        placeholder="Add private founder task…"
+                        className="flex-1 bg-[#161618] text-white rounded-xl px-3 py-1.5 text-[12px] border border-[#26262A] outline-none focus:border-[#A24BFF]"
+                      />
+                      <button
+                        onClick={handleAddTodo}
+                        className="px-3 py-1.5 bg-[#A24BFF] text-white text-[12px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
+                      >
+                        Add
                       </button>
                     </div>
-                  ))}
+                    <div className="space-y-1.5 max-h-[160px] overflow-y-auto">
+                      {todos.map((todo) => (
+                        <div
+                          key={todo.id}
+                          className="flex items-center justify-between p-2 rounded-xl bg-[#141416] border border-[#1E1E22] text-[12px]"
+                        >
+                          <button
+                            onClick={() => handleToggleTodo(todo.id)}
+                            className={cn(
+                              "flex items-center gap-2 text-left flex-1 min-w-0",
+                              todo.done ? "line-through text-[#6E6E73]" : "text-white"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "w-4 h-4 rounded border flex items-center justify-center shrink-0",
+                                todo.done ? "bg-[#A24BFF] border-[#A24BFF]" : "border-[#3A3A3E]"
+                              )}
+                            >
+                              {todo.done && <Check size={11} className="text-white" />}
+                            </span>
+                            <span className="truncate">{todo.text}</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTodo(todo.id)}
+                            className="text-[#6E6E73] hover:text-red-400 p-1"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1140,136 +1158,213 @@ function HomePageContent() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="space-y-3"
+              className="grid grid-cols-1 lg:grid-cols-12 gap-6"
             >
-              {/* Quick Post Trigger */}
-              <div className="p-3 bg-[#0F0F11] border border-[#1C1C1E] rounded-2xl">
-                {!showPostBox ? (
-                  <button
-                    onClick={() => setShowPostBox(true)}
-                    className="w-full flex items-center gap-3 text-left py-2 px-3 rounded-xl bg-[#1C1C1E] text-[#8E8E93] text-[14px] hover:text-white transition-colors"
-                  >
-                    <Avatar name={user?.userHandle ? `@${user.userHandle}` : "Aarav Reddy"} size="sm" />
-                    <span>Share an update as {config.label}…</span>
-                  </button>
-                ) : (
-                  <form onSubmit={handleCreatePost} className="space-y-3 pt-1">
-                    <textarea
-                      autoFocus
-                      rows={3}
-                      value={newPostText}
-                      onChange={(e) => setNewPostText(e.target.value)}
-                      placeholder={`What would you like to share with the community as a ${config.label}?`}
-                      className="w-full bg-[#1C1C1E] border border-[#2A2A2D] rounded-xl p-3 text-white text-[14px] placeholder:text-[#6E6E73] focus:outline-none focus:border-[#A24BFF] resize-none"
-                    />
-                    <div className="flex items-center justify-between">
-                      <span className="text-[12px] text-[#6E6E73]">
-                        Posting as <strong className="text-white">{config.label}</strong>
-                      </span>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowPostBox(false);
-                            setNewPostText("");
-                          }}
-                          className="px-3 py-1.5 text-[13px] text-[#8E8E93] hover:text-white"
-                        >
-                          Cancel
-                        </button>
-                        <GradientRingButton size="sm" type="submit" disabled={!newPostText.trim()}>
-                          Post Update
-                        </GradientRingButton>
-                      </div>
-                    </div>
-                  </form>
-                )}
-              </div>
-
-              {/* Feed Posts */}
-              {posts.map((post, idx) => (
-                <div key={post.id} className="space-y-3">
-                  <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 hover:border-[#2A2A2D] transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar name={post.authorName} size="md" />
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-white font-semibold text-[15px] leading-tight">
-                              {post.authorName}
-                            </p>
-                            <span className="text-[#6E6E73] text-[12px]">@{post.authorHandle}</span>
-                          </div>
-                          <p className="text-[#8E8E93] text-[12px] leading-snug mt-0.5">
-                            {post.authorHeadline}
-                          </p>
+              {/* Main Stream (Col 8 on desktop, full width on mobile) */}
+              <div className="lg:col-span-8 space-y-4">
+                {/* Quick Post Trigger */}
+                <div className="p-3 bg-[#0F0F11] border border-[#1C1C1E] rounded-2xl">
+                  {!showPostBox ? (
+                    <button
+                      onClick={() => setShowPostBox(true)}
+                      className="w-full flex items-center gap-3 text-left py-2 px-3 rounded-xl bg-[#1C1C1E] text-[#8E8E93] text-[14px] hover:text-white transition-colors"
+                    >
+                      <Avatar name={user?.userHandle ? `@${user.userHandle}` : "Aarav Reddy"} size="sm" />
+                      <span>Share an update as {config.label}…</span>
+                    </button>
+                  ) : (
+                    <form onSubmit={handleCreatePost} className="space-y-3 pt-1">
+                      <textarea
+                        autoFocus
+                        rows={3}
+                        value={newPostText}
+                        onChange={(e) => setNewPostText(e.target.value)}
+                        placeholder={`What would you like to share with the community as a ${config.label}?`}
+                        className="w-full bg-[#1C1C1E] border border-[#2A2A2D] rounded-xl p-3 text-white text-[14px] placeholder:text-[#6E6E73] focus:outline-none focus:border-[#A24BFF] resize-none"
+                      />
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] text-[#6E6E73]">
+                          Posting as <strong className="text-white">{config.label}</strong>
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowPostBox(false);
+                              setNewPostText("");
+                            }}
+                            className="px-3 py-1.5 text-[13px] text-[#8E8E93] hover:text-white"
+                          >
+                            Cancel
+                          </button>
+                          <GradientRingButton size="sm" type="submit" disabled={!newPostText.trim()}>
+                            Post Update
+                          </GradientRingButton>
                         </div>
                       </div>
-                      {post.tag && (
-                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#A24BFF]/10 text-[#A24BFF] border border-[#A24BFF]/20">
-                          {post.tag}
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-white text-[14px] leading-relaxed whitespace-pre-wrap">
-                      {post.body}
-                    </p>
-
-                    <div className="flex items-center justify-between pt-2 border-t border-[#1C1C1E] text-[#8E8E93] text-[13px]">
-                      <div className="flex items-center gap-5">
-                        <button
-                          onClick={() => handleLike(post.id)}
-                          className={cn(
-                            "flex items-center gap-1.5 transition-colors",
-                            post.liked ? "text-pink-500 font-semibold" : "hover:text-white"
-                          )}
-                        >
-                          <Heart size={16} fill={post.liked ? "currentColor" : "none"} />
-                          <span>{post.likeCount}</span>
-                        </button>
-                        <button className="flex items-center gap-1.5 hover:text-white transition-colors">
-                          <MessageCircle size={16} />
-                          <span>{post.commentCount}</span>
-                        </button>
-                        <button className="hover:text-white transition-colors">
-                          <Share2 size={15} />
-                        </button>
-                      </div>
-                      <TimeAgo date={post.createdAt} fallback="1h" className="text-[11px] text-[#6E6E73]" />
-                    </div>
-                  </div>
-
-                  {/* Sponsored Card after every 2 updates (B6) */}
-                  {(idx + 1) % 2 === 0 && (
-                    <div className="bg-[#0e0e12] border border-[#2a2a36] rounded-2xl p-4 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4FF3A] px-2 py-0.5 rounded-full bg-[#D4FF3A]/10 border border-[#D4FF3A]/20">
-                          Sponsored
-                        </span>
-                        <span className="text-[11px] text-[#6E6E73]">Promoted Startup Resource</span>
-                      </div>
-                      <div>
-                        <h4 className="text-white font-bold text-[14px]">Google for Startups Cloud Program</h4>
-                        <p className="text-[#8E8E93] text-[12px] mt-1">
-                          Receive up to ₹20,00,000 in Google Cloud & Firebase credits, 1:1 technical mentorship, and Web3 credits.
-                        </p>
-                      </div>
-                      <div className="pt-1 flex items-center justify-between">
-                        <span className="text-[#B3B3BA] text-[11px]">Google Cloud India</span>
-                        <a
-                          href="https://cloud.google.com/startup"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1 bg-white text-black text-[11px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
-                        >
-                          Apply Now
-                        </a>
-                      </div>
-                    </div>
+                    </form>
                   )}
                 </div>
-              ))}
+
+                {/* Feed Posts */}
+                {posts.map((post, idx) => (
+                  <div key={post.id} className="space-y-4">
+                    <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 hover:border-[#2A2A2D] transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar name={post.authorName} size="md" />
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-white font-semibold text-[15px] leading-tight">
+                                {post.authorName}
+                              </p>
+                              <span className="text-[#6E6E73] text-[12px]">@{post.authorHandle}</span>
+                            </div>
+                            <p className="text-[#8E8E93] text-[12px] leading-snug mt-0.5">
+                              {post.authorHeadline}
+                            </p>
+                          </div>
+                        </div>
+                        {post.tag && (
+                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#A24BFF]/10 text-[#A24BFF] border border-[#A24BFF]/20">
+                            {post.tag}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-white text-[14px] leading-relaxed whitespace-pre-wrap">
+                        {post.body}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-[#1C1C1E] text-[#8E8E93] text-[13px]">
+                        <div className="flex items-center gap-5">
+                          <button
+                            onClick={() => handleLike(post.id)}
+                            className={cn(
+                              "flex items-center gap-1.5 transition-colors",
+                              post.liked ? "text-pink-500 font-semibold" : "hover:text-white"
+                            )}
+                          >
+                            <Heart size={16} fill={post.liked ? "currentColor" : "none"} />
+                            <span>{post.likeCount}</span>
+                          </button>
+                          <button className="flex items-center gap-1.5 hover:text-white transition-colors">
+                            <MessageCircle size={16} />
+                            <span>{post.commentCount}</span>
+                          </button>
+                          <button className="hover:text-white transition-colors">
+                            <Share2 size={15} />
+                          </button>
+                        </div>
+                        <TimeAgo date={post.createdAt} fallback="1h" className="text-[11px] text-[#6E6E73]" />
+                      </div>
+                    </div>
+
+                    {/* Sponsored Card after every 2 updates (B6) */}
+                    {(idx + 1) % 2 === 0 && (
+                      <div className="bg-[#0e0e12] border border-[#2a2a36] rounded-2xl p-4 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4FF3A] px-2 py-0.5 rounded-full bg-[#D4FF3A]/10 border border-[#D4FF3A]/20">
+                            Sponsored
+                          </span>
+                          <span className="text-[11px] text-[#6E6E73]">Promoted Startup Resource</span>
+                        </div>
+                        <div>
+                          <h4 className="text-white font-bold text-[14px]">Google for Startups Cloud Program</h4>
+                          <p className="text-[#8E8E93] text-[12px] mt-1">
+                            Receive up to ₹20,00,000 in Google Cloud & Firebase credits, 1:1 technical mentorship, and Web3 credits.
+                          </p>
+                        </div>
+                        <div className="pt-1 flex items-center justify-between">
+                          <span className="text-[#B3B3BA] text-[11px]">Google Cloud India</span>
+                          <a
+                            href="https://cloud.google.com/startup"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1 bg-white text-black text-[11px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
+                          >
+                            Apply Now
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Feed Sidebar (Col 4 on desktop) */}
+              <div className="hidden lg:block lg:col-span-4 space-y-4">
+                {/* Meetups Widget */}
+                <div className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-white font-bold text-[15px]">Upcoming Meetups</h3>
+                    <Link href="/meetups" className="text-[12px] text-[#A24BFF] hover:underline">
+                      View All →
+                    </Link>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] space-y-2">
+                    <p className="text-white font-semibold text-[13px]">Bengaluru AI Founders Mixer</p>
+                    <p className="text-[#8E8E93] text-[11px]">Today · 6:30 PM IST · Koramangala</p>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                        18 attending
+                      </span>
+                      <Link
+                        href="/meetups"
+                        className="px-3 py-1 bg-[#A24BFF] text-white text-[11px] font-medium rounded-lg hover:bg-[#8e3eee] transition-colors"
+                      >
+                        RSVP
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sponsored Partner */}
+                <div className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#A1A1A6] px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+                      Partner
+                    </span>
+                    <span className="text-[11px] text-[#6E6E73]">Ecosystem Credit</span>
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold text-[14px]">$25,000 AWS Cloud Credits</h4>
+                    <p className="text-[#8E8E93] text-[11px] mt-1">
+                      Free infrastructure credits for early-stage Indian startups and founders.
+                    </p>
+                  </div>
+                  <div className="pt-1 flex items-center justify-between">
+                    <span className="text-[#D4FF3A] text-[11px] font-medium">AWS for Startups</span>
+                    <a
+                      href="https://aws.amazon.com/startups"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1 bg-white text-black text-[11px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
+                    >
+                      Claim
+                    </a>
+                  </div>
+                </div>
+
+                {/* Quick Link to Hub & Ideas */}
+                <div className="p-4 rounded-2xl bg-[#0F0F12] border border-[#1E1E22] space-y-3">
+                  <h4 className="text-white font-semibold text-[13px]">Explore Ruven Ecosystem</h4>
+                  <div className="space-y-1.5 text-[12px]">
+                    <Link href="/hub" className="flex items-center justify-between p-2 rounded-xl bg-[#141416] hover:bg-[#1A1A1E] text-white transition-colors">
+                      <span>Founders Hub Directory</span>
+                      <span className="text-[#A24BFF]">→</span>
+                    </Link>
+                    <Link href="/ideas" className="flex items-center justify-between p-2 rounded-xl bg-[#141416] hover:bg-[#1A1A1E] text-white transition-colors">
+                      <span>Co-founder Ideas & Asks</span>
+                      <span className="text-[#FF8A3D]">→</span>
+                    </Link>
+                    <Link href="/plans" className="flex items-center justify-between p-2 rounded-xl bg-[#141416] hover:bg-[#1A1A1E] text-white transition-colors">
+                      <span>Pro Verification & Grants</span>
+                      <span className="text-[#D4FF3A]">→</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
 
               <div className="h-6" />
             </motion.div>

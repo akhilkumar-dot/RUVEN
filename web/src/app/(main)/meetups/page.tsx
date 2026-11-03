@@ -327,7 +327,7 @@ function MeetupCard({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3"
+      className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 h-full flex flex-col justify-between hover:border-[#2A2A2E] transition-colors"
     >
       {/* Header */}
       <div className="flex items-start gap-3">
@@ -502,7 +502,7 @@ function MeetupsPageContent() {
     <div className="min-h-dvh bg-black flex flex-col">
       <TopBar unreadCount={3} />
 
-      <div className="px-4 pt-3 max-w-[430px] mx-auto w-full">
+      <div className="px-4 sm:px-6 lg:px-8 pt-4 max-w-6xl mx-auto w-full">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-white font-bold text-[20px] flex items-center gap-2">
             <MapPin size={20} className="text-[#FF8A3D]" /> Meetups
@@ -532,20 +532,25 @@ function MeetupsPageContent() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))]">
-        <div className="px-4 max-w-[430px] mx-auto space-y-3">
-          {view === "upcoming" &&
-            meetups.map((m) => (
-              <MeetupCard
-                key={m.id}
-                meetup={m}
-                onApply={(selected) => setSelectedForApply(selected)}
-              />
-            ))}
+      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24">
+        <div className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-4">
+          {view === "upcoming" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {meetups.map((m) => (
+                <MeetupCard
+                  key={m.id}
+                  meetup={m}
+                  onApply={(selected) => setSelectedForApply(selected)}
+                />
+              ))}
+            </div>
+          )}
 
           {view === "my_rsvps" && (
-            <div className="space-y-3">
-              <p className="text-[12px] text-[#8E8E93]">My Meetup RSVPs & Applications (1)</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3 col-span-full">
+                <p className="text-[12px] text-[#8E8E93]">My Meetup RSVPs & Applications (1)</p>
+              </div>
               <div className="p-4 rounded-2xl bg-[#0F0F12] border border-[#1E1E22] space-y-2">
                 <div className="flex items-center justify-between">
                   <h4 className="text-white font-semibold text-[14px]">Bengaluru AI Founders Mixer</h4>

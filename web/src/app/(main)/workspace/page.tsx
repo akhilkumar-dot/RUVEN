@@ -84,7 +84,7 @@ function DocCard({ doc, onClick }: { doc: Doc; onClick: () => void }) {
     <motion.button
       onClick={onClick}
       whileTap={{ scale: 0.98 }}
-      className="w-full flex items-start gap-3 bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 text-left hover:border-[#2A2A2D] transition-colors"
+      className="w-full flex items-start gap-3 bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 text-left hover:border-[#2A2A2D] transition-colors h-full"
     >
       <span className="text-2xl shrink-0 mt-0.5">{doc.emoji ?? "📄"}</span>
       <div className="flex-1 min-w-0">
@@ -129,7 +129,7 @@ export default function WorkspacePage() {
       <div className="min-h-dvh bg-black flex flex-col">
         <TopBar unreadCount={3} />
 
-        <div className="px-4 pt-3 max-w-[430px] mx-auto w-full">
+        <div className="px-4 sm:px-6 lg:px-8 pt-4 max-w-6xl mx-auto w-full">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-white font-bold text-[20px] flex items-center gap-2">
               <FileText size={20} className="text-[#A24BFF]" />Workspace
@@ -151,11 +151,13 @@ export default function WorkspacePage() {
           </div>
         </div>
 
-        <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))]">
-          <div className="px-4 max-w-[430px] mx-auto space-y-2">
-            {filtered.map(doc => (
-              <DocCard key={doc.id} doc={doc} onClick={() => setOpenDoc(doc)} />
-            ))}
+        <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24">
+          <div className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {filtered.map(doc => (
+                <DocCard key={doc.id} doc={doc} onClick={() => setOpenDoc(doc)} />
+              ))}
+            </div>
             {filtered.length === 0 && (
               <div className="flex flex-col items-center gap-3 py-16 text-center">
                 <FileText size={32} className="text-[#2A2A2D]" />

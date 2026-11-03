@@ -156,7 +156,7 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
         )}
       </div>
 
-      <div className="px-4 max-w-[430px] mx-auto space-y-3 mt-4">
+      <div className="px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto space-y-4 mt-4">
         {/* ── Hero ── */}
         <div className="bg-[#121212] rounded-2xl p-5 border border-[#1C1C1E]">
           <div className="flex items-start gap-4">

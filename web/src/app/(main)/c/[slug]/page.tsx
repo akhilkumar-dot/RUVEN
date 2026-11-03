@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, Suspense } from "react";
 import Link from "next/link";
 import { BridgeLogo } from "@/ui/BridgeLogo";
 import { Avatar } from "@/ui/Avatar";
@@ -22,7 +22,7 @@ interface PublicCompanyProps {
   params: Promise<{ slug: string }>;
 }
 
-export default function PublicCompanyPage({ params }: PublicCompanyProps) {
+function CompanyDetail({ params }: PublicCompanyProps) {
   const resolvedParams = use(params);
   const slug = resolvedParams.slug;
 
@@ -124,5 +124,19 @@ export default function PublicCompanyPage({ params }: PublicCompanyProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PublicCompanyPage(props: PublicCompanyProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-dvh bg-black flex items-center justify-center text-[#8E8E93] text-sm">
+          Loading company profile...
+        </div>
+      }
+    >
+      <CompanyDetail {...props} />
+    </Suspense>
   );
 }

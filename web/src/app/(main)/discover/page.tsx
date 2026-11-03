@@ -161,7 +161,7 @@ export default function DiscoverPage() {
       <TopBar unreadCount={3} />
 
       {/* Search bar */}
-      <div className="px-4 pt-3 pb-2 max-w-[430px] mx-auto w-full">
+      <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-2 max-w-6xl mx-auto w-full">
         <div className="relative">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6E6E73]" />
           <input
@@ -177,7 +177,7 @@ export default function DiscoverPage() {
       </div>
 
       {/* Discover sub-tabs */}
-      <div className="flex overflow-x-auto scrollbar-hide gap-2 px-4 pb-2 max-w-[430px] mx-auto w-full">
+      <div className="flex overflow-x-auto scrollbar-hide gap-2 px-4 sm:px-6 lg:px-8 pb-3 max-w-6xl mx-auto w-full">
         {DISCOVER_TABS.map(t => (
           <button
             key={t.key}
@@ -195,12 +195,14 @@ export default function DiscoverPage() {
       </div>
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))]">
-        <div className="px-4 py-2 max-w-[430px] mx-auto space-y-3">
-          {activeTab === "people"    && PEOPLE.map(p    => <PersonCard   key={p.handle} person={p} />)}
-          {activeTab === "companies" && COMPANIES.map(c  => <CompanyCard  key={c.slug} co={c} />)}
-          {activeTab === "investors" && INVESTORS.map(i  => <InvestorCard key={i.handle} inv={i} />)}
-          {activeTab === "jobs"      && JOBS.map((j, i)  => <JobCard      key={i} job={j} />)}
+      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24">
+        <div className="px-4 sm:px-6 lg:px-8 py-2 max-w-6xl mx-auto w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {activeTab === "people"    && PEOPLE.map(p    => <PersonCard   key={p.handle} person={p} />)}
+            {activeTab === "companies" && COMPANIES.map(c  => <CompanyCard  key={c.slug} co={c} />)}
+            {activeTab === "investors" && INVESTORS.map(i  => <InvestorCard key={i.handle} inv={i} />)}
+            {activeTab === "jobs"      && JOBS.map((j, i)  => <JobCard      key={i} job={j} />)}
+          </div>
         </div>
       </main>
 

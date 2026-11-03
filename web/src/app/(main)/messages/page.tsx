@@ -14,7 +14,8 @@ import {
   Mic,
   MicOff,
   VideoOff,
-  ShieldCheck
+  ShieldCheck,
+  MessageSquare
 } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
 import { TopBar } from "@/ui/TopBar";
@@ -519,48 +520,60 @@ function MessagesPageContent() {
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
-      {!selectedId && <TopBar unreadCount={3} />}
+      <TopBar unreadCount={3} className={selectedId ? "hidden md:flex" : "flex"} />
 
       <main
-        className="flex-1 flex overflow-hidden"
+        className="flex-1 flex overflow-hidden w-full max-w-7xl mx-auto md:px-4 md:py-3"
         style={{ height: "calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))" }}
       >
-        {/* Always show list on larger screens; show thread on mobile when selected */}
-        <div
-          className={cn(
-            "flex flex-col flex-1 border-r border-[#1C1C1E] max-w-[430px] mx-auto w-full",
-            selectedId ? "hidden md:flex" : "flex"
-          )}
-        >
-          <div className="px-4 pt-4 pb-2">
-            <h1 className="text-white font-bold text-[22px]">Messages</h1>
-          </div>
-          <ConvoList
-            convos={convos}
-            selected={selectedId}
-            onSelect={setSelectedId}
-          />
-        </div>
-
-        {selectedId && (
-          <div className="flex flex-col flex-1 max-w-[430px] mx-auto w-full">
-            <ChatThread
-              convoId={selectedId}
-              convo={activeConvo}
-              onBack={() => setSelectedId(null)}
+        <div className="flex-1 flex overflow-hidden md:border md:border-[#1C1C1E] md:rounded-2xl bg-[#09090B]">
+          {/* Conversation list pane: full width on mobile when no chat selected; fixed sidebar on desktop */}
+          <div
+            className={cn(
+              "flex flex-col border-r border-[#1C1C1E] w-full md:w-[320px] lg:w-[360px] shrink-0 bg-black md:bg-[#0D0D0F]",
+              selectedId ? "hidden md:flex" : "flex"
+            )}
+          >
+            <div className="px-4 pt-4 pb-2">
+              <h1 className="text-white font-bold text-[22px]">Messages</h1>
+            </div>
+            <ConvoList
+              convos={convos}
+              selected={selectedId}
+              onSelect={setSelectedId}
             />
           </div>
-        )}
+
+          {/* Active Chat or Desktop Placeholder */}
+          {selectedId ? (
+            <div className="flex flex-col flex-1 min-w-0 bg-black">
+              <ChatThread
+                convoId={selectedId}
+                convo={activeConvo}
+                onBack={() => setSelectedId(null)}
+              />
+            </div>
+          ) : (
+            <div className="hidden md:flex flex-1 flex-col items-center justify-center text-center p-8 text-[#6E6E73] bg-black/40">
+              <div className="w-16 h-16 rounded-full bg-[#1A1A1E] border border-[#2A2A2E] flex items-center justify-center text-[#A1A1A6] mb-4">
+                <MessageSquare size={28} className="text-[#A24BFF]" />
+              </div>
+              <h3 className="text-white font-semibold text-lg mb-1">Your Messages</h3>
+              <p className="text-sm max-w-xs text-[#8E8E93]">
+                Select a conversation from the left to start collaborating with founders, investors, and talent.
+              </p>
+            </div>
+          )}
+        </div>
       </main>
 
-      {!selectedId && (
-        <BottomDock
-          activeTab={navTab}
-          tabs={[{ key: "msg", label: "Messages" }]}
-          onTabChange={setNavTab}
-          userName={user?.userHandle || "Aarav Reddy"}
-        />
-      )}
+      <BottomDock
+        className={selectedId ? "hidden md:flex" : "flex"}
+        activeTab={navTab}
+        tabs={[{ key: "msg", label: "Messages" }]}
+        onTabChange={setNavTab}
+        userName={user?.userHandle || "Aarav Reddy"}
+      />
     </div>
   );
 }

@@ -32,7 +32,7 @@ export function FloatingActionStack({
   return (
     <div
       className={cn(
-        "fixed right-4 bottom-[calc(80px+env(safe-area-inset-bottom,0px))]",
+        "fixed right-4 bottom-[calc(80px+env(safe-area-inset-bottom,0px))] md:bottom-24 md:right-8",
         "flex flex-col gap-3 z-[var(--z-dock)]",
         className
       )}
@@ -129,6 +129,8 @@ export function BottomDock({
         "flex items-center gap-2 px-3",
         "pb-[calc(env(safe-area-inset-bottom,0px)+10px)] pt-3",
         "bg-black/90 backdrop-blur-xl border-t border-[#1C1C1E]",
+        "md:bottom-6 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-auto md:max-w-xl",
+        "md:rounded-full md:border md:border-[#2A2A2E] md:shadow-2xl md:shadow-black/90 md:px-4 md:py-2 md:pb-2",
         className
       )}
     >

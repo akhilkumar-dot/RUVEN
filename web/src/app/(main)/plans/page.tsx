@@ -81,7 +81,7 @@ function PlanCard({
     <motion.div
       whileTap={{ scale: 0.98 }}
       className={cn(
-        "relative rounded-2xl p-5 border",
+        "relative rounded-2xl p-6 border h-full flex flex-col justify-between",
         isPro
           ? "border-[#A24BFF] bg-gradient-to-br from-[#A24BFF]/10 to-[#FF3D81]/5"
           : "border-[#1C1C1E] bg-[#0C0C0C]"
@@ -234,13 +234,13 @@ export default function PlansPage() {
           </div>
         </div>
 
-        <div className="px-4 pb-16 max-w-[430px] mx-auto">
-          <div className="text-center mb-6">
+        <div className="px-4 pb-16 max-w-4xl mx-auto">
+          <div className="text-center mb-8">
             <h1 className="text-white font-bold text-[32px] tracking-tight">Simple Pricing</h1>
             <p className="text-[#6E6E73] text-[15px] mt-2">No hidden fees. Cancel anytime.</p>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch mb-10">
             {PLANS.map(plan => (
               <PlanCard
                 key={plan.key}
@@ -252,19 +252,21 @@ export default function PlansPage() {
           </div>
 
           {/* FAQ */}
-          <div className="mt-8 space-y-4">
-            <h2 className="text-white font-bold text-[18px]">Frequently Asked</h2>
-            {[
-              ["Can I cancel anytime?", "Yes — cancel before your next billing date and you won't be charged."],
-              ["Is there a free trial?", "The Free plan is always free. Pro is ₹199/month — start anytime."],
-              ["What payment methods?", "UPI (GPay, PhonePe), all debit/credit cards, and net banking via Razorpay."],
-              ["Is GST included?", "Yes — ₹199 is GST-inclusive. Your invoice will show ₹168.64 + ₹30.36 GST (18%)."],
-            ].map(([q, a]) => (
-              <div key={q} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4">
-                <p className="text-white font-semibold text-[15px] mb-1">{q}</p>
-                <p className="text-[#6E6E73] text-[14px] leading-relaxed">{a}</p>
-              </div>
-            ))}
+          <div className="space-y-4">
+            <h2 className="text-white font-bold text-[20px] text-center md:text-left">Frequently Asked</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                ["Can I cancel anytime?", "Yes — cancel before your next billing date and you won't be charged."],
+                ["Is there a free trial?", "The Free plan is always free. Pro is ₹199/month — start anytime."],
+                ["What payment methods?", "UPI (GPay, PhonePe), all debit/credit cards, and net banking via Razorpay."],
+                ["Is GST included?", "Yes — ₹199 is GST-inclusive. Your invoice will show ₹168.64 + ₹30.36 GST (18%)."],
+              ].map(([q, a]) => (
+                <div key={q} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4">
+                  <p className="text-white font-semibold text-[15px] mb-1">{q}</p>
+                  <p className="text-[#6E6E73] text-[14px] leading-relaxed">{a}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
