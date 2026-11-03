@@ -7,9 +7,9 @@ export const supabaseAuth = {
    * Register with real Supabase Auth + sync to public.users & public.profiles
    */
   register: async (payload: RegisterPayload): Promise<AuthResponse> => {
-    const handle =
-      payload.name.toLowerCase().replace(/[^a-z0-9]/g, "") +
-      Math.floor(Math.random() * 900 + 100);
+    const sanitizedBase =
+      payload.name.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18) || "user";
+    const handle = `${sanitizedBase}${Math.floor(Math.random() * 900 + 100)}`;
 
     const { data, error } = await supabase.auth.signUp({
       email: payload.email,
