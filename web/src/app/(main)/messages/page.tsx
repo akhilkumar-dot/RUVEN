@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, ChevronLeft, Search, Phone, Video, MoreHorizontal, Circle } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
 import { TopBar } from "@/ui/TopBar";
 import { BottomDock } from "@/ui/BottomDock";
-import { relativeTime, cn } from "@/lib/utils";
+import { TimeAgo } from "@/ui/TimeAgo";
+import { cn } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────
 interface Conversation {
@@ -28,21 +29,21 @@ interface Message {
 
 // ── Mock data ─────────────────────────────────────────────────
 const CONVOS: Conversation[] = [
-  { id: "1", handle: "priya_founder",  lastMessage: "Let's sync tomorrow at 10am?",         lastAt: new Date(Date.now() - 5*60000),    unread: 2, online: true },
-  { id: "2", handle: "arjun_vc",      lastMessage: "Deck looks good. Send financials too.", lastAt: new Date(Date.now() - 35*60000),   unread: 0, online: false },
-  { id: "3", handle: "rahul_verma",   lastMessage: "The API is down, urgent!",              lastAt: new Date(Date.now() - 2*3600000),  unread: 1, online: true },
-  { id: "4", handle: "neha_design",   lastMessage: "Just dropped the new screens 🎨",       lastAt: new Date(Date.now() - 5*3600000),  unread: 0 },
-  { id: "5", handle: "deepstack_ai",  lastMessage: "Happy to collaborate on the model.",    lastAt: new Date(Date.now() - 24*3600000), unread: 0 },
+  { id: "1", handle: "priya_founder",  lastMessage: "Let's sync tomorrow at 10am?",         lastAt: new Date("2026-11-03T17:55:00.000Z"), unread: 2, online: true },
+  { id: "2", handle: "arjun_vc",      lastMessage: "Deck looks good. Send financials too.", lastAt: new Date("2026-11-03T17:25:00.000Z"), unread: 0, online: false },
+  { id: "3", handle: "rahul_verma",   lastMessage: "The API is down, urgent!",              lastAt: new Date("2026-11-03T16:00:00.000Z"), unread: 1, online: true },
+  { id: "4", handle: "neha_design",   lastMessage: "Just dropped the new screens 🎨",       lastAt: new Date("2026-11-03T13:00:00.000Z"), unread: 0 },
+  { id: "5", handle: "deepstack_ai",  lastMessage: "Happy to collaborate on the model.",    lastAt: new Date("2026-11-02T18:00:00.000Z"), unread: 0 },
 ];
 
 const THREAD: Message[] = [
-  { id: "1", senderId: "priya_founder", text: "Hey! Saw your idea on FounderBridge. Super interesting.",               sentAt: new Date(Date.now() - 30*60000) },
-  { id: "2", senderId: "me",            text: "Thanks! Yes, been working on it for 3 months now.",                    sentAt: new Date(Date.now() - 28*60000), status: "read" },
-  { id: "3", senderId: "priya_founder", text: "The vernacular angle is 🔥 — would love to learn more.",               sentAt: new Date(Date.now() - 20*60000) },
-  { id: "4", senderId: "me",            text: "Let's do a quick call? I can show you the demo.",                      sentAt: new Date(Date.now() - 18*60000), status: "read" },
-  { id: "5", senderId: "priya_founder", text: "100%. Are you free tomorrow? I'm in Bangalore this week.",             sentAt: new Date(Date.now() - 10*60000) },
-  { id: "6", senderId: "me",            text: "Yes! 10am works perfectly.",                                           sentAt: new Date(Date.now() - 8*60000),  status: "delivered" },
-  { id: "7", senderId: "priya_founder", text: "Let's sync tomorrow at 10am?",                                         sentAt: new Date(Date.now() - 5*60000) },
+  { id: "1", senderId: "priya_founder", text: "Hey! Saw your idea on FounderBridge. Super interesting.",               sentAt: new Date("2026-11-03T17:30:00.000Z") },
+  { id: "2", senderId: "me",            text: "Thanks! Yes, been working on it for 3 months now.",                    sentAt: new Date("2026-11-03T17:32:00.000Z"), status: "read" },
+  { id: "3", senderId: "priya_founder", text: "The vernacular angle is 🔥 — would love to learn more.",               sentAt: new Date("2026-11-03T17:40:00.000Z") },
+  { id: "4", senderId: "me",            text: "Let's do a quick call? I can show you the demo.",                      sentAt: new Date("2026-11-03T17:42:00.000Z"), status: "read" },
+  { id: "5", senderId: "priya_founder", text: "100%. Are you free tomorrow? I'm in Bangalore this week.",             sentAt: new Date("2026-11-03T17:50:00.000Z") },
+  { id: "6", senderId: "me",            text: "Yes! 10am works perfectly.",                                           sentAt: new Date("2026-11-03T17:52:00.000Z"), status: "delivered" },
+  { id: "7", senderId: "priya_founder", text: "Let's sync tomorrow at 10am?",                                         sentAt: new Date("2026-11-03T17:55:00.000Z") },
 ];
 
 // ── Conversation list ─────────────────────────────────────────
@@ -92,7 +93,7 @@ function ConvoList({
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <p className="text-white font-semibold text-[15px]">@{c.handle}</p>
-                <span className="text-[#6E6E73] text-[11px]">{relativeTime(c.lastAt)}</span>
+                <TimeAgo date={c.lastAt} fallback="5m" className="text-[#6E6E73] text-[11px]" />
               </div>
               <p className={cn("text-[13px] truncate mt-0.5", c.unread > 0 ? "text-white font-medium" : "text-[#6E6E73]")}>
                 {c.lastMessage}
@@ -189,7 +190,7 @@ function ChatThread({ convoId, onBack }: { convoId: string; onBack: () => void }
                 )}>
                   {msg.text}
                   <div className={cn("flex items-center gap-1 mt-1", isMe ? "justify-end" : "justify-start")}>
-                    <span className="text-[10px] opacity-60">{relativeTime(msg.sentAt)}</span>
+                    <TimeAgo date={msg.sentAt} fallback="now" className="text-[10px] opacity-60" />
                     {isMe && msg.status === "read" && <span className="text-[10px] text-sky-300">✓✓</span>}
                     {isMe && msg.status === "delivered" && <span className="text-[10px] opacity-60">✓✓</span>}
                     {isMe && msg.status === "sent" && <span className="text-[10px] opacity-60">✓</span>}
@@ -232,7 +233,7 @@ function ChatThread({ convoId, onBack }: { convoId: string; onBack: () => void }
 }
 
 // ── Main page ─────────────────────────────────────────────────
-export default function MessagesPage() {
+function MessagesPageContent() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [navTab, setNavTab] = useState("msg");
 
@@ -269,3 +270,16 @@ export default function MessagesPage() {
     </div>
   );
 }
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-dvh bg-black flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-[#A24BFF] border-t-transparent animate-spin" />
+      </div>
+    }>
+      <MessagesPageContent />
+    </Suspense>
+  );
+}
+

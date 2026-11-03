@@ -23,8 +23,12 @@ export function getPastel(seed: string): PastelColour {
   return PASTELS[hash % PASTELS.length];
 }
 
-/** Relative time: "now", "5m", "2h", "3d" */
+/** Relative time: "now", "5m", "2h", "3d" (safe for SSR & Client) */
 export function relativeTime(date: Date | string | number): string {
+  if (typeof window === "undefined") {
+    // Avoid reading Date.now() during server prerender
+    return "";
+  }
   const ms = Date.now() - new Date(date).getTime();
   const m = Math.round(ms / 60_000);
   if (m < 1) return "now";

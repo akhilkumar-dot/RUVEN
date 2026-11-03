@@ -19,11 +19,11 @@ interface Doc {
 }
 
 const MOCK_DOCS: Doc[] = [
-  { id: "1", title: "Product Roadmap Q4 2024",           updatedAt: new Date(Date.now() - 1*3600000),   wordCount: 1240, collaborators: 3, visibility: "workspace", emoji: "🗺️" },
-  { id: "2", title: "Investor Pitch Deck — Notes",       updatedAt: new Date(Date.now() - 6*3600000),   wordCount: 820,  collaborators: 1, visibility: "private",   emoji: "💼" },
-  { id: "3", title: "Technical Architecture v2",         updatedAt: new Date(Date.now() - 24*3600000),  wordCount: 3100, collaborators: 2, visibility: "workspace", emoji: "⚙️" },
-  { id: "4", title: "Hiring: ML Engineer JD",            updatedAt: new Date(Date.now() - 48*3600000),  wordCount: 560,  collaborators: 1, visibility: "public",    emoji: "📋" },
-  { id: "5", title: "Co-founder Agreement Draft",        updatedAt: new Date(Date.now() - 3*86400000),  wordCount: 4200, collaborators: 2, visibility: "private",   emoji: "🤝" },
+  { id: "1", title: "Product Roadmap Q4 2024",           updatedAt: new Date("2026-11-03T17:00:00.000Z"), wordCount: 1240, collaborators: 3, visibility: "workspace", emoji: "🗺️" },
+  { id: "2", title: "Investor Pitch Deck — Notes",       updatedAt: new Date("2026-11-03T12:00:00.000Z"), wordCount: 820,  collaborators: 1, visibility: "private",   emoji: "💼" },
+  { id: "3", title: "Technical Architecture v2",         updatedAt: new Date("2026-11-02T18:00:00.000Z"), wordCount: 3100, collaborators: 2, visibility: "workspace", emoji: "⚙️" },
+  { id: "4", title: "Hiring: ML Engineer JD",            updatedAt: new Date("2026-11-01T18:00:00.000Z"), wordCount: 560,  collaborators: 1, visibility: "public",    emoji: "📋" },
+  { id: "5", title: "Co-founder Agreement Draft",        updatedAt: new Date("2026-10-31T18:00:00.000Z"), wordCount: 4200, collaborators: 2, visibility: "private",   emoji: "🤝" },
 ];
 
 // ── Minimal doc editor (rich textarea) ───────────────────────

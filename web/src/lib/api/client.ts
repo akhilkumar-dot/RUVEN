@@ -53,8 +53,19 @@ async function apiFetch<T>(
 
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: "include", // send HttpOnly refresh cookie
+    signal: options.signal ?? AbortSignal.timeout(4000),
     ...options,
     headers,
+  }).catch((err: unknown) => {
+    // Network error or timeout — backend not reachable
+    const networkErr: ApiError = {
+      type: "about:blank",
+      title: "Cannot connect to server",
+      status: 0,
+      detail: `Could not reach the server at ${API_BASE}. Make sure the backend is running.`,
+      code: "NETWORK_ERROR",
+    };
+    throw networkErr;
   });
 
   // Try to refresh on 401 (once)

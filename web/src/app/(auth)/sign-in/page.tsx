@@ -4,17 +4,17 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { BridgeLogo } from "@/ui/BridgeLogo";
 
-// ── Google OAuth entry point ──────────────────────────────────
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
-const GOOGLE_AUTH_URL = `${API_BASE}/api/v1/auth/oauth2/authorize/google`;
+import { supabaseAuth } from "@/lib/api/supabaseAuth";
 
 export default function SignInPage() {
   const router = useRouter();
 
-  function handleGoogleSignIn() {
-    // Full-page redirect to backend Spring OAuth2 authorization endpoint
-    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-    window.location.href = GOOGLE_AUTH_URL;
+  async function handleGoogleSignIn() {
+    try {
+      await supabaseAuth.signInWithGoogle();
+    } catch (err) {
+      console.error("Google sign in error:", err);
+    }
   }
 
   return (

@@ -1,5 +1,8 @@
 import { create } from "zustand";
-import { authApi, setAccessToken, type AuthResponse } from "@/lib/api/client";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { authApi, setAccessToken, type AuthResponse, type ApiError } from "@/lib/api/client";
+import { mockAuthApi } from "@/lib/api/mockAuth";
+import { supabaseAuth } from "@/lib/api/supabaseAuth";
 
 // ── Types ─────────────────────────────────────────────────────
 export type AccountType =
@@ -30,85 +33,152 @@ interface AuthState {
     password: string;
     type: AccountType;
   }) => Promise<AuthUser>;
+  switchAccountType: (type: AccountType) => void;
   logout: () => Promise<void>;
   logoutAll: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
   setUser: (user: AuthUser | null) => void;
   /** Called by OAuth callback page to hydrate session from redirect params */
-  setAuth: (opts: { accessToken: string; userHandle: string }) => void;
+  setAuth: (opts: { accessToken: string; userHandle: string; type?: AccountType }) => void;
 }
 
-// ── Store ─────────────────────────────────────────────────────
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  accessToken: null,
-  isAuthenticated: false,
-  isLoading: false,
+// ── Store with localStorage persistence ───────────────────────
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      accessToken: null,
+      isAuthenticated: false,
+      isLoading: false,
 
-  setUser: (user) =>
-    set({ user, isAuthenticated: user !== null }),
+      setUser: (user) =>
+        set({ user, isAuthenticated: user !== null }),
 
-  setAuth: ({ accessToken, userHandle }) => {
-    setAccessToken(accessToken);
-    set({
-      accessToken,
-      isAuthenticated: true,
-      user: { id: "", userHandle, email: "", type: "INDIVIDUAL" },
-    });
-  },
+      switchAccountType: (type: AccountType) =>
+        set((state) => {
+          if (!state.user) {
+            return {
+              user: {
+                id: "usr-" + Math.random().toString(36).substring(2, 9),
+                userHandle: "aarav_reddy",
+                email: "aarav@founderbridge.in",
+                type,
+              },
+              isAuthenticated: true,
+            };
+          }
+          return { user: { ...state.user, type } };
+        }),
 
-  login: async (payload) => {
-    set({ isLoading: true });
-    try {
-      const data: AuthResponse = await authApi.login(payload);
-      setAccessToken(data.accessToken);
-      set({
-        user: data.user as AuthUser,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } catch (err) {
-      set({ isLoading: false });
-      throw err;
+      setAuth: ({ accessToken, userHandle, type = "STARTUP_FOUNDER" }) => {
+        setAccessToken(accessToken);
+        set({
+          accessToken,
+          isAuthenticated: true,
+          user: {
+            id: "u-" + Math.random().toString(36).substring(2, 9),
+            userHandle,
+            email: `${userHandle}@founderbridge.in`,
+            type,
+          },
+        });
+      },
+
+      login: async (payload) => {
+        set({ isLoading: true });
+        try {
+          let data: AuthResponse;
+          try {
+            data = await supabaseAuth.login(payload);
+          } catch (supaErr) {
+            if (mockAuthApi.isEnabled) {
+              data = await mockAuthApi.login(payload);
+            } else {
+              throw supaErr;
+            }
+          }
+          setAccessToken(data.accessToken);
+          set({
+            user: data.user as AuthUser,
+            accessToken: data.accessToken,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (err) {
+          set({ isLoading: false });
+          throw err;
+        }
+      },
+
+      register: async (payload) => {
+        set({ isLoading: true });
+        try {
+          let data: AuthResponse;
+          try {
+            data = await supabaseAuth.register(payload);
+          } catch (supaErr) {
+            if (mockAuthApi.isEnabled) {
+              data = await mockAuthApi.register(payload);
+            } else {
+              throw supaErr;
+            }
+          }
+          setAccessToken(data.accessToken);
+          const user = data.user as AuthUser;
+          set({ user, accessToken: data.accessToken, isAuthenticated: true, isLoading: false });
+          return user;
+        } catch (err) {
+          set({ isLoading: false });
+          throw err;
+        }
+      },
+
+      logout: async () => {
+        await supabaseAuth.logout().catch(() => {});
+        if (mockAuthApi.isEnabled) await mockAuthApi.logout();
+        setAccessToken(null);
+        set({ user: null, accessToken: null, isAuthenticated: false });
+      },
+
+      logoutAll: async () => {
+        await supabaseAuth.logout().catch(() => {});
+        if (mockAuthApi.isEnabled) await mockAuthApi.logoutAll();
+        setAccessToken(null);
+        set({ user: null, accessToken: null, isAuthenticated: false });
+      },
+
+      refreshSession: async () => {
+        try {
+          const data = await supabaseAuth.refresh();
+          if (data) {
+            setAccessToken(data.accessToken);
+            set({ user: data.user as AuthUser, accessToken: data.accessToken, isAuthenticated: true });
+            return true;
+          }
+          if (mockAuthApi.isEnabled) {
+            const mockData = await mockAuthApi.refresh();
+            setAccessToken(mockData.accessToken);
+            set({ user: mockData.user as AuthUser, accessToken: mockData.accessToken, isAuthenticated: true });
+            return true;
+          }
+          setAccessToken(null);
+          set({ user: null, accessToken: null, isAuthenticated: false });
+          return false;
+        } catch {
+          setAccessToken(null);
+          set({ user: null, accessToken: null, isAuthenticated: false });
+          return false;
+        }
+      },
+    }),
+    {
+      name: "founderbridge-auth-storage",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        user: state.user,
+        accessToken: state.accessToken,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
-  },
-
-  register: async (payload) => {
-    set({ isLoading: true });
-    try {
-      const data: AuthResponse = await authApi.register(payload);
-      setAccessToken(data.accessToken);
-      const user = data.user as AuthUser;
-      set({ user, isAuthenticated: true, isLoading: false });
-      return user;
-    } catch (err) {
-      set({ isLoading: false });
-      throw err;
-    }
-  },
-
-  logout: async () => {
-    await authApi.logout().catch(() => {});
-    setAccessToken(null);
-    set({ user: null, isAuthenticated: false });
-  },
-
-  logoutAll: async () => {
-    await authApi.logoutAll().catch(() => {});
-    setAccessToken(null);
-    set({ user: null, isAuthenticated: false });
-  },
-
-  refreshSession: async () => {
-    try {
-      const data: AuthResponse = await authApi.refresh();
-      setAccessToken(data.accessToken);
-      set({ user: data.user as AuthUser, isAuthenticated: true });
-      return true;
-    } catch {
-      setAccessToken(null);
-      set({ user: null, isAuthenticated: false });
-      return false;
-    }
-  },
-}));
+  )
+);

@@ -1,29 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SplashScreen } from "@/ui/SplashScreen";
 
-export default function RootPage() {
+function RootPageContent() {
   const [showSplash, setShowSplash] = useState(true);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isPreview = searchParams.get("preview") === "1";
 
-  // After splash, check auth → redirect to home or sign-in
   function handleSplashFinish() {
+    if (isPreview) return;
     setShowSplash(false);
-    // Phase 1: check for valid access token in memory / refresh cookie
-    // For now, always go to sign-in
     router.replace("/sign-in");
   }
 
-  // Skip splash on second visit (access token present)
-  useEffect(() => {
-    // Phase 1 will check auth state here
-  }, []);
-
   if (showSplash) {
-    return <SplashScreen onFinish={handleSplashFinish} />;
+    return <SplashScreen onFinish={handleSplashFinish} persistent={isPreview} />;
   }
 
   return null;
+}
+
+export default function RootPage() {
+  return (
+    <Suspense fallback={<div className="min-h-dvh bg-black" />}>
+      <RootPageContent />
+    </Suspense>
+  );
 }

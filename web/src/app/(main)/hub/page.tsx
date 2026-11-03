@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, MessageCircle, Share2, MoreHorizontal, Zap } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
 import { TopBar } from "@/ui/TopBar";
 import { BottomDock } from "@/ui/BottomDock";
 import { GradientRingButton } from "@/ui/GradientRingButton";
-import { relativeTime, cn } from "@/lib/utils";
+import { TimeAgo } from "@/ui/TimeAgo";
+import { cn } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────
 interface PostItem {
@@ -30,7 +31,7 @@ const MOCK_POSTS: PostItem[] = [
     body: "Just crossed ₹1 Cr ARR with a team of 4. No VC. No big office. Just product-market fit and relentless customer obsession.\n\nIndia's next wave of startups will be lean, profitable, and real. 🇮🇳",
     likeCount: 312,
     commentCount: 47,
-    createdAt: new Date(Date.now() - 1.5 * 3600000).toISOString(),
+    createdAt: "2026-11-03T16:30:00.000Z",
   },
   {
     id: "2",
@@ -39,7 +40,7 @@ const MOCK_POSTS: PostItem[] = [
     body: "Hot take: The best Indian founders I've met in 2024 are solving problems that *only* exist in India — not 'Uber for X' clones.\n\nThe India Stack moment is real. BharatPe, PhonePe, Zepto all started from genuine Indian problems.",
     likeCount: 891,
     commentCount: 134,
-    createdAt: new Date(Date.now() - 3 * 3600000).toISOString(),
+    createdAt: "2026-11-03T15:00:00.000Z",
   },
   {
     id: "3",
@@ -48,7 +49,7 @@ const MOCK_POSTS: PostItem[] = [
     body: "We just open-sourced our multilingual embedding model trained on 12 Indian languages.\n\nHindi, Tamil, Telugu, Kannada, Bengali, Gujarati, Marathi, Punjabi, Odia, Malayalam, Assamese, Urdu — all in one model, 4x smaller than alternatives.\n\nGitHub link in comments 👇",
     likeCount: 2140,
     commentCount: 289,
-    createdAt: new Date(Date.now() - 6 * 3600000).toISOString(),
+    createdAt: "2026-11-03T12:00:00.000Z",
   },
   {
     id: "4",
@@ -57,7 +58,7 @@ const MOCK_POSTS: PostItem[] = [
     body: "Design tip nobody talks about:\n\nStop asking \"does this look good?\"\nStart asking \"does this reduce friction?\"\n\nThe best UX is the one users don't notice.",
     likeCount: 445,
     commentCount: 61,
-    createdAt: new Date(Date.now() - 12 * 3600000).toISOString(),
+    createdAt: "2026-11-03T06:00:00.000Z",
   },
 ];
 
@@ -93,9 +94,7 @@ function PostCard({ post }: { post: PostItem }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[#6E6E73] text-[12px]">
-            {relativeTime(new Date(post.createdAt))}
-          </span>
+          <TimeAgo date={post.createdAt} fallback="1h" className="text-[#6E6E73] text-[12px]" />
           <button className="text-[#6E6E73] hover:text-white transition-colors" aria-label="More options">
             <MoreHorizontal size={16} />
           </button>
@@ -197,7 +196,7 @@ const FEED_TABS = [
 ];
 
 // ── Main feed page ────────────────────────────────────────────
-export default function FeedPage() {
+function FeedPageContent() {
   const [activeTab, setActiveTab] = useState("feed");
   const [posts, setPosts] = useState(MOCK_POSTS);
 
@@ -237,3 +236,16 @@ export default function FeedPage() {
     </div>
   );
 }
+
+export default function FeedPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-dvh bg-black flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-[#A24BFF] border-t-transparent animate-spin" />
+      </div>
+    }>
+      <FeedPageContent />
+    </Suspense>
+  );
+}
+

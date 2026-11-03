@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lightbulb, ThumbsUp, MessageCircle, Tag, Plus, X, ChevronRight, Flame } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
 import { TopBar } from "@/ui/TopBar";
 import { BottomDock } from "@/ui/BottomDock";
 import { GradientRingButton } from "@/ui/GradientRingButton";
-import { relativeTime, cn } from "@/lib/utils";
+import { TimeAgo } from "@/ui/TimeAgo";
+import { cn } from "@/lib/utils";
 
 interface Idea {
   id: string;
@@ -31,7 +32,7 @@ const MOCK_IDEAS: Idea[] = [
     tags: ["Fintech", "AI/ML", "Rural India", "B2B SaaS"],
     upvotes: 142,
     comments: 28,
-    createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
+    createdAt: "2026-11-03T16:00:00.000Z",
     lookingFor: "Technical co-founder with NLP experience",
   },
   {
@@ -42,7 +43,7 @@ const MOCK_IDEAS: Idea[] = [
     tags: ["Agritech", "Logistics", "Marketplace"],
     upvotes: 89,
     comments: 17,
-    createdAt: new Date(Date.now() - 5 * 3600000).toISOString(),
+    createdAt: "2026-11-03T13:00:00.000Z",
     lookingFor: "Co-founder with logistics/supply chain background",
   },
   {
@@ -53,7 +54,7 @@ const MOCK_IDEAS: Idea[] = [
     tags: ["Healthtech", "Mental Health", "Founders"],
     upvotes: 231,
     comments: 54,
-    createdAt: new Date(Date.now() - 18 * 3600000).toISOString(),
+    createdAt: "2026-11-03T00:00:00.000Z",
     lookingFor: "Clinical psychologist co-founder or advisor",
   },
   {
@@ -64,7 +65,7 @@ const MOCK_IDEAS: Idea[] = [
     tags: ["Fintech", "AI/ML", "SME", "GovTech"],
     upvotes: 178,
     comments: 41,
-    createdAt: new Date(Date.now() - 24 * 3600000).toISOString(),
+    createdAt: "2026-11-02T18:00:00.000Z",
   },
 ];
 
@@ -84,7 +85,7 @@ function IdeaCard({ idea }: { idea: Idea }) {
           <Avatar name={idea.authorHandle} size="sm" />
           <span className="text-[#A1A1A6] text-[13px]">@{idea.authorHandle}</span>
         </div>
-        <span className="text-[#6E6E73] text-[12px]">{relativeTime(new Date(idea.createdAt))}</span>
+        <TimeAgo date={idea.createdAt} fallback="2h" className="text-[#6E6E73] text-[12px]" />
       </div>
 
       {/* Title */}
@@ -183,7 +184,7 @@ function PostIdeaForm({ onClose }: { onClose: () => void }) {
 // ── Main page ─────────────────────────────────────────────────
 const SORT_TABS = ["Trending", "Recent", "My Ideas"];
 
-export default function IdeasPage() {
+function IdeasPageContent() {
   const [sort, setSort] = useState("Trending");
   const [showForm, setShowForm] = useState(false);
   const [navTab, setNavTab] = useState("ideas");
@@ -235,3 +236,16 @@ export default function IdeasPage() {
     </div>
   );
 }
+
+export default function IdeasPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-dvh bg-black flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-[#FF8A3D] border-t-transparent animate-spin" />
+      </div>
+    }>
+      <IdeasPageContent />
+    </Suspense>
+  );
+}
+

@@ -49,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-IN" className={jakarta.variable}>
+    <html lang="en-IN" className={jakarta.variable} data-scroll-behavior="smooth">
       <body className="antialiased bg-[#000] text-white">
         {children}
       </body>
