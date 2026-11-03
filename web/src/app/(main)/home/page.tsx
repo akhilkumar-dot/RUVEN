@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { TopBar } from "@/ui/TopBar";
 import { BentoGrid, BentoCard } from "@/ui/BentoCard";
@@ -9,6 +10,7 @@ import { Avatar } from "@/ui/Avatar";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { TimeAgo } from "@/ui/TimeAgo";
 import { useAuthStore, type AccountType } from "@/lib/store/authStore";
+import { supabase } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import {
   Heart,
@@ -28,8 +30,30 @@ import {
   DollarSign,
   FileText,
   Users,
-  Compass
+  Compass,
+  Check,
+  CheckSquare,
+  Trash2
 } from "lucide-react";
+
+const ROLE_QUOTES: Record<AccountType, { quote: string; author: string }> = {
+  STARTUP_FOUNDER: {
+    quote: "Move fast, be bold, and build what customers genuinely cannot live without.",
+    author: "Naveen Tewari, InMobi",
+  },
+  COMPANY_OWNER: {
+    quote: "Execution is everything; culture eats strategy for breakfast every single day.",
+    author: "N.R. Narayana Murthy, Infosys",
+  },
+  INDIVIDUAL: {
+    quote: "Exceptional craftsmanship and consistency open high-leverage doors capital alone cannot buy.",
+    author: "Kunal Shah, CRED",
+  },
+  INVESTOR: {
+    quote: "Back unreasonable people building non-consensus breakthroughs against all odds.",
+    author: "Vinod Khosla, Khosla Ventures",
+  },
+};
 
 // ── Types ─────────────────────────────────────────────────────
 interface FeedPost {
@@ -533,38 +557,129 @@ function HomePageContent() {
   const [newPostText, setNewPostText] = useState("");
   const [showPostBox, setShowPostBox] = useState(false);
 
-  // Update posts when role switches
-  const currentFeedPosts = config.feedPosts;
+  // Private To-Do list state (B7)
+  const [todos, setTodos] = useState<{ id: string; text: string; done: boolean }[]>([
+    { id: "1", text: "Finalize seed round pitch deck", done: true },
+    { id: "2", text: "Follow up with Priya regarding AI demo", done: false },
+    { id: "3", text: "Review candidate applications in My Company", done: false },
+  ]);
+  const [newTodo, setNewTodo] = useState("");
 
-  function handleLike(id: string) {
+  const handleAddTodo = () => {
+    if (!newTodo.trim()) return;
+    setTodos((prev) => [...prev, { id: "td-" + Date.now(), text: newTodo.trim(), done: false }]);
+    setNewTodo("");
+  };
+
+  const handleToggleTodo = (id: string) => {
+    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+  };
+
+  const handleDeleteTodo = (id: string) => {
+    setTodos((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Load database posts from Supabase on mount
+  useEffect(() => {
+    async function loadDbPosts() {
+      try {
+        const { data, error } = await supabase
+          .from("posts")
+          .select("id, author_id, body, like_count, comment_count, created_at")
+          .order("created_at", { ascending: false })
+          .limit(20);
+
+        if (!error && data && data.length > 0) {
+          const dbPosts: FeedPost[] = data.map((p) => ({
+            id: p.id,
+            authorName: "Founder",
+            authorHandle: "founder",
+            authorHeadline: config.badgeLabel,
+            location: "India",
+            body: p.body,
+            likeCount: p.like_count || 0,
+            commentCount: p.comment_count || 0,
+            createdAt: p.created_at,
+            liked: false,
+            tag: "Update",
+          }));
+          setPosts((prev) => {
+            const ids = new Set(dbPosts.map((d) => d.id));
+            return [...dbPosts, ...prev.filter((p) => !ids.has(p.id))];
+          });
+        }
+      } catch {
+        // fallback
+      }
+    }
+    loadDbPosts();
+  }, [config.badgeLabel]);
+
+  async function handleLike(id: string) {
+    const post = posts.find((p) => p.id === id);
+    const willBeLiked = !post?.liked;
+
     setPosts((prev) =>
       prev.map((p) =>
         p.id === id
-          ? { ...p, liked: !p.liked, likeCount: p.liked ? p.likeCount - 1 : p.likeCount + 1 }
+          ? { ...p, liked: willBeLiked, likeCount: willBeLiked ? p.likeCount + 1 : Math.max(0, p.likeCount - 1) }
           : p
       )
     );
+
+    if (user?.id && id.includes("-")) {
+      try {
+        if (willBeLiked) {
+          await supabase.from("post_likes").insert({ post_id: id, user_id: user.id });
+        } else {
+          await supabase.from("post_likes").delete().eq("post_id", id).eq("user_id", user.id);
+        }
+      } catch (err) {
+        console.error("Like toggle error:", err);
+      }
+    }
   }
 
-  function handleCreatePost(e: React.FormEvent) {
+  async function handleCreatePost(e: React.FormEvent) {
     e.preventDefault();
     if (!newPostText.trim()) return;
-    const post: FeedPost = {
+    const bodyText = newPostText.trim();
+    const tempPost: FeedPost = {
       id: "post-" + Date.now(),
       authorName: user?.userHandle ? `@${user.userHandle}` : "Aarav Reddy",
       authorHandle: user?.userHandle ?? "founder",
       authorHeadline: config.badgeLabel,
       location: "India",
-      body: newPostText.trim(),
-      likeCount: 1,
+      body: bodyText,
+      likeCount: 0,
       commentCount: 0,
       createdAt: new Date().toISOString(),
-      liked: true,
+      liked: false,
       tag: "Update",
     };
-    setPosts([post, ...posts]);
+    setPosts((prev) => [tempPost, ...prev]);
     setNewPostText("");
     setShowPostBox(false);
+
+    if (user?.id) {
+      try {
+        const { data } = await supabase
+          .from("posts")
+          .insert({
+            author_id: user.id,
+            body: bodyText,
+            like_count: 0,
+            comment_count: 0,
+          })
+          .select("id")
+          .single();
+        if (data?.id) {
+          setPosts((prev) => prev.map((p) => (p.id === tempPost.id ? { ...p, id: data.id } : p)));
+        }
+      } catch (err) {
+        console.error("Failed to insert post:", err);
+      }
+    }
   }
 
   return (
@@ -614,6 +729,22 @@ function HomePageContent() {
                 <span>{config.badgeLabel}</span>
               </span>
             </div>
+          </div>
+
+          {/* ══════════ DAILY QUOTE WIDGET (B1) ══════════ */}
+          <div data-testid="daily-quote" className="mb-4 p-4 rounded-2xl bg-[#0F0F12] border border-[#1E1E22] relative overflow-hidden">
+            <div className="flex items-center justify-between text-[11px] text-[#8E8E93] mb-1.5">
+              <span className="uppercase tracking-wider font-semibold text-[#A24BFF]">
+                {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: "numeric" })}
+              </span>
+              <span className="text-[11px] text-[#6E6E73]">Daily Inspiration</span>
+            </div>
+            <blockquote className="text-white text-[13px] italic font-medium leading-relaxed">
+              "{ROLE_QUOTES[activeRole]?.quote || "Build relentlessly."}"
+            </blockquote>
+            <p className="text-[#8E8E93] text-[11px] mt-1.5 text-right font-medium">
+              — {ROLE_QUOTES[activeRole]?.author || "Founder"}
+            </p>
           </div>
 
           {/* Top Switcher Tabs */}
@@ -830,6 +961,175 @@ function HomePageContent() {
                 </div>
               </div>
 
+              {/* ══════════ LAUNCH CHECKLIST (B10) ══════════ */}
+              <div className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-white font-bold text-[15px] flex items-center gap-2">
+                      <Sparkles size={16} className="text-[#D4FF3A]" /> Launch Checklist
+                    </h3>
+                    <p className="text-[#8E8E93] text-[11px] mt-0.5">3 of 5 milestones achieved</p>
+                  </div>
+                  <span className="text-[12px] font-bold text-[#D4FF3A] bg-[#D4FF3A]/10 px-2 py-0.5 rounded-full border border-[#D4FF3A]/20">
+                    60%
+                  </span>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full h-1.5 bg-[#1C1C1E] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#A24BFF] to-[#D4FF3A] rounded-full transition-all duration-500"
+                    style={{ width: "60%" }}
+                  />
+                </div>
+
+                <div className="space-y-2 pt-1 text-[12px]">
+                  {[
+                    { label: "Complete founder profile & headline", done: true },
+                    { label: "Publish company profile & verification", done: true },
+                    { label: "Post first job or talent requirement", done: true },
+                    { label: "Share your startup ask or idea in Ecosystem", done: false, href: "/ideas" },
+                    { label: "Connect with 3 verified founders or investors", done: false, href: "/hub" },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2 rounded-xl bg-[#141416] border border-[#1E1E22]">
+                      <div className="flex items-center gap-2.5">
+                        <span
+                          className={cn(
+                            "w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[10px]",
+                            item.done
+                              ? "bg-[#D4FF3A] text-black font-bold"
+                              : "border border-[#3A3A3E] text-transparent"
+                          )}
+                        >
+                          ✓
+                        </span>
+                        <span className={item.done ? "line-through text-[#6E6E73]" : "text-white font-medium"}>
+                          {item.label}
+                        </span>
+                      </div>
+                      {item.href && !item.done && (
+                        <Link href={item.href} className="text-[#A24BFF] hover:underline text-[11px] font-semibold shrink-0">
+                          Start →
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ══════════ TODAY'S MEETUPS BLOCK (B9) ══════════ */}
+              <div className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-white font-bold text-[15px]">Today's Meetups</h3>
+                  <Link href="/meetups" className="text-[12px] text-[#A24BFF] hover:underline">
+                    View All →
+                  </Link>
+                </div>
+                <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-semibold text-[13px]">Bengaluru AI Founders Mixer</p>
+                    <p className="text-[#8E8E93] text-[11px]">Today · 6:30 PM IST · Koramangala, Bengaluru</p>
+                    <span className="inline-block mt-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      18 founders attending
+                    </span>
+                  </div>
+                  <Link
+                    href="/meetups"
+                    className="px-3 py-1.5 bg-[#A24BFF] text-white text-[12px] font-medium rounded-xl hover:bg-[#8e3eee] transition-colors shrink-0"
+                  >
+                    RSVP
+                  </Link>
+                </div>
+              </div>
+
+              {/* ══════════ ADS PANEL (B4) ══════════ */}
+              <div data-testid="ads-panel" className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#A1A1A6] px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+                    Sponsored
+                  </span>
+                  <span className="text-[11px] text-[#6E6E73]">Promoted Ecosystem Partner</span>
+                </div>
+                <div>
+                  <h4 className="text-white font-bold text-[15px]">$25,000 in Cloud Credits · AWS for Startups</h4>
+                  <p className="text-[#8E8E93] text-[12px] mt-1">
+                    Scale your AI inference workflows with dedicated Nvidia H100 clusters and credits.
+                  </p>
+                </div>
+                <div className="pt-2 flex items-center justify-between">
+                  <span className="text-[#D4FF3A] text-[12px] font-medium">AWS for Startups</span>
+                  <a
+                    href="https://aws.amazon.com/startups"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1 bg-white text-black text-[11px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
+                  >
+                    Claim Credits
+                  </a>
+                </div>
+              </div>
+
+              {/* ══════════ PRIVATE TO-DO LIST (B7) ══════════ */}
+              <div data-testid="todo-list" className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-semibold text-white flex items-center gap-2">
+                    <CheckSquare size={15} className="text-[#A24BFF]" /> Private To-do List
+                  </span>
+                  <span className="text-[11px] text-[#6E6E73]">
+                    {todos.filter((t) => t.done).length}/{todos.length} done
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    value={newTodo}
+                    onChange={(e) => setNewTodo(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleAddTodo();
+                    }}
+                    placeholder="Add private founder task…"
+                    className="flex-1 bg-[#161618] text-white rounded-xl px-3 py-1.5 text-[12px] border border-[#26262A] outline-none focus:border-[#A24BFF]"
+                  />
+                  <button
+                    onClick={handleAddTodo}
+                    className="px-3 py-1.5 bg-[#A24BFF] text-white text-[12px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="space-y-1.5 max-h-[160px] overflow-y-auto">
+                  {todos.map((todo) => (
+                    <div
+                      key={todo.id}
+                      className="flex items-center justify-between p-2 rounded-xl bg-[#141416] border border-[#1E1E22] text-[12px]"
+                    >
+                      <button
+                        onClick={() => handleToggleTodo(todo.id)}
+                        className={cn(
+                          "flex items-center gap-2 text-left flex-1 min-w-0",
+                          todo.done ? "line-through text-[#6E6E73]" : "text-white"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "w-4 h-4 rounded border flex items-center justify-center shrink-0",
+                            todo.done ? "bg-[#A24BFF] border-[#A24BFF]" : "border-[#3A3A3E]"
+                          )}
+                        >
+                          {todo.done && <Check size={11} className="text-white" />}
+                        </span>
+                        <span className="truncate">{todo.text}</span>
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTodo(todo.id)}
+                        className="text-[#6E6E73] hover:text-red-400 p-1"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="h-6" />
             </motion.div>
           )}
@@ -850,7 +1150,7 @@ function HomePageContent() {
                     className="w-full flex items-center gap-3 text-left py-2 px-3 rounded-xl bg-[#1C1C1E] text-[#8E8E93] text-[14px] hover:text-white transition-colors"
                   >
                     <Avatar name={user?.userHandle ? `@${user.userHandle}` : "Aarav Reddy"} size="sm" />
-                    <span>Share an ask, milestone, or update as {config.label}…</span>
+                    <span>Share an update as {config.label}…</span>
                   </button>
                 ) : (
                   <form onSubmit={handleCreatePost} className="space-y-3 pt-1">
@@ -887,59 +1187,87 @@ function HomePageContent() {
               </div>
 
               {/* Feed Posts */}
-              {posts.map((post) => (
-                <div
-                  key={post.id}
-                  className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 hover:border-[#2A2A2D] transition-colors"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar name={post.authorName} size="md" />
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-white font-semibold text-[15px] leading-tight">
-                            {post.authorName}
+              {posts.map((post, idx) => (
+                <div key={post.id} className="space-y-3">
+                  <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 hover:border-[#2A2A2D] transition-colors">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar name={post.authorName} size="md" />
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-white font-semibold text-[15px] leading-tight">
+                              {post.authorName}
+                            </p>
+                            <span className="text-[#6E6E73] text-[12px]">@{post.authorHandle}</span>
+                          </div>
+                          <p className="text-[#8E8E93] text-[12px] leading-snug mt-0.5">
+                            {post.authorHeadline}
                           </p>
-                          <span className="text-[#6E6E73] text-[12px]">@{post.authorHandle}</span>
                         </div>
-                        <p className="text-[#8E8E93] text-[12px] leading-snug mt-0.5">
-                          {post.authorHeadline}
+                      </div>
+                      {post.tag && (
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#A24BFF]/10 text-[#A24BFF] border border-[#A24BFF]/20">
+                          {post.tag}
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-white text-[14px] leading-relaxed whitespace-pre-wrap">
+                      {post.body}
+                    </p>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-[#1C1C1E] text-[#8E8E93] text-[13px]">
+                      <div className="flex items-center gap-5">
+                        <button
+                          onClick={() => handleLike(post.id)}
+                          className={cn(
+                            "flex items-center gap-1.5 transition-colors",
+                            post.liked ? "text-pink-500 font-semibold" : "hover:text-white"
+                          )}
+                        >
+                          <Heart size={16} fill={post.liked ? "currentColor" : "none"} />
+                          <span>{post.likeCount}</span>
+                        </button>
+                        <button className="flex items-center gap-1.5 hover:text-white transition-colors">
+                          <MessageCircle size={16} />
+                          <span>{post.commentCount}</span>
+                        </button>
+                        <button className="hover:text-white transition-colors">
+                          <Share2 size={15} />
+                        </button>
+                      </div>
+                      <TimeAgo date={post.createdAt} fallback="1h" className="text-[11px] text-[#6E6E73]" />
+                    </div>
+                  </div>
+
+                  {/* Sponsored Card after every 2 updates (B6) */}
+                  {(idx + 1) % 2 === 0 && (
+                    <div className="bg-[#0e0e12] border border-[#2a2a36] rounded-2xl p-4 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4FF3A] px-2 py-0.5 rounded-full bg-[#D4FF3A]/10 border border-[#D4FF3A]/20">
+                          Sponsored
+                        </span>
+                        <span className="text-[11px] text-[#6E6E73]">Promoted Startup Resource</span>
+                      </div>
+                      <div>
+                        <h4 className="text-white font-bold text-[14px]">Google for Startups Cloud Program</h4>
+                        <p className="text-[#8E8E93] text-[12px] mt-1">
+                          Receive up to ₹20,00,000 in Google Cloud & Firebase credits, 1:1 technical mentorship, and Web3 credits.
                         </p>
                       </div>
+                      <div className="pt-1 flex items-center justify-between">
+                        <span className="text-[#B3B3BA] text-[11px]">Google Cloud India</span>
+                        <a
+                          href="https://cloud.google.com/startup"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1 bg-white text-black text-[11px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
+                        >
+                          Apply Now
+                        </a>
+                      </div>
                     </div>
-                    {post.tag && (
-                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#A24BFF]/10 text-[#A24BFF] border border-[#A24BFF]/20">
-                        {post.tag}
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-white text-[14px] leading-relaxed whitespace-pre-wrap">
-                    {post.body}
-                  </p>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-[#1C1C1E] text-[#8E8E93] text-[13px]">
-                    <div className="flex items-center gap-5">
-                      <button
-                        onClick={() => handleLike(post.id)}
-                        className={cn(
-                          "flex items-center gap-1.5 transition-colors",
-                          post.liked ? "text-pink-500 font-semibold" : "hover:text-white"
-                        )}
-                      >
-                        <Heart size={16} fill={post.liked ? "currentColor" : "none"} />
-                        <span>{post.likeCount}</span>
-                      </button>
-                      <button className="flex items-center gap-1.5 hover:text-white transition-colors">
-                        <MessageCircle size={16} />
-                        <span>{post.commentCount}</span>
-                      </button>
-                      <button className="hover:text-white transition-colors">
-                        <Share2 size={15} />
-                      </button>
-                    </div>
-                    <TimeAgo date={post.createdAt} fallback="1h" className="text-[11px] text-[#6E6E73]" />
-                  </div>
+                  )}
                 </div>
               ))}
 
