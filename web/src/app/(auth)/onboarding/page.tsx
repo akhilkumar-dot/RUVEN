@@ -8,15 +8,63 @@ import {
   CheckCircle2,
   ChevronRight,
   ChevronLeft,
-  ArrowRight
+  ArrowRight,
+  TrendingUp,
+  Building2,
+  User,
+  Briefcase,
+  Sparkles
 } from "lucide-react";
 import { BridgeLogo } from "@/ui/BridgeLogo";
 import { PillInput } from "@/ui/PillInput";
 import { GradientRingButton } from "@/ui/GradientRingButton";
-import { WavyGradientHeader } from "@/ui/WavyGradientHeader";
 import { Avatar } from "@/ui/Avatar";
-import { useAuthStore } from "@/lib/store/authStore";
+import { useAuthStore, type AccountType } from "@/lib/store/authStore";
+import { supabase } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+
+const ACCOUNT_CLASSES = [
+  {
+    key: "STARTUP_FOUNDER" as AccountType,
+    label: "Startup Founder",
+    badge: "Founder",
+    icon: <TrendingUp size={22} />,
+    description: "Building your own startup, looking for co-founders, early team & investors.",
+    accent: "#A24BFF",
+    borderClass: "border-[#A24BFF]",
+    bgClass: "bg-[#A24BFF]/10",
+  },
+  {
+    key: "COMPANY_OWNER" as AccountType,
+    label: "Company Owner",
+    badge: "Enterprise",
+    icon: <Building2 size={22} />,
+    description: "Running an established company, hiring specialized talent & partnering with B2B ventures.",
+    accent: "#5E9C8A",
+    borderClass: "border-[#5E9C8A]",
+    bgClass: "bg-[#5E9C8A]/10",
+  },
+  {
+    key: "INDIVIDUAL" as AccountType,
+    label: "Individual / Professional",
+    badge: "Talent",
+    icon: <User size={22} />,
+    description: "Developer, designer, student, or freelancer seeking exciting startups or consulting gigs.",
+    accent: "#3B82F6",
+    borderClass: "border-[#3B82F6]",
+    bgClass: "bg-[#3B82F6]/10",
+  },
+  {
+    key: "INVESTOR" as AccountType,
+    label: "Investor",
+    badge: "Capital",
+    icon: <Briefcase size={22} />,
+    description: "Angel, venture capitalist, or family office seeking high-growth Indian deal flow.",
+    accent: "#FF8A3D",
+    borderClass: "border-[#FF8A3D]",
+    bgClass: "bg-[#FF8A3D]/10",
+  },
+] as const;
 
 const INDIAN_HUBS = [
   "Bengaluru",
@@ -31,42 +79,57 @@ const INDIAN_HUBS = [
 ];
 
 const POPULAR_SKILLS = [
+  "AI & ML",
   "B2B SaaS",
-  "AI / ML",
   "Fintech",
   "Full Stack",
   "Product Management",
   "UX Design",
-  "D2C",
-  "Agritech",
-  "Fundraising",
-  "GTM & Sales",
+  "Growth & GTM",
   "Operations",
+  "Fundraising",
   "Legal & GST",
-];
-
-const LOOKING_FOR_OPTIONS = [
-  "Technical Co-founder",
-  "GTM / Business Co-founder",
-  "Angel / Seed Investment",
-  "Joining an Early Startup",
-  "First 10 Hires",
-  "Founder Mentorship",
 ];
 
 function OnboardingContent() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const switchAccountType = useAuthStore((s) => s.switchAccountType);
 
-  const [step, setStep] = useState(0); // 0=Basics, 1=Ecosystem fit, 2=Ready
-  const [headline, setHeadline] = useState("Building the future of Indian startups");
+  const [step, setStep] = useState(0); // 0=Class selection, 1=Profile details, 2=Welcome preview
+  const [selectedClass, setSelectedClass] = useState<AccountType>(user?.type || "STARTUP_FOUNDER");
+  const [headline, setHeadline] = useState(
+    user?.type === "INVESTOR"
+      ? "Angel Investor · Early-stage deal flow"
+      : user?.type === "COMPANY_OWNER"
+      ? "Founder & Managing Director"
+      : user?.type === "INDIVIDUAL"
+      ? "Full Stack Engineer & Tech Consultant"
+      : "Building the future of Indian tech"
+  );
   const [location, setLocation] = useState("Bengaluru");
-  const [bio, setBio] = useState("Passionate about solving genuine Indian problems with high product-market fit.");
-  const [companyName, setCompanyName] = useState("");
-  const [stage, setStage] = useState("Pre-seed");
-  const [selectedSkills, setSelectedSkills] = useState<string[]>(["B2B SaaS", "AI / ML"]);
-  const [lookingFor, setLookingFor] = useState<string>("Technical Co-founder");
+  const [bio, setBio] = useState("Passionate about building impactful solutions with strong product-market fit in India.");
+  const [organizationName, setOrganizationName] = useState("");
+  const [selectedSkills, setSelectedSkills] = useState<string[]>(["AI & ML", "B2B SaaS"]);
   const [saving, setSaving] = useState(false);
+
+  const activeClassConfig = ACCOUNT_CLASSES.find((c) => c.key === selectedClass) || ACCOUNT_CLASSES[0];
+
+  function handleSelectClass(type: AccountType) {
+    setSelectedClass(type);
+    switchAccountType(type);
+
+    // Set contextual default headline
+    if (type === "INVESTOR") {
+      setHeadline("Angel Investor · Early-stage tech");
+    } else if (type === "COMPANY_OWNER") {
+      setHeadline("Managing Director & Enterprise Builder");
+    } else if (type === "INDIVIDUAL") {
+      setHeadline("Full Stack Engineer & Consultant");
+    } else {
+      setHeadline("Building the future of Indian tech");
+    }
+  }
 
   function toggleSkill(skill: string) {
     setSelectedSkills((prev) =>
@@ -76,44 +139,66 @@ function OnboardingContent() {
 
   async function handleComplete() {
     setSaving(true);
-    // Simulate brief save
-    await new Promise((r) => setTimeout(r, 400));
-    setSaving(false);
-    router.replace("/home");
+    try {
+      switchAccountType(selectedClass);
+
+      // Persist chosen class to Supabase if session exists
+      if (user?.id) {
+        await supabase
+          .from("users")
+          .update({
+            type: selectedClass,
+            headline: headline.trim(),
+            location: location,
+            bio: bio.trim(),
+          })
+          .eq("id", user.id);
+      }
+    } catch {
+      // Ignore background persistence errors
+    } finally {
+      setSaving(false);
+      router.replace("/home");
+    }
   }
 
   const displayName = user?.userHandle ? `@${user.userHandle}` : "Founder";
 
   return (
-    <div className="min-h-dvh bg-black flex flex-col">
-      {/* TopBar */}
-      <div className="flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-4">
+    <div className="min-h-dvh bg-black text-white flex flex-col justify-between">
+      {/* Top Header */}
+      <header className="flex items-center justify-between px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+12px)] pb-3 border-b border-[#1C1C1E]">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-black border border-[#2A2A2E] flex items-center justify-center overflow-hidden">
+          <div className="w-8 h-8 rounded-xl bg-black border border-[#2A2A2E] flex items-center justify-center overflow-hidden shrink-0">
             <BridgeLogo size={32} />
           </div>
-          <span className="text-white font-bold text-[16px]">Ruven</span>
+          <span className="text-white font-bold text-[17px] tracking-tight">Ruven</span>
         </div>
         <button
           onClick={() => router.replace("/home")}
-          className="text-[#8E8E93] text-[13px] hover:text-white transition-colors"
+          className="text-[#8E8E93] text-[13px] hover:text-white transition-colors px-2 py-1"
         >
           Skip to Feed
         </button>
-      </div>
+      </header>
 
-      <div className="flex-1 flex flex-col items-center px-5 max-w-[460px] mx-auto w-full pb-8">
-        {/* Title */}
-        <div className="relative w-full flex flex-col items-center mb-6 text-center">
-          <span className="text-[12px] font-bold uppercase tracking-wider text-[#A24BFF] mb-1">
+      {/* Main Container */}
+      <main className="flex-1 flex flex-col items-center justify-start px-4 sm:px-6 py-6 w-full max-w-[500px] mx-auto">
+        {/* Step Indicator & Title */}
+        <div className="w-full text-center mb-5">
+          <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-[#A24BFF] mb-1">
             Step {step + 1} of 3
           </span>
-          <h1 className="text-white font-bold text-[32px] tracking-tight z-10 leading-tight">
-            {step === 0 && "Complete Your Profile"}
-            {step === 1 && "What Are You Building?"}
-            {step === 2 && "Welcome Aboard!"}
+          <h1 className="text-white font-bold text-[22px] sm:text-[26px] tracking-tight leading-snug">
+            {step === 0 && "Select Your Account Class"}
+            {step === 1 && "Tailor Your Profile"}
+            {step === 2 && "Welcome to Ruven!"}
           </h1>
-          <WavyGradientHeader className="w-full max-w-[240px] mt-1" />
+          <p className="text-[#8E8E93] text-[13px] sm:text-[14px] mt-1 max-w-[340px] mx-auto leading-normal">
+            {step === 0 && "Ruven tailors your dashboard, deals, and ecosystem according to your role."}
+            {step === 1 && "Help other founders, investors, and talent discover and collaborate with you."}
+            {step === 2 && "Your personalized card is ready. Tap launch to enter the ecosystem."}
+          </p>
         </div>
 
         {/* Progress Bar */}
@@ -133,142 +218,180 @@ function OnboardingContent() {
           ))}
         </div>
 
-        {/* Step Container */}
+        {/* Dynamic Step Content */}
         <div className="w-full">
           <AnimatePresence mode="wait">
-            {/* ── STEP 0: Basics ── */}
+            {/* ══════════ STEP 0: 4 ACCOUNT CLASSES ══════════ */}
             {step === 0 && (
               <motion.div
                 key="step0"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-3"
+              >
+                {ACCOUNT_CLASSES.map((cls) => {
+                  const isSelected = selectedClass === cls.key;
+                  return (
+                    <button
+                      key={cls.key}
+                      type="button"
+                      onClick={() => handleSelectClass(cls.key)}
+                      className={cn(
+                        "w-full text-left p-3.5 sm:p-4 rounded-2xl border transition-all flex items-start gap-3.5 relative",
+                        isSelected
+                          ? cn("border-2 bg-[#121216] shadow-lg", cls.borderClass)
+                          : "border-[#1E1E22] bg-[#0E0E10] hover:border-[#2E2E34] hover:bg-[#141416]"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
+                          isSelected
+                            ? cn(cls.bgClass, cls.borderClass, "text-white")
+                            : "bg-[#18181C] border-[#26262A] text-[#8E8E93]"
+                        )}
+                        style={{ color: isSelected ? cls.accent : undefined }}
+                      >
+                        {cls.icon}
+                      </div>
+
+                      <div className="flex-1 min-w-0 pr-6">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h2 className="text-white font-bold text-[15px] sm:text-[16px] leading-tight">
+                            {cls.label}
+                          </h2>
+                          <span
+                            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
+                            style={{
+                              backgroundColor: `${cls.accent}15`,
+                              color: cls.accent,
+                              borderColor: `${cls.accent}30`,
+                            }}
+                          >
+                            {cls.badge}
+                          </span>
+                        </div>
+                        <p className="text-[#8E8E93] text-[12px] sm:text-[13px] mt-1 leading-snug">
+                          {cls.description}
+                        </p>
+                      </div>
+
+                      {/* Selection Radio / Checkmark */}
+                      <div className="absolute right-3.5 top-4">
+                        {isSelected ? (
+                          <CheckCircle2 size={20} style={{ color: cls.accent }} />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full border border-[#2E2E34] bg-black/40" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+
+                <div className="pt-3">
+                  <GradientRingButton
+                    size="lg"
+                    className="w-full"
+                    onClick={() => setStep(1)}
+                  >
+                    Continue as {activeClassConfig.label} <ChevronRight size={18} />
+                  </GradientRingButton>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ══════════ STEP 1: PROFILE DETAILS ══════════ */}
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-[#0F0F11] border border-[#1C1C1E]">
-                  <Avatar name={displayName} size="lg" />
-                  <div>
-                    <p className="text-white font-semibold text-[15px]">{displayName}</p>
-                    <p className="text-[#8E8E93] text-[12px]">India Startup Ecosystem</p>
+                {/* Selected class indicator badge */}
+                <div className="p-3 rounded-xl bg-[#121216] border border-[#222226] flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span style={{ color: activeClassConfig.accent }}>
+                      {activeClassConfig.icon}
+                    </span>
+                    <span className="text-white text-[13px] font-semibold">
+                      {activeClassConfig.label}
+                    </span>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setStep(0)}
+                    className="text-[#A24BFF] text-[12px] font-medium hover:underline"
+                  >
+                    Change Class
+                  </button>
                 </div>
 
+                {/* Organization or Venture Name */}
                 <PillInput
-                  label="Headline / Role"
-                  placeholder="e.g. Co-founder @ Startup · Ex-Flipkart"
+                  label={
+                    selectedClass === "INVESTOR"
+                      ? "Fund / Angel Portfolio Name (Optional)"
+                      : selectedClass === "COMPANY_OWNER"
+                      ? "Company Name"
+                      : "Startup / Venture Name (Optional)"
+                  }
+                  placeholder={
+                    selectedClass === "INVESTOR"
+                      ? "e.g. Bharat Venture Partners"
+                      : selectedClass === "COMPANY_OWNER"
+                      ? "e.g. Apex Tech Solutions"
+                      : "e.g. FinPilot, NovaLeaf Labs..."
+                  }
+                  value={organizationName}
+                  onChange={(e) => setOrganizationName(e.target.value)}
+                />
+
+                {/* Headline / Role */}
+                <PillInput
+                  label="Headline / Title"
+                  placeholder="e.g. Co-founder & CEO · Ex-Razorpay"
                   value={headline}
                   onChange={(e) => setHeadline(e.target.value)}
                 />
 
+                {/* Location */}
                 <div className="space-y-1.5">
                   <label className="text-[12px] font-medium text-[#8E8E93] px-3">
-                    Startup Hub / Location
+                    Primary Hub
                   </label>
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {INDIAN_HUBS.map((city) => (
-                      <button
-                        key={city}
-                        type="button"
-                        onClick={() => setLocation(city)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-full text-[12px] font-medium transition-all border",
-                          location === city
-                            ? "bg-[#A24BFF]/20 border-[#A24BFF] text-white"
-                            : "bg-[#1C1C1E] border-[#2A2A2D] text-[#8E8E93] hover:text-white"
-                        )}
-                      >
-                        {city}
-                      </button>
+                  <select
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="w-full bg-[#121214] border border-[#222226] text-white text-[14px] rounded-2xl px-4 py-3 outline-none focus:border-[#A24BFF] transition-colors"
+                  >
+                    {INDIAN_HUBS.map((hub) => (
+                      <option key={hub} value={hub} className="bg-[#121214] text-white">
+                        {hub}
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
 
+                {/* Bio / Summary */}
                 <div className="space-y-1.5">
                   <label className="text-[12px] font-medium text-[#8E8E93] px-3">
-                    Short Founder Bio
+                    Short Bio
                   </label>
                   <textarea
-                    rows={3}
+                    rows={2}
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder="Tell founders & investors what you are passionate about..."
-                    className="w-full bg-[#121214] border border-[#2A2A2D] rounded-2xl p-3.5 text-white text-[14px] placeholder:text-[#6E6E73] focus:outline-none focus:border-[#A24BFF] resize-none"
+                    placeholder="Brief intro about what you're building or seeking..."
+                    className="w-full bg-[#121214] border border-[#222226] text-white text-[13px] rounded-2xl px-4 py-2.5 outline-none focus:border-[#A24BFF] transition-colors resize-none"
                   />
                 </div>
 
-                <GradientRingButton
-                  size="lg"
-                  className="w-full mt-4"
-                  onClick={() => setStep(1)}
-                >
-                  Continue <ChevronRight size={18} />
-                </GradientRingButton>
-              </motion.div>
-            )}
-
-            {/* ── STEP 1: Startup Details & Skills ── */}
-            {step === 1 && (
-              <motion.div
-                key="step1"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-4"
-              >
-                <PillInput
-                  label="Startup / Project Name (Optional)"
-                  placeholder="e.g. FinPilot, NovaLeaf Labs..."
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                />
-
-                <div className="space-y-1.5">
-                  <label className="text-[12px] font-medium text-[#8E8E93] px-3">
-                    Current Stage
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {["Idea / Concept", "Pre-seed", "Seed Stage", "Bootstrapped Profitable"].map((st) => (
-                      <button
-                        key={st}
-                        type="button"
-                        onClick={() => setStage(st)}
-                        className={cn(
-                          "p-2.5 rounded-xl text-[13px] font-medium transition-all border text-center",
-                          stage === st
-                            ? "bg-[#A24BFF]/20 border-[#A24BFF] text-white"
-                            : "bg-[#1C1C1E] border-[#2A2A2D] text-[#8E8E93] hover:text-white"
-                        )}
-                      >
-                        {st}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[12px] font-medium text-[#8E8E93] px-3">
-                    Looking For Right Now
-                  </label>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {LOOKING_FOR_OPTIONS.map((opt) => (
-                      <button
-                        key={opt}
-                        type="button"
-                        onClick={() => setLookingFor(opt)}
-                        className={cn(
-                          "px-3.5 py-2 rounded-xl text-[13px] font-medium transition-all border text-left flex items-center justify-between",
-                          lookingFor === opt
-                            ? "bg-[#A24BFF]/20 border-[#A24BFF] text-white font-semibold"
-                            : "bg-[#1C1C1E] border-[#2A2A2D] text-[#8E8E93] hover:text-white"
-                        )}
-                      >
-                        <span>{opt}</span>
-                        {lookingFor === opt && <CheckCircle2 size={16} className="text-[#A24BFF]" />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
+                {/* Key Sectors & Focus Areas */}
                 <div className="space-y-1.5">
                   <label className="text-[12px] font-medium text-[#8E8E93] px-3">
                     Sectors & Skills
@@ -285,7 +408,7 @@ function OnboardingContent() {
                             "px-2.5 py-1 rounded-full text-[11px] font-medium transition-all border",
                             isSel
                               ? "bg-white text-black font-semibold border-white"
-                              : "bg-[#1C1C1E] border-[#2A2A2D] text-[#8E8E93] hover:text-white"
+                              : "bg-[#18181C] border-[#26262A] text-[#8E8E93] hover:text-white"
                           )}
                         >
                           {sk}
@@ -295,11 +418,12 @@ function OnboardingContent() {
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-2">
+                {/* Step Navigation */}
+                <div className="flex items-center gap-3 pt-3">
                   <button
                     type="button"
                     onClick={() => setStep(0)}
-                    className="flex items-center gap-1.5 text-[#8E8E93] text-[14px] hover:text-white px-3"
+                    className="flex items-center gap-1 text-[#8E8E93] text-[13px] hover:text-white px-2 py-2"
                   >
                     <ChevronLeft size={16} /> Back
                   </button>
@@ -308,85 +432,116 @@ function OnboardingContent() {
                     className="flex-1"
                     onClick={() => setStep(2)}
                   >
-                    Next <ChevronRight size={18} />
+                    Review Profile <ChevronRight size={18} />
                   </GradientRingButton>
                 </div>
               </motion.div>
             )}
 
-            {/* ── STEP 2: Preview & Launch ── */}
+            {/* ══════════ STEP 2: MEMBER PREVIEW & LAUNCH ══════════ */}
             {step === 2 && (
               <motion.div
                 key="step2"
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="space-y-6 text-center"
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-5 text-center"
               >
-                {/* Preview Bento Card */}
+                {/* Ruven Member Card Preview */}
                 <div
-                  className="rounded-[28px] p-6 text-left relative overflow-hidden shadow-2xl border border-white/10"
+                  className="rounded-3xl p-5 text-left relative overflow-hidden border border-[#26262C] shadow-2xl space-y-3"
                   style={{
-                    background: "linear-gradient(135deg, #1C1C1E 0%, #0F0F11 100%)",
+                    background: "linear-gradient(135deg, #131316 0%, #0A0A0C 100%)",
                   }}
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <Avatar name={displayName} size="lg" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#A24BFF]/20 text-[#A24BFF] border border-[#A24BFF]/30">
-                      Founder Profile
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <Avatar name={displayName} size="md" />
+                      <div>
+                        <p className="text-white font-bold text-[15px]">{displayName}</p>
+                        <p className="text-[#8E8E93] text-[11px] flex items-center gap-1">
+                          <MapPin size={11} className="text-[#A24BFF]" /> {location}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border"
+                      style={{
+                        backgroundColor: `${activeClassConfig.accent}15`,
+                        color: activeClassConfig.accent,
+                        borderColor: `${activeClassConfig.accent}30`,
+                      }}
+                    >
+                      {activeClassConfig.label}
                     </span>
                   </div>
 
-                  <h3 className="text-white font-bold text-[20px] leading-tight">
-                    {displayName}
-                  </h3>
-                  <p className="text-[#A24BFF] text-[13px] font-medium mt-0.5">
-                    {headline}
-                  </p>
-                  <p className="text-[#8E8E93] text-[12px] flex items-center gap-1 mt-1">
-                    <MapPin size={12} /> {location}
-                  </p>
+                  <div>
+                    <p className="text-white text-[13px] font-medium leading-snug">
+                      {headline}
+                    </p>
+                    {organizationName && (
+                      <p className="text-[#A24BFF] text-[12px] font-semibold mt-0.5">
+                        {organizationName}
+                      </p>
+                    )}
+                    <p className="text-[#8E8E93] text-[12px] leading-relaxed mt-2 line-clamp-2">
+                      {bio}
+                    </p>
+                  </div>
 
-                  <p className="text-white/80 text-[13px] mt-3 leading-relaxed">
-                    {bio}
-                  </p>
-
-                  <div className="flex flex-wrap gap-1.5 mt-4 pt-3 border-t border-white/10">
+                  <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[#1E1E22]">
                     {selectedSkills.map((sk) => (
                       <span
                         key={sk}
-                        className="px-2 py-0.5 rounded-full bg-white/10 text-white text-[10px] font-medium"
+                        className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white text-[10px]"
                       >
                         {sk}
                       </span>
                     ))}
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-medium border border-emerald-500/30">
-                      Seeking: {lookingFor}
-                    </span>
                   </div>
                 </div>
 
-                <div>
-                  <h2 className="text-white font-semibold text-[20px]">
-                    Your founder card is ready!
+                <div className="px-2">
+                  <div className="inline-flex items-center gap-1.5 text-[12px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full font-medium mb-1">
+                    <Sparkles size={13} /> Class confirmed & verified
+                  </div>
+                  <h2 className="text-white font-bold text-[18px]">
+                    You&apos;re ready to launch
                   </h2>
-                  <p className="text-[#8E8E93] text-[14px] mt-1">
-                    You can now network with verified founders, angels, and incubators across India.
+                  <p className="text-[#8E8E93] text-[12px] max-w-[320px] mx-auto mt-0.5">
+                    Your tailored ecosystem, deal flow, and directory filters are now configured.
                   </p>
                 </div>
 
-                <GradientRingButton
-                  size="lg"
-                  className="w-full"
-                  disabled={saving}
-                  onClick={handleComplete}
-                >
-                  {saving ? "Launching…" : "Launch Into FounderBridge"} <ArrowRight size={18} />
-                </GradientRingButton>
+                <div className="flex items-center gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="flex items-center gap-1 text-[#8E8E93] text-[13px] hover:text-white px-2 py-2"
+                  >
+                    <ChevronLeft size={16} /> Edit
+                  </button>
+                  <GradientRingButton
+                    size="lg"
+                    className="flex-1"
+                    disabled={saving}
+                    onClick={handleComplete}
+                  >
+                    {saving ? "Launching…" : "Enter Ruven Dashboard"} <ArrowRight size={18} />
+                  </GradientRingButton>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="py-4 text-center text-[#6E6E73] text-[11px] border-t border-[#1C1C1E]">
+        © 2026 Ruven Technologies Private Limited
+      </footer>
     </div>
   );
 }

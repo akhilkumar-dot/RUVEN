@@ -59,9 +59,9 @@ function AuthCallbackContent() {
           type: resolvedType,
         });
 
-        setStatus("Authentication successful! Redirecting…");
+        setStatus("Authentication successful! Redirecting to onboarding…");
         setTimeout(() => {
-          router.replace("/home");
+          router.replace("/onboarding");
         }, 500);
       } catch (err: unknown) {
         const error = err as Error;
@@ -84,7 +84,7 @@ function AuthCallbackContent() {
           <div className="w-6 h-6 border-2 border-[#A24BFF] border-t-transparent rounded-full animate-spin mx-auto" />
           <h2 className="text-white font-bold text-[20px]">{status}</h2>
           <p className="text-[#8E8E93] text-[13px]">
-            Connecting your account to FounderBridge…
+            Connecting your account to Ruven…
           </p>
         </div>
       ) : (

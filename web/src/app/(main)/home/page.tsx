@@ -729,11 +729,11 @@ function HomePageContent() {
 
             {/* Daily Quote Widget (B1) */}
             <div data-testid="daily-quote" className="p-4 rounded-2xl bg-[#0F0F12] border border-[#1E1E22] relative overflow-hidden flex flex-col justify-between">
-              <div className="flex items-center justify-between text-[11px] text-[#8E8E93] mb-1.5">
-                <span className="uppercase tracking-wider font-semibold text-[#A24BFF]">
-                  {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: "numeric" })}
+              <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-[#8E8E93] mb-1.5 gap-2">
+                <span className="uppercase tracking-wider font-semibold text-[#A24BFF] truncate">
+                  {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                 </span>
-                <span className="text-[11px] text-[#6E6E73]">Daily Inspiration</span>
+                <span className="text-[10px] sm:text-[11px] text-[#6E6E73] shrink-0">Daily Inspiration</span>
               </div>
               <blockquote className="text-white text-[13px] italic font-medium leading-relaxed">
                 &ldquo;{ROLE_QUOTES[activeRole]?.quote || "Build relentlessly."}&rdquo;
@@ -749,18 +749,18 @@ function HomePageContent() {
             <button
               onClick={() => setActiveTab("dashboard")}
               className={cn(
-                "flex-1 py-2 text-[14px] font-semibold rounded-xl transition-all",
+                "flex-1 py-2 text-[12px] sm:text-[14px] font-semibold rounded-xl transition-all truncate px-1 sm:px-3 text-center",
                 activeTab === "dashboard"
                   ? "bg-white text-black shadow"
                   : "text-[#8E8E93] hover:text-white"
               )}
             >
-              {config.label} Dashboard
+              <span className="hidden sm:inline">{config.label} </span>Dashboard
             </button>
             <button
               onClick={() => setActiveTab("feed")}
               className={cn(
-                "flex-1 py-2 text-[14px] font-semibold rounded-xl transition-all",
+                "flex-1 py-2 text-[12px] sm:text-[14px] font-semibold rounded-xl transition-all truncate px-1 sm:px-3 text-center",
                 activeTab === "feed"
                   ? "bg-white text-black shadow"
                   : "text-[#8E8E93] hover:text-white"
@@ -796,10 +796,10 @@ function HomePageContent() {
                     key={idx}
                     className="p-3.5 rounded-2xl bg-[#121214] border border-[#1E1E22] hover:border-[#2A2A2E] transition-colors"
                   >
-                    <div className="flex items-center justify-between text-[11px] text-[#71717A] mb-1">
-                      <span>{s.label}</span>
+                    <div className="flex items-center justify-between text-[11px] text-[#71717A] mb-1 gap-1">
+                      <span className="truncate pr-1">{s.label}</span>
                       <span
-                        className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                        className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0"
                         style={{
                           background: `${config.accentColor}15`,
                           color: config.accentColor,
@@ -808,7 +808,7 @@ function HomePageContent() {
                         {s.trend}
                       </span>
                     </div>
-                    <p className="text-white text-[22px] font-bold tracking-tight leading-tight">
+                    <p className="text-white text-[18px] sm:text-[22px] font-bold tracking-tight leading-tight truncate">
                       {s.value}
                     </p>
                     <p className="text-[#8E8E93] text-[11px] mt-0.5 truncate">
@@ -877,19 +877,19 @@ function HomePageContent() {
                       </p>
                     </div>
 
-                    <div className="flex items-end justify-between pt-3 border-t border-black/10 mt-4">
-                      <div>
-                        <p className="text-black font-extrabold text-[24px] leading-none">
+                    <div className="flex items-end justify-between pt-3 border-t border-black/10 mt-4 gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-black font-extrabold text-[20px] sm:text-[24px] leading-none">
                           {config.featuredProfile.statValue}
                         </p>
-                        <p className="text-black/70 text-[11px] font-medium mt-0.5">
+                        <p className="text-black/70 text-[11px] font-medium mt-0.5 truncate">
                           {config.featuredProfile.statLabel}
                         </p>
                       </div>
 
                       <button
                         onClick={() => { router.push("/discover"); }}
-                        className="px-3 py-1.5 rounded-xl bg-black text-white text-[12px] font-semibold flex items-center gap-1 hover:bg-black/80 transition-colors"
+                        className="px-3 py-1.5 rounded-xl bg-black text-white text-[12px] font-semibold flex items-center gap-1 hover:bg-black/80 transition-colors shrink-0"
                       >
                         <span>Connect</span>
                         <ChevronRight size={14} />
@@ -905,11 +905,11 @@ function HomePageContent() {
                 >
                   <div className="relative z-10 flex flex-col justify-between min-h-[170px] h-full">
                     <div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-white/80 px-2 py-0.5 rounded-full bg-black/20">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-white/80 px-2 py-0.5 rounded-full bg-black/20 truncate">
                           {config.featuredOpportunity.organization}
                         </span>
-                        <span className="text-white font-extrabold text-[15px]">
+                        <span className="text-white font-extrabold text-[14px] sm:text-[15px] shrink-0">
                           {config.featuredOpportunity.statValue}
                         </span>
                       </div>
