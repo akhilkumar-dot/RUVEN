@@ -56,6 +56,15 @@ export function NavDrawer({ isOpen, onClose }: NavDrawerProps) {
     router.replace("/sign-in");
   }
 
+  const filteredNavItems = NAV_ITEMS.filter((item) => {
+    if (item.key === "company") {
+      if (user?.type === "INDIVIDUAL" || user?.type === "INVESTOR") {
+        return false;
+      }
+    }
+    return true;
+  });
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -109,7 +118,7 @@ export function NavDrawer({ isOpen, onClose }: NavDrawerProps) {
 
             {/* Navigation Links */}
             <nav className="flex-1 overflow-y-auto mt-4 space-y-1 pr-1 -mr-1">
-              {NAV_ITEMS.map((item) => {
+              {filteredNavItems.map((item) => {
                 const isActive = pathname?.startsWith(item.href);
                 return (
                   <Link
