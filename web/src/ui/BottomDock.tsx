@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Zap, Shield, Clock } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 import { Avatar } from "./Avatar";
 
 interface FloatingActionStackProps {
@@ -13,15 +14,6 @@ interface FloatingActionStackProps {
   verifiedCount?: number;
 }
 
-/**
- * FloatingActionStack — the vertical cluster of round buttons
- * on the right edge of the screen, as seen in the reference image.
- *
- * Three buttons:
- *  1. Clock  — Today's meetups
- *  2. Bolt   — Quick post
- *  3. Shield — Verified/Pro status (with small badge count)
- */
 export function FloatingActionStack({
   className,
   onTodayMeetups,
@@ -29,11 +21,12 @@ export function FloatingActionStack({
   onVerifiedStatus,
   verifiedCount,
 }: FloatingActionStackProps) {
+  const router = useRouter();
   const buttons = [
-    { icon: <Clock size={18} />, label: "Today's meetups", onClick: onTodayMeetups },
+    { icon: <Clock size={18} />, label: "Today's meetups", onClick: onTodayMeetups ?? (() => router.push("/meetups")) },
     { icon: <Zap size={18} />,   label: "Quick post",      onClick: onQuickPost,
       badge: verifiedCount && verifiedCount > 0 ? String(verifiedCount) : undefined },
-    { icon: <Shield size={18} />, label: "Verified status", onClick: onVerifiedStatus },
+    { icon: <Shield size={18} />, label: "Verified status", onClick: onVerifiedStatus ?? (() => router.push("/plans")) },
   ];
 
   return (
@@ -70,10 +63,26 @@ export function FloatingActionStack({
   );
 }
 
+// ── Route map for bottom nav ──────────────────────────────────
+export const NAV_TABS = [
+  { key: "home",      label: "Home",      href: "/home"      },
+  { key: "discover",  label: "Discover",  href: "/discover"  },
+  { key: "hub",       label: "Hub",       href: "/hub"       },
+  { key: "ideas",     label: "Ideas",     href: "/ideas"     },
+  { key: "meetups",   label: "Meetups",   href: "/meetups"   },
+  { key: "messages",  label: "Messages",  href: "/messages"  },
+  { key: "workspace", label: "Docs",      href: "/workspace" },
+  { key: "company",   label: "Company",   href: "/company"   },
+  { key: "profile",   label: "Profile",   href: "/profile"   },
+  { key: "plans",     label: "Plans",     href: "/plans"     },
+] as const;
+
 interface BottomDockProps {
-  activeTab: string;
-  tabs: Array<{ key: string; label: string }>;
-  onTabChange: (key: string) => void;
+  /** Override active tab — defaults to current pathname */
+  activeTab?: string;
+  /** Override visible tabs — defaults to 5 primary tabs */
+  tabs?: Array<{ key: string; label: string }>;
+  onTabChange?: (key: string) => void;
   onCreateOpen?: () => void;
   userPhotoUrl?: string | null;
   userName?: string;
@@ -81,14 +90,12 @@ interface BottomDockProps {
   className?: string;
 }
 
-/**
- * BottomDock — matches the reference image:
- *  Left:  Gradient "+" Create button
- *  Center: Segmented text tabs
- *  Right: User avatar (opens profile)
- */
+const PRIMARY_TABS = NAV_TABS.filter(t =>
+  ["home", "discover", "hub", "ideas", "meetups"].includes(t.key)
+);
+
 export function BottomDock({
-  activeTab,
+  activeTab: activeTabOverride,
   tabs,
   onTabChange,
   onCreateOpen,
@@ -97,6 +104,23 @@ export function BottomDock({
   onProfileOpen,
   className,
 }: BottomDockProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Derive active tab from route if not overridden
+  const activeTab =
+    activeTabOverride ??
+    NAV_TABS.find(t => pathname?.startsWith(t.href))?.key ??
+    "home";
+
+  const visibleTabs = tabs ?? PRIMARY_TABS;
+
+  function handleTabChange(key: string) {
+    onTabChange?.(key);
+    const route = NAV_TABS.find(t => t.key === key);
+    if (route) router.push(route.href);
+  }
+
   return (
     <nav
       aria-label="Main navigation"
@@ -122,17 +146,17 @@ export function BottomDock({
         </span>
       </motion.button>
 
-      {/* Segmented tabs — scrollable */}
+      {/* Segmented tabs */}
       <div
         className="flex-1 flex items-center justify-center gap-1 overflow-x-auto scrollbar-hide"
         role="tablist"
       >
-        {tabs.map((tab) => (
+        {visibleTabs.map((tab) => (
           <button
             key={tab.key}
             role="tab"
             aria-selected={activeTab === tab.key}
-            onClick={() => onTabChange(tab.key)}
+            onClick={() => handleTabChange(tab.key)}
             className={cn(
               "relative px-3 py-1.5 text-[13px] font-medium rounded-full whitespace-nowrap transition-colors",
               activeTab === tab.key
@@ -153,9 +177,9 @@ export function BottomDock({
         ))}
       </div>
 
-      {/* Avatar */}
+      {/* Avatar → Profile */}
       <button
-        onClick={onProfileOpen}
+        onClick={onProfileOpen ?? (() => router.push("/profile"))}
         aria-label="Open profile"
         className="shrink-0"
       >
