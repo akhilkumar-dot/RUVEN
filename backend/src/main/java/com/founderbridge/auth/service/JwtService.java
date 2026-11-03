@@ -1,58 +1,49 @@
 ﻿package com.founderbridge.auth.service;
 
+import com.founderbridge.AppConfig;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
-import java.time.Instant;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 
-@Slf4j
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
-    private final Key key;
-    private final long accessExpirySeconds;
+    private final AppConfig appConfig;
 
-    public JwtService(
-            @Value("${app.jwt.secret}") String secret,
-            @Value("${app.jwt.access-expiry-seconds:900}") long accessExpirySeconds) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes());
-        this.accessExpirySeconds = accessExpirySeconds;
+    private SecretKey key() {
+        byte[] bytes = appConfig.jwt().secret().getBytes(StandardCharsets.UTF_8);
+        if (bytes.length < 32) throw new IllegalStateException("JWT secret must be ≥ 32 chars");
+        return Keys.hmacShaKeyFor(bytes);
     }
 
-    /** Generate a signed access JWT for the given user. */
     public String generateAccessToken(UUID userId, String email, String role) {
-        Instant now = Instant.now();
+        long expiryMs = appConfig.jwt().accessExpirySeconds() * 1000L;
         return Jwts.builder()
-                .subject(userId.toString())
-                .claims(Map.of("email", email, "role", role))
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusSeconds(accessExpirySeconds)))
-                .signWith(key)
-                .compact();
+            .subject(userId.toString())
+            .claim("email", email)
+            .claim("role", role)
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + expiryMs))
+            .signWith(key())
+            .compact();
     }
 
-    /** Validate and parse the JWT. Returns null if invalid/expired. */
-    public Claims validateToken(String token) {
-        try {
-            return Jwts.parser()
-                    .verifyWith((javax.crypto.SecretKey) key)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-        } catch (JwtException ex) {
-            log.debug("JWT validation failed: {}", ex.getMessage());
-            return null;
-        }
+    public Claims validateAndExtract(String token) {
+        return Jwts.parser()
+            .verifyWith(key())
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
     }
 
     public long getAccessExpirySeconds() {
-        return accessExpirySeconds;
+        return appConfig.jwt().accessExpirySeconds();
     }
 }

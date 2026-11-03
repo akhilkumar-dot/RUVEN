@@ -1,4 +1,4 @@
-﻿import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     java
@@ -88,7 +88,6 @@ dependencies {
     // Dev tools
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.testcontainers:junit-jupiter")
@@ -96,6 +95,10 @@ dependencies {
     testImplementation("org.testcontainers:redis")
     testImplementation("io.rest-assured:rest-assured:5.5.0")
     testImplementation("io.rest-assured:spring-mock-mvc:5.5.0")
+    // H2 for lightweight unit tests (no Docker needed)
+    testRuntimeOnly("com.h2database:h2")
+    // Lettuce for Bucket4j Redis (needed at compile-time for RedisConfig)
+    implementation("io.lettuce:lettuce-core")
 }
 
 dependencyManagement {
