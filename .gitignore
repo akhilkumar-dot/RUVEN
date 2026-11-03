@@ -24,3 +24,8 @@ backend/.gradle/
 # OS
 Thumbs.db
 ehthumbs.db
+
+node_modules/
+test-results/
+web/test-results/
+web/playwright.config.ts

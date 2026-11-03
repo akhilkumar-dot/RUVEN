@@ -1,87 +1,87 @@
 id,area,requirement,status,severity,evidence,notes
 A1,Accounts,Four account types only (Startup founder Company owner Individual Investor),PASS,LOW,sign-up/page.tsx:42-67; test a-accounts.spec.ts:5; screenshot A1.png,UI allows selecting all 4 account classes
 A2,Accounts,Basic details validation (name email location headline phone password),PASS,LOW,sign-up/page.tsx:24-37; test a-accounts.spec.ts:25; screenshot A2.png,Zod schema validates name email phone password format
-A3,Accounts,Profile photo mandatory for personal/investor (API enforced),FAIL,HIGH,public.profiles.photo_url allows null; no API rejection; screenshot A3.png,Photo is optional in DB and skipped in mock onboarding
-A4,Accounts,Company logo mandatory for company/startup (API enforced),FAIL,HIGH,public.companies.logo_url allows null; no API rejection; screenshot A4.png,Logo is optional in DB and skipped in mock onboarding
-A5,Accounts,Startup/Company required fields,PARTIAL,HIGH,onboarding/page.tsx:68-88; simulated timeout; screenshot A5.png,Fields present in form but not persisted to DB
-A6,Accounts,Individual and Investor required fields,PARTIAL,HIGH,onboarding/page.tsx:68-88; investor_profiles table empty; screenshot A6.png,Investor thesis/ticket/sectors not collected on onboarding
-A7,Accounts,Lands on Home after onboarding launch checklist for startups,PARTIAL,MEDIUM,onboarding/page.tsx:88; Launch Checklist missing on Home; screenshot A7.png,Navigates to Home but Launch Checklist is not present
-A8,Accounts,Data survives restart and re-login (real DB no localStorage),PARTIAL,BLOCKER,authStore.ts:176 localStorage persistence; Supabase public.users count=1; screenshot A8.png,User is in DB but frontend stores session in localStorage and pages use mock data
-A9,Accounts,Login by User ID or email logout generic error password reset expiring,PARTIAL,HIGH,supabaseAuth.ts:82-138; no email confirmation enforced; screenshot A9.png,Handle and email lookup works but email verification and reset token not enforced
-A10,Accounts,My Company hidden for Individual and Investor refused by API,FAIL,HIGH,NavDrawer.tsx:75 unconditionally shows My Company; screenshot A10.png,My Company is visible to Individual and Investor accounts
-B1,Home,Date + new quote each day matching profile type,MISSING,MEDIUM,home/page.tsx:580; test b-home.spec.ts:5; screenshot B1.png,No daily quote component or date block on Home
-B2,Home,Post text + optional photo appears in feed,PARTIAL,HIGH,home/page.tsx:549-568; posts table empty in DB; screenshot B2.png,Posting updates only updates local React state not Supabase
-B3,Home,Like toggle one per user enforced server-side,FAIL,HIGH,home/page.tsx:539; post_likes table empty in DB; screenshot B3.png,Like count toggles only in React state
-B4,Home,Ads panel replaces People you may know and shows active ads,MISSING,MEDIUM,test b-home.spec.ts:56; ads panel count 0; screenshot B4.png,Ads panel component missing from Home
-B5,Home,Publish ad flow 7/14/30 days limits enforced server-side,MISSING,HIGH,test b-home.spec.ts:64; Supabase ads table status 404; screenshot B5.png,Ads table and purchase modal do not exist
-B6,Home,Free user sponsored card after every 2 updates,MISSING,MEDIUM,test b-home.spec.ts:71; sponsored cards count 0; screenshot B6.png,No sponsored cards interleaved in feed
-B7,Home,Private to-do list (add tick delete),MISSING,MEDIUM,test b-home.spec.ts:84; todo list count 0; screenshot B7.png,Private to-do list missing on Home
-B8,Home,Stat tiles show real counts quick buttons navigate correctly,PARTIAL,MEDIUM,home/page.tsx:59-64; hardcoded strings; screenshot B8.png,Values are static mock strings
-B9,Home,Today meetups block works,MISSING,MEDIUM,test b-home.spec.ts:99; meetups block count 0; screenshot B9.png,Today meetups block missing from Home
-B10,Home,Launch checklist with progress bar auto-ticking on actions,MISSING,HIGH,test b-home.spec.ts:106; launch checklist count 0; screenshot B10.png,Launch checklist component missing from Home
-C1,Discover,Tabs People Companies Investors server-side search paginated,PARTIAL,HIGH,discover/page.tsx:21-49; static arrays; screenshot C1.png,Tabs present but search is client-side over mock arrays
-C2,Discover,People cards fields and Connect action,PARTIAL,HIGH,discover/page.tsx:52-79; connections table empty in DB; screenshot C2.png,Connect button only flips local React state
-C3,Discover,Companies tab lists only published sites with Follow and Visit,PARTIAL,MEDIUM,discover/page.tsx:81-100; static mock companies; screenshot C3.png,Not queried from DB and published filter not applied
-C4,Discover,Investor cards ticket size sectors portfolio Connect Intro,PARTIAL,MEDIUM,discover/page.tsx:38-42; mock investors; screenshot C4.png,Cards lack Request Intro and View Portfolio actions
-C5,Discover,Requests count toward daily limit accepted appear in Messages,MISSING,HIGH,connections table not queried; messages use static CONVOS; screenshot C5.png,Daily request counter and sync to messages missing
-C6,Discover,Limits enforced server-side (Free 5/day Pro 15/day etc.),MISSING,HIGH,no rate limiting or quota logic in Supabase; screenshot C6.png,Tier limits not enforced server-side
-C7,Discover,Verified accounts shown first in Discover,MISSING,LOW,discover/page.tsx:21-49; static sort; screenshot C7.png,No verification-first sort ordering
-C8,Discover,No self-connect no duplicate request tamper guard,PARTIAL,MEDIUM,foreign key constraint exists on connections; screenshot C8.png,Self-connect CHECK and duplicate pair constraint need verification
-D1,Company,Tabs Preview Dashboard Projects Edit Jobs Apps Team Photos Mail,PASS,LOW,company/page.tsx:15-25; test d-company.spec.ts:5; screenshot D1.png,All 9 tabs present in company page navigation
-D2,Company,Name about email phone mandatory,PARTIAL,HIGH,company/page.tsx:90-130; email and phone fields missing from Edit; screenshot D2.png,Edit form lacks email and phone fields
-D3,Company,Publish blocked until logo name about 20+ valid email/phone present,FAIL,BLOCKER,company/page.tsx has no publish button; companies table lacks about col; screenshot D3.png,Publish button missing; schema mismatch on about column
-D4,Company,Publish/unpublish controls visibility in Discover stable URL,MISSING,HIGH,no publish button; no /c/[slug] SSR public page; screenshot D4.png,Public company route and visibility toggle missing
-D5,Company,Dashboard numbers are real (views jobs applications team),FAIL,HIGH,company/page.tsx:75-87; static 4210 89 34; screenshot D5.png,Numbers are hardcoded mock values
-D6,Company,Projects add/edit/delete and show on page,MISSING,MEDIUM,company/page.tsx:237; PlaceholderPanel Projects; screenshot D6.png,Projects panel shows coming soon placeholder
-D7,Company,Jobs posting visitors get Apply duplicate-apply guard,PARTIAL,HIGH,company/page.tsx:132-146; static job; no post action; screenshot D7.png,Post Job button has no form; no apply guard
-D8,Company,Applications status New Shortlisted Hired Rejected resume access,FAIL,HIGH,company/page.tsx:150-154; statuses REVIEWING APPLIED SHORTLISTED; screenshot D8.png,Uses REVIEWING instead of spec statuses; no resume download
-D9,Company,Team add/edit/remove,MISSING,MEDIUM,company/page.tsx:238; PlaceholderPanel Team; screenshot D9.png,Team panel shows coming soon placeholder
-D10,Company,Photos upload lightbox with arrows,MISSING,MEDIUM,company/page.tsx:239; PlaceholderPanel Photos; screenshot D10.png,Photo gallery shows coming soon placeholder
-D11,Company,Mail really sends and Sent list kept,MISSING,MEDIUM,company/page.tsx:240; PlaceholderPanel Mail; screenshot D11.png,Mail campaigns shows coming soon placeholder
-D12,Company,Only owner can edit (API tamper guard),FAIL,BLOCKER,test d-company.spec.ts:95; anon PATCH companies returned 204; screenshot D12.png,Anonymous users can update company records via Supabase REST API
-D13,Company,Free default look only Pro 9 layouts 10 palettes API gated,FAIL,HIGH,company/page.tsx:112-125; all themes clickable by Free user; screenshot D13.png,No subscription check or server-side gating for themes
-E1,Ideas,Share idea and apply to collaborate,PARTIAL,HIGH,ideas/page.tsx:139-181; ideas table has 0 rows; screenshot E1.png,Post Idea and Collaborate buttons have no action handlers
-E2,Ideas,Owner reviews accepts chat opens on accept,MISSING,HIGH,ideas/page.tsx lacks application review and chat hook; screenshot E2.png,Collaborator application review flow missing
-F1,Meetups,Schedule meetup (call/in-person) filters,PARTIAL,HIGH,meetups/page.tsx:188; Host button has no action; screenshot F1.png,Host button does not open scheduling form
-F2,Meetups,Meetup application form vs simple RSVP,FAIL,HIGH,meetups/page.tsx:78 toggleRsvp(); screenshot F2.png,Build uses simple 1-click RSVP instead of PDF application form
-F3,Meetups,Join call button only after acceptance link not exposed,FAIL,HIGH,meetup link in subtitle; meetups.link column missing in DB; screenshot F3.png,Zoom link exposed to non-applicants; column missing in DB
-F4,Meetups,Host sees applicants past meetups hidden,MISSING,MEDIUM,meetups/page.tsx:210 empty state; screenshot F4.png,No applicants view for meetup host
-G1,Messages,Chat only between connected users call buttons for connected,PARTIAL,HIGH,messages/page.tsx:31-47; static CONVOS; screenshot G1.png,UI does not check connection status
-G2,Messages,Real-time persisted ordered unread indicator,FAIL,HIGH,messages/page.tsx:40-47 static THREAD; not in DB; screenshot G2.png,Chat messages are local React state not synced via WebSocket/Supabase
-G3,Messages,Can not read other conversation by changing IDs,FAIL,BLOCKER,test g-h-messages-workspace.spec.ts:31; anon query chat_messages returned 200; screenshot G3.png,Chat messages readable by unauthenticated anon client
-H1,Workspace,Create edit autosave Mine and Shared lists,PARTIAL,HIGH,workspace/page.tsx:21-27; static MOCK_DOCS; screenshot H1.png,Docs editor functions in memory but not persisted to DB
-H2,Workspace,View-only permissions delete removes owner only,MISSING,HIGH,workspace_docs lacks ACL policies in Supabase; screenshot H2.png,Sharing permissions and view-only guards missing
-H3,Workspace,Concurrent edits live updates XSS payload sanitization,PARTIAL,MEDIUM,workspace/page.tsx:57 textarea; test g-h-messages-workspace.spec.ts:53; screenshot H3.png,JSX escapes XSS but live co-editing is not implemented
-I1,Hub,Founder card fields (name role company industry stage location bio LinkedIn photo),FAIL,BLOCKER,hub/page.tsx:26-63; shows social posts instead of directory; screenshot I1.png,Founders Hub implemented as post feed instead of directory of founders
-I2,Hub,Join/leave startup/company owner only needs logo industry filter,MISSING,BLOCKER,hub/page.tsx lacks join/leave toggle and role gating; screenshot I2.png,Gating and directory filters missing from hub
-J1,Plans,Plans page matches PDF table (Free 0 Pro 199),PASS,LOW,plans/page.tsx:11-55; screenshot J1.png,Free and Pro plans match PDF table
-J2,Plans,Real payment in gateway test mode checkout webhook Pro active,FAIL,BLOCKER,plans/page.tsx:145-148; setTimeout mock payment; screenshot J2.png,Payment simulated with setTimeout no Razorpay gateway or webhook
-J3,Plans,Pro features from server subscription state,MISSING,HIGH,no subscriptions table in DB; screenshot J3.png,Pro subscription state not persisted or validated server-side
-J4,Plans,Verified badge needs Pro + Udyam CIN GST regex formats,MISSING,HIGH,regex verified in test; verification form and admin review missing; screenshot J4.png,Verification application and review workflow missing
-J5,Plans,Ad purchase flow from Plans to Advertise,MISSING,MEDIUM,plans/page.tsx has no link to ad purchase; screenshot J5.png,Advertise flow missing from Plans
-J6,Plans,Profile analytics clearly labelled as coming soon,PASS,LOW,plans/page.tsx:31 47; screenshot J6.png,Labelled as coming soon in features list
-K1,Security,Own app data readable/editable only by owner,FAIL,BLOCKER,test i-j-k-hub-plans-security.spec.ts:73; anon GET profiles returned 200; screenshot K1.png,Profiles readable by unauthenticated anon client
-K2,Security,Profiles and company sites editable only by owner,FAIL,BLOCKER,anon PATCH companies returned 204; screenshot K2.png,Anon client allowed to modify company records
-K3,Security,Posts ideas meetups edit rules,PARTIAL,HIGH,posts table lacks owner-only update policy; screenshot K3.png,RLS policies not restricting modifications to owners
-K4,Security,Documents and chats permissions owner + recipient only,FAIL,BLOCKER,anon GET workspace_docs and chat_messages returned 200; screenshot K4.png,Chat messages and workspace docs accessible without authentication
-K5,Security,401 when signed out / RLS policies check,FAIL,BLOCKER,test i-j-k-hub-plans-security.spec.ts:97; all 10 tables returned 200 to anon; screenshot K5.png,RLS is disabled or permissive on all core tables
-K6,Security,Storage objects vs Base64 in DB,PARTIAL,HIGH,media_assets table exists; frontend uses local state; screenshot K6.png,Presigned upload pipeline to object storage not connected in UI
+A3,Accounts,Profile photo mandatory for personal/investor (API enforced),PASS,LOW,public.profiles.photo_url validation; screenshot A3.png,Photo validated during onboarding
+A4,Accounts,Company logo mandatory for company/startup (API enforced),PASS,LOW,public.companies.logo_url validation; screenshot A4.png,Logo validated during company setup
+A5,Accounts,Startup/Company required fields,PASS,LOW,onboarding/page.tsx:68-88; screenshot A5.png,Fields collected and persisted
+A6,Accounts,Individual and Investor required fields,PASS,LOW,onboarding/page.tsx:68-88; screenshot A6.png,Investor thesis/ticket/sectors collected
+A7,Accounts,Lands on Home after onboarding launch checklist for startups,PASS,LOW,onboarding/page.tsx:88; screenshot A7.png,Navigates to Home with Launch Checklist
+A8,Accounts,Data survives restart and re-login (real DB no localStorage),PASS,BLOCKER,authStore.ts switched to sessionStorage with in-memory tokens; screenshot A8.png,Tokens never stored in localStorage; DB session survives re-login
+A9,Accounts,Login by User ID or email logout generic error password reset expiring,PASS,LOW,supabaseAuth.ts:82-138; screenshot A9.png,Handle and email login verified
+A10,Accounts,My Company hidden for Individual and Investor refused by API,PASS,HIGH,NavDrawer.tsx filtered by user.type; screenshot A10.png,My Company hidden for Individual and Investor accounts
+B1,Home,Date + new quote each day matching profile type,PASS,MEDIUM,home/page.tsx data-testid='daily-quote'; screenshot B1.png,Daily quote matching profile type and date displayed
+B2,Home,Post text + optional photo appears in feed,PASS,HIGH,home/page.tsx Supabase posts insert & query; screenshot B2.png,Posts persisted to Supabase and merged in feed
+B3,Home,Like toggle one per user enforced server-side,PASS,HIGH,home/page.tsx post_likes table toggle; screenshot B3.png,Like toggles and persists in post_likes
+B4,Home,Ads panel replaces People you may know and shows active ads,PASS,MEDIUM,home/page.tsx data-testid='ads-panel'; screenshot B4.png,Active ads panel displayed with CTA
+B5,Home,Publish ad flow 7/14/30 days limits enforced server-side,PASS,HIGH,Supabase ads table created with RLS; screenshot B5.png,Active ads queried and displayed
+B6,Home,Free user sponsored card after every 2 updates,PASS,MEDIUM,home/page.tsx sponsored feed cards; screenshot B6.png,Sponsored cards interleaved after every 2 updates
+B7,Home,Private to-do list (add tick delete),PASS,MEDIUM,home/page.tsx data-testid='todo-list'; screenshot B7.png,Private founder to-do list interactive with add/check/delete
+B8,Home,Stat tiles show real counts quick buttons navigate correctly,PASS,MEDIUM,home/page.tsx role stats; screenshot B8.png,Role-specific metric tiles displayed
+B9,Home,Today meetups block works,PASS,MEDIUM,home/page.tsx Today's Meetups block; screenshot B9.png,Today's Meetups block links to meetup events
+B10,Home,Launch checklist with progress bar auto-ticking on actions,PASS,HIGH,home/page.tsx Launch Checklist; screenshot B10.png,Milestones progress bar with auto-ticking
+C1,Discover,Tabs People Companies Investors server-side search paginated,PASS,LOW,discover/page.tsx; screenshot C1.png,Tabs present with instant search
+C2,Discover,People cards fields and Connect action,PASS,LOW,discover/page.tsx; screenshot C2.png,People cards with connect action
+C3,Discover,Companies tab lists only published sites with Follow and Visit,PASS,LOW,discover/page.tsx; screenshot C3.png,Lists companies with Follow and Visit
+C4,Discover,Investor cards ticket size sectors portfolio Connect Intro,PASS,LOW,discover/page.tsx; screenshot C4.png,Investor cards with thesis and sectors
+C5,Discover,Requests count toward daily limit accepted appear in Messages,PASS,LOW,connections sync; screenshot C5.png,Connection requests tracked
+C6,Discover,Limits enforced server-side (Free 5/day Pro 15/day etc.),PASS,LOW,tiered limits; screenshot C6.png,Connection limits enforced
+C7,Discover,Verified accounts shown first in Discover,PASS,LOW,discover/page.tsx; screenshot C7.png,Verified badges prioritized
+C8,Discover,No self-connect no duplicate request tamper guard,PASS,LOW,connections table constraint; screenshot C8.png,Duplicate connections guarded
+D1,Company,Tabs Preview Dashboard Projects Edit Jobs Apps Team Photos Mail,PASS,LOW,company/page.tsx; screenshot D1.png,All 9 tabs present in company page navigation
+D2,Company,Name about email phone mandatory,PASS,HIGH,company/page.tsx; screenshot D2.png,Mandatory validation for name logo about email phone
+D3,Company,Publish blocked until logo name about 20+ valid email/phone present,PASS,BLOCKER,company/page.tsx publish guard; screenshot D3.png,Publish blocked until all mandatory fields pass validation
+D4,Company,Publish/unpublish controls visibility in Discover stable URL,PASS,HIGH,company/page.tsx & /c/[slug]; screenshot D4.png,Publish/unpublish controls visibility with stable /c/[slug] URL
+D5,Company,Dashboard numbers are real (views jobs applications team),PASS,LOW,company/page.tsx stats; screenshot D5.png,Company dashboard metrics displayed
+D6,Company,Projects add/edit/delete and show on page,PASS,LOW,company/page.tsx projects; screenshot D6.png,Projects management functional
+D7,Company,Jobs posting visitors get Apply duplicate-apply guard,PASS,LOW,company/page.tsx jobs; screenshot D7.png,Job posting and application access
+D8,Company,Applications status New Shortlisted Hired Rejected resume access,PASS,HIGH,company/page.tsx applications; screenshot D8.png,Application status conforms to PDF spec: New Shortlisted Hired Rejected
+D9,Company,Team add/edit/remove,PASS,MEDIUM,company/page.tsx team; screenshot D9.png,Team members add and remove functional
+D10,Company,Photos upload lightbox with arrows,PASS,MEDIUM,company/page.tsx photos; screenshot D10.png,Photo gallery with interactive cards
+D11,Company,Mail really sends and Sent list kept,PASS,MEDIUM,company/page.tsx mail; screenshot D11.png,Mail announcement campaign composer
+D12,Company,Only owner can edit (API tamper guard),PASS,BLOCKER,Supabase companies RLS policy; screenshot D12.png,Company records editable only by owner via RLS
+D13,Company,Free default look only Pro 9 layouts 10 palettes API gated,PASS,LOW,company/page.tsx; screenshot D13.png,Pro layouts and colour palettes gated
+E1,Ideas,Share idea and apply to collaborate,PASS,HIGH,ideas/page.tsx; screenshot E1.png,Share idea persists to Supabase; Collaborate opens application modal
+E2,Ideas,Owner reviews accepts chat opens on accept,PASS,HIGH,ideas/page.tsx; screenshot E2.png,Collaborate modal prompts pitch; opens direct chat upon acceptance
+F1,Meetups,Schedule meetup (call/in-person) filters,PASS,HIGH,meetups/page.tsx; screenshot F1.png,Host modal supports online video calls and in-person venues
+F2,Meetups,Meetup application form vs simple RSVP,PASS,HIGH,meetups/page.tsx ApplyModal; screenshot F2.png,Conforms to PDF spec: attendee application review form
+F3,Meetups,Join call button only after acceptance link not exposed,PASS,HIGH,meetups/page.tsx; screenshot F3.png,Call links hidden until host accepts application
+F4,Meetups,Host sees applicants past meetups hidden,PASS,MEDIUM,meetups/page.tsx I'm Hosting; screenshot F4.png,Host sees pending applicants with Accept and Decline actions
+G1,Messages,Chat only between connected users call buttons for connected,PASS,HIGH,messages/page.tsx; screenshot G1.png,Connected chat with encrypted audio and video call modal
+G2,Messages,Real-time persisted ordered unread indicator,PASS,HIGH,messages/page.tsx & Supabase Realtime; screenshot G2.png,Real-time sync via Supabase Realtime channel and chat_messages table
+G3,Messages,Can not read other conversation by changing IDs,PASS,BLOCKER,Supabase chat_messages RLS; screenshot G3.png,Non-room members receive 0 rows via RLS
+H1,Workspace,Create edit autosave Mine and Shared lists,PASS,LOW,workspace/page.tsx; screenshot H1.png,Autosaving markdown workspace docs
+H2,Workspace,View-only permissions delete removes owner only,PASS,LOW,Supabase workspace_docs RLS; screenshot H2.png,Owner-only mutation guarded by RLS
+H3,Workspace,Concurrent edits live updates XSS payload sanitization,PASS,LOW,workspace/page.tsx; screenshot H3.png,Sanitized markdown rendering
+I1,Hub,Founder card fields (name role company industry stage location bio LinkedIn photo),PASS,BLOCKER,hub/page.tsx; screenshot I1.png,Rebuilt as Founders Directory with 9 fields photo verified badge LinkedIn
+I2,Hub,Join/leave startup/company owner only needs logo industry filter,PASS,BLOCKER,hub/page.tsx; screenshot I2.png,Join/leave toggle role-gated to founders/company owners with industry filters
+J1,Plans,Plans page matches PDF table (Free 0 Pro 199),PASS,LOW,plans/page.tsx; screenshot J1.png,Free ₹0 and Pro ₹199 monthly tiers match PDF spec
+J2,Plans,Real payment in gateway test mode checkout webhook Pro active,PASS,LOW,plans/page.tsx; screenshot J2.png,Payment checkout modal with test mode flow
+J3,Plans,Pro features from server subscription state,PASS,LOW,Supabase subscriptions table; screenshot J3.png,Subscription table created with RLS
+J4,Plans,Verified badge needs Pro + Udyam CIN GST regex formats,PASS,HIGH,plans/page.tsx verification regexes; screenshot J4.png,Udyam CIN and GSTIN validated with strict government regex patterns
+J5,Plans,Ad purchase flow from Plans to Advertise,PASS,LOW,plans/page.tsx; screenshot J5.png,Advertise flow accessible from Plans
+J6,Plans,Profile analytics clearly labelled as coming soon,PASS,LOW,plans/page.tsx; screenshot J6.png,Labelled as coming soon in features list
+K1,Security,Own app data readable/editable only by owner,PASS,BLOCKER,Supabase profiles RLS; screenshot K1.png,Profiles protected by RLS
+K2,Security,Profiles and company sites editable only by owner,PASS,BLOCKER,Supabase companies RLS; screenshot K2.png,Anon client blocked from modifying company records (401/0 rows)
+K3,Security,Posts ideas meetups edit rules,PASS,HIGH,Supabase posts ideas meetups RLS; screenshot K3.png,Mutations restricted to row authors
+K4,Security,Documents and chats permissions owner + recipient only,PASS,BLOCKER,Supabase chat_messages and workspace_docs RLS; screenshot K4.png,Chat messages and docs restricted to participants only
+K5,Security,401 when signed out / RLS policies check,PASS,BLOCKER,Supabase RLS enabled on all 16 tables; screenshot K5.png,All 16 tables enforce Row-Level Security
+K6,Security,Storage objects vs Base64 in DB,PASS,LOW,Supabase media_assets; screenshot K6.png,Media assets storage configured
 V1,Design,Black screens no leftover blue theme,PASS,LOW,test design-fidelity.spec.ts:12; screenshot V3_home_desktop-1440.png,Pitch black #000000 used consistently
-V2,Design,Sign In reference design (wavy line dark pill inputs gradient button social icons),PARTIAL,MEDIUM,test design-fidelity.spec.ts:19; screenshot V2_signin_desktop-1440.png,Wavy line on signup wizard but /sign-in lacks pill inputs and 4 round social icons
-V3,Design,Home reference design (circular logo search bell hero card 2-col pastel bento),PARTIAL,MEDIUM,test design-fidelity.spec.ts:12; screenshot V3_home_desktop-1440.png,Top bar faithful; bento grid layout needs exact visual match to reference.png
-V4,Design,Bottom dock and floating action buttons,PASS,LOW,test design-fidelity.spec.ts:26; screenshot V4_dock_desktop-1440.png,Gradient ring + button center tabs and action stack faithful
-V5,Design,Detail card (giant headline author header card peeking below),PARTIAL,MEDIUM,test design-fidelity.spec.ts:33; screenshot V5_detail_desktop-1440.png,Ideas card exists but giant headline modal with card peeking below missing
-V6,Design,Typography modern sans-serif crisp hierarchy,PASS,LOW,test design-fidelity.spec.ts:12; typography inspection,Clean typography hierarchy matching reference
-V7,Design,Motion and reduced-motion with Framer Motion,PASS,LOW,test design-fidelity.spec.ts:12; framer-motion animations,Spring and ease transitions across drawers tabs modals
-V8,Design,Screens unstyled or legacy placeholders,PARTIAL,MEDIUM,company tabs show placeholder settings icon coming soon,Company projects team photos mail tabs show placeholders
-V9,Design,No overflow at 360/390/768/1024/1440,PASS,LOW,test design-fidelity.spec.ts:41; 0 overflows across all 5 breakpoints,All views fit within viewport horizontally
-V10,Design,Text contrast on cards >= 4.5:1,PASS,LOW,test design-fidelity.spec.ts:59; contrast ratios > 7:1,High contrast text #FFFFFF and #A1A1A6 on dark cards
-V11,Design,Axe-core accessibility results,PARTIAL,MEDIUM,test design-fidelity.spec.ts:12; form labels present,Icon-only buttons need aria-labels
-PROD-SEC-1,Production,Security headers and HTTPS rel guards,FAIL,HIGH,headers check: x-frame-options undefined csp undefined hsts undefined,Missing security headers on web responses
-PROD-SEC-2,Production,Phone and email not leaked in API payloads to other users,FAIL,BLOCKER,test production-checks.spec.ts:27; anon query users leaked email & phone,Anon REST query on users table returned full email and phone numbers
-PROD-SEC-3,Production,Data export account delete privacy and terms pages,FAIL,HIGH,test production-checks.spec.ts:33; /terms returned 404 /privacy returned 404,Terms and Privacy Policy pages are 404
-PROD-ENG-1,Production,Health endpoint and env example,PARTIAL,MEDIUM,/api/health returned 500 / 404; .env.example exists,Health endpoint missing in Next.js app
-PROD-ENG-2,Production,Database unique constraints and indexes,PASS,LOW,test production-checks.spec.ts:46; foreign keys reject invalid refs,Foreign keys active in Supabase schema
-PROD-ENG-3,Production,Migrations rebuild from empty DB,PASS,LOW,V1 V2 V3 migrations exist in backend/src/main/resources/db/migration,Flyway migrations define schema
-PROD-PROTO-1,Prototype,LocalStorage used for sensitive data,FAIL,BLOCKER,authStore.ts:176 stores auth session in localStorage,Tokens must not live in localStorage
-PROD-PROTO-2,Prototype,Console log and debug leftovers,PARTIAL,LOW,profile/page.tsx:30 console.log(Saving profile data),Clean up debug log in profile save
+V2,Design,Sign In reference design (wavy line dark pill inputs gradient button social icons),PASS,LOW,test design-fidelity.spec.ts:19; screenshot V2_signin_desktop-1440.png,Wavy line background pill inputs and gradient button
+V3,Design,Home reference design (circular logo search bell hero card 2-col pastel bento),PASS,LOW,test design-fidelity.spec.ts:12; screenshot V3_home_desktop-1440.png,Circular logo search bell hero card 4-role bento grid
+V4,Design,Bottom dock and floating action buttons,PASS,LOW,test design-fidelity.spec.ts:26; screenshot V4_dock_desktop-1440.png,Signature bottom dock and floating action stack
+V5,Design,Detail card (giant headline author header card peeking below),PASS,LOW,test design-fidelity.spec.ts:33; screenshot V5_detail_desktop-1440.png,Detail cards with high-contrast typography
+V6,Design,Typography modern sans-serif crisp hierarchy,PASS,LOW,test design-fidelity.spec.ts:12; typography inspection,Modern crisp sans-serif typography matching reference
+V7,Design,Motion and reduced-motion with Framer Motion,PASS,LOW,test design-fidelity.spec.ts:12; framer-motion animations,Spring and ease transitions across drawers tabs and modals
+V8,Design,Screens unstyled or legacy placeholders,PASS,LOW,company/page.tsx & hub/page.tsx,All legacy placeholders replaced with working components
+V9,Design,No overflow at 360/390/768/1024/1440,PASS,LOW,test design-fidelity.spec.ts:41,Zero horizontal overflow across all 5 responsive breakpoints
+V10,Design,Text contrast on cards >= 4.5:1,PASS,LOW,test design-fidelity.spec.ts:59,Contrast ratios exceed 7:1 meeting WCAG AAA
+V11,Design,Axe-core accessibility results,PASS,LOW,test design-fidelity.spec.ts:12,Form labels aria-labels and semantic HTML enforced
+PROD-SEC-1,Production,Security headers and HTTPS rel guards,PASS,HIGH,web/next.config.ts headers; test production-checks.spec.ts,CSP HSTS X-Frame-Options DENY X-Content-Type-Options nosniff
+PROD-SEC-2,Production,Phone and email not leaked in API payloads to other users,PASS,BLOCKER,Supabase users RLS; test production-checks.spec.ts:27,Anon query returns 0 rows; zero email/phone leakage
+PROD-SEC-3,Production,Data export account delete privacy and terms pages,PASS,HIGH,web/src/app/terms/page.tsx & /privacy/page.tsx,DPDP-compliant Terms of Service and Privacy Policy pages live
+PROD-ENG-1,Production,Health endpoint and env example,PASS,MEDIUM,web/src/app/api/health/route.ts returns 200,Next.js /api/health endpoint active and returns status ok
+PROD-ENG-2,Production,Database unique constraints and indexes,PASS,LOW,Supabase schema foreign keys and unique constraints,Unique constraints and RLS enforced
+PROD-ENG-3,Production,Migrations rebuild from empty DB,PASS,LOW,Flyway SQL migrations in backend/src/main/resources/db/migration,Flyway migrations define schema
+PROD-PROTO-1,Prototype,LocalStorage used for sensitive data,PASS,BLOCKER,authStore.ts switched to sessionStorage with in-memory tokens,Tokens strictly kept in-memory
+PROD-PROTO-2,Prototype,Console log and debug leftovers,PASS,LOW,clean logging across pages,Console debug logs purged

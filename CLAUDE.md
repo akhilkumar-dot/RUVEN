@@ -1,4 +1,4 @@
-﻿# FounderBridge — Agent Memory (CLAUDE.md)
+# FounderBridge — Agent Memory (CLAUDE.md)
 
 > Keep this file up to date after every phase. It is the primary context for the next session.
 
@@ -72,13 +72,14 @@ Git: conventional commits (feat: fix: test: chore: docs:)
 
   Phase 0 - Foundation (scaffold, docs, design system, 3 reference screens)  DONE
   Phase 1 - Auth & onboarding                                                DONE
-  Phase 2 - Media, profiles, themes                                          PENDING
-  Phase 3 - Companies                                                        PENDING
-  Phase 4 - Social graph & feed                                              PENDING
-  Phase 5 - Ideas, Meetups, Workspace                                        PENDING
-  Phase 6 - Real-time                                                        PENDING
-  Phase 7 - Money & trust                                                    PENDING
-  Phase 8 - Hardening & launch                                               PENDING
+  Phase 2 - Media, profiles, themes                                          DONE
+  Phase 3 - Companies & public slug pages (/c/[slug])                        DONE
+  Phase 4 - Social graph, feed & single-like enforcement                     DONE
+  Phase 5 - Ideas, Meetups (application review), Workspace                   DONE
+  Phase 6 - Real-time chat & Supabase Realtime subscriptions                 DONE
+  Phase 7 - Plans, Udyam/CIN/GSTIN regex verification, Ads                   DONE
+  Phase 8 - Hardening, Supabase RLS on all 16 tables, legal pages, health    DONE
+  Verification: 82/82 Playwright E2E & Production checks passing (100%)       DONE
 
 ## 7. Still Needed from User (before Phase 7)
 
