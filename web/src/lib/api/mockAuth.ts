@@ -36,7 +36,7 @@ const DEFAULT_ACCOUNTS: Record<string, { name: string; email: string; type: stri
 function getStoredUsers(): Record<string, { name: string; email: string; type: string }> {
   if (typeof window === "undefined") return { ...DEFAULT_ACCOUNTS };
   try {
-    const raw = localStorage.getItem("founderbridge_registered_users");
+    const raw = sessionStorage.getItem("founderbridge_registered_users");
     const stored = raw ? JSON.parse(raw) : {};
     return { ...DEFAULT_ACCOUNTS, ...stored };
   } catch {
@@ -50,7 +50,7 @@ function storeUser(user: { name: string; email: string; type: string }) {
     const users = getStoredUsers();
     users[user.email.toLowerCase()] = user;
     users[user.name.toLowerCase().replace(/\s+/g, "")] = user;
-    localStorage.setItem("founderbridge_registered_users", JSON.stringify(users));
+    sessionStorage.setItem("founderbridge_registered_users", JSON.stringify(users));
   } catch {
     // Ignore storage errors in dev
   }

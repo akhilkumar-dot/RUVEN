@@ -173,11 +173,11 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "founderbridge-auth-storage",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => (typeof window !== "undefined" ? window.sessionStorage : localStorage)),
       partialize: (state) => ({
         user: state.user,
-        accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,
+        // Tokens are in-memory only (never saved to localStorage per security spec)
       }),
     }
   )
