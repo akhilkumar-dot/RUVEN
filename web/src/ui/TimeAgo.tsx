@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { relativeTime } from "@/lib/utils";
 
 interface TimeAgoProps {
@@ -9,17 +9,17 @@ interface TimeAgoProps {
   className?: string;
 }
 
+function subscribe(onChange: () => void) {
+  const id = setInterval(onChange, 60_000);
+  return () => clearInterval(id);
+}
+
 export function TimeAgo({ date, fallback = "now", className }: TimeAgoProps) {
-  const [formatted, setFormatted] = useState<string>(fallback);
+  const formatted = useSyncExternalStore(
+    subscribe,
+    () => relativeTime(date),
+    () => fallback
+  );
 
-  useEffect(() => {
-    // Only read Date.now() inside useEffect after mount to prevent prerender blocking
-    setFormatted(relativeTime(date));
-    const interval = setInterval(() => {
-      setFormatted(relativeTime(date));
-    }, 60_000);
-    return () => clearInterval(interval);
-  }, [date]);
-
-  return <span className={className}>{formatted}</span>;
+  return <span className={className}>{formatted || fallback}</span>;
 }

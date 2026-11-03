@@ -3,8 +3,7 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Mail, CheckCircle2, ArrowRight } from "lucide-react";
+import { Mail, ArrowRight } from "lucide-react";
 import { BridgeLogo } from "@/ui/BridgeLogo";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { WavyGradientHeader } from "@/ui/WavyGradientHeader";
@@ -24,8 +23,8 @@ function VerifyEmailContent() {
   return (
     <div className="min-h-dvh bg-black flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-[380px] flex flex-col items-center text-center">
-        <Link href="/" className="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-6 shadow-[0_0_40px_#A24BFF30]">
-          <BridgeLogo size={28} strokeColor="#000" accentColor="#000" />
+        <Link href="/" className="w-16 h-16 rounded-2xl bg-black border border-[#2A2A2E] flex items-center justify-center mb-6 shadow-[0_0_40px_#A24BFF30] overflow-hidden">
+          <BridgeLogo size={56} />
         </Link>
 
         <h1 className="text-white font-bold text-[30px] tracking-tight mb-2">

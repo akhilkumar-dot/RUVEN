@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   MapPin,
   Calendar,
@@ -317,8 +317,8 @@ function MeetupCard({
   meetup: Meetup;
   onApply: (m: Meetup) => void;
 }) {
-  const [appStatus, setAppStatus] = useState<Meetup["status"]>(meetup.status ?? "none");
-  const [count, setCount] = useState(meetup.attendeeCount);
+  const appStatus = meetup.status ?? "none";
+  const count = meetup.attendeeCount;
   const spotsLeft = meetup.maxAttendees ? meetup.maxAttendees - count : null;
   const isFull = spotsLeft !== null && spotsLeft <= 0;
   const calUrl = googleCalendarUrl({ title: meetup.title, start: meetup.date });
@@ -566,7 +566,7 @@ function MeetupsPageContent() {
           {view === "organising" && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-[12px] text-[#8E8E93]">Meetups You're Hosting (1)</p>
+                <p className="text-[12px] text-[#8E8E93]">Meetups You&apos;re Hosting (1)</p>
                 <button
                   onClick={() => setShowHostModal(true)}
                   className="text-[11px] text-[#A24BFF] hover:underline"

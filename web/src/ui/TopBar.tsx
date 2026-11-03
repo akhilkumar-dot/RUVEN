@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Bell } from "lucide-react";
 import { BridgeLogo } from "./BridgeLogo";
 import { NavDrawer } from "./NavDrawer";
@@ -59,9 +59,9 @@ export function TopBar({
             whileTap={{ scale: 0.9 }}
             onClick={handleLogoClick}
             aria-label="Open navigation menu"
-            className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-lg"
+            className="w-10 h-10 rounded-2xl bg-black border border-[#2A2A2E] flex items-center justify-center shrink-0 shadow-lg hover:border-[#A24BFF]/50 transition-colors overflow-hidden"
           >
-            <BridgeLogo size={22} strokeColor="#000" accentColor="#000" />
+            <BridgeLogo size={36} />
           </motion.button>
 
           {/* Right controls */}

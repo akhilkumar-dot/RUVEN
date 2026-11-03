@@ -4,16 +4,10 @@ import { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Sparkles,
   MapPin,
-  Briefcase,
-  TrendingUp,
-  Tag,
   CheckCircle2,
   ChevronRight,
   ChevronLeft,
-  Building2,
-  Compass,
   ArrowRight
 } from "lucide-react";
 import { BridgeLogo } from "@/ui/BridgeLogo";
@@ -95,10 +89,10 @@ function OnboardingContent() {
       {/* TopBar */}
       <div className="flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
-            <BridgeLogo size={20} strokeColor="#000" accentColor="#000" />
+          <div className="w-9 h-9 rounded-xl bg-black border border-[#2A2A2E] flex items-center justify-center overflow-hidden">
+            <BridgeLogo size={32} />
           </div>
-          <span className="text-white font-bold text-[16px]">FounderBridge</span>
+          <span className="text-white font-bold text-[16px]">Ruven</span>
         </div>
         <button
           onClick={() => router.replace("/home")}

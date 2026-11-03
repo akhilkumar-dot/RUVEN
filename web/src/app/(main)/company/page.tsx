@@ -5,8 +5,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Eye, LayoutDashboard, FolderOpen, Edit3,
-  Briefcase, Users, ImageIcon, Mail, Settings,
-  CheckCircle2, AlertCircle, ExternalLink, Plus, Trash2, Globe
+  Briefcase, Users, ImageIcon, Mail,
+  CheckCircle2, AlertCircle, Plus, Trash2, Globe
 } from "lucide-react";
 import { BridgeLogo } from "@/ui/BridgeLogo";
 import { Avatar } from "@/ui/Avatar";
@@ -506,6 +506,7 @@ export default function CompanyPage() {
                   "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=300&auto=format&fit=crop&q=80"
                 ].map((src, i) => (
                   <div key={i} className="aspect-video rounded-2xl overflow-hidden border border-[#222] bg-[#141416]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={src} alt="Office" className="w-full h-full object-cover hover:scale-105 transition-transform" />
                   </div>
                 ))}

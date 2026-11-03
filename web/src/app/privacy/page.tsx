@@ -14,7 +14,7 @@ export default function PrivacyPage() {
         </Link>
         <div className="flex items-center gap-2">
           <BridgeLogo size={16} />
-          <span className="text-[13px] font-semibold text-white">FounderBridge Privacy</span>
+          <span className="text-[13px] font-semibold text-white">Ruven Privacy</span>
         </div>
       </header>
 
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
             <Lock size={16} className="text-[#A24BFF]" /> 1. Data Collection & Purpose
           </h2>
           <p className="text-[#B3B3BA] text-[14px] leading-relaxed">
-            We collect personal identification information including your full name, email address, phone number, professional experience, and enterprise details strictly to enable networking, co-founder discovery, hiring, and investment matching on FounderBridge.
+            We collect personal identification information including your full name, email address, phone number, professional experience, and enterprise details strictly to enable networking, co-founder discovery, hiring, and investment matching on Ruven.
           </p>
         </section>
 
@@ -52,7 +52,7 @@ export default function PrivacyPage() {
             <UserCheck size={16} className="text-[#A24BFF]" /> 3. Data Subject Rights & Deletion
           </h2>
           <p className="text-[#B3B3BA] text-[14px] leading-relaxed">
-            Under India's DPDP Act 2023, you hold the absolute right to access your stored data, request data export, rectify outdated particulars, and request permanent erasure of your account and associated assets at any time by contacting our designated Data Protection Officer.
+            Under India&apos;s DPDP Act 2023, you hold the absolute right to access your stored data, request data export, rectify outdated particulars, and request permanent erasure of your account and associated assets at any time by contacting our designated Data Protection Officer.
           </p>
         </section>
 
@@ -60,14 +60,14 @@ export default function PrivacyPage() {
           <h2 className="text-[18px] font-semibold text-white">4. Grievance Redressal</h2>
           <p className="text-[#B3B3BA] text-[14px] leading-relaxed">
             Grievance Officer: <strong>Aarav Reddy</strong><br />
-            FounderBridge Technologies Private Limited<br />
+            Ruven Technologies Private Limited<br />
             Indiranagar, Bengaluru, Karnataka 560038<br />
             Email: <span className="text-[#D4FF3A]">grievance@founderbridge.in</span>
           </p>
         </section>
 
         <div className="pt-4 border-t border-[#1C1C1E] flex items-center justify-between text-[13px] text-[#6E6E73]">
-          <span>© 2026 FounderBridge Technologies Pvt. Ltd.</span>
+          <span>© 2026 Ruven Technologies Pvt. Ltd.</span>
           <Link href="/terms" className="text-[#A24BFF] hover:underline">
             Read Terms of Service →
           </Link>

@@ -1,26 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  Users,
   Search,
-  Filter,
   CheckCircle2,
-  ExternalLink,
   MessageSquare,
   UserPlus,
   ShieldCheck,
-  Building2,
   Sparkles,
-  ArrowRight,
-  TrendingUp,
   MapPin
 } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
 import { TopBar } from "@/ui/TopBar";
 import { BottomDock } from "@/ui/BottomDock";
-import { GradientRingButton } from "@/ui/GradientRingButton";
 import { useAuthStore } from "@/lib/store/authStore";
 import { cn } from "@/lib/utils";
 

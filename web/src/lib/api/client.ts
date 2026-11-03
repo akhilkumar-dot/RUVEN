@@ -56,7 +56,7 @@ async function apiFetch<T>(
     signal: options.signal ?? AbortSignal.timeout(4000),
     ...options,
     headers,
-  }).catch((err: unknown) => {
+  }).catch(() => {
     // Network error or timeout — backend not reachable
     const networkErr: ApiError = {
       type: "about:blank",

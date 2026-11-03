@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck, Scale, FileText, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Scale, CheckCircle2 } from "lucide-react";
 import { BridgeLogo } from "@/ui/BridgeLogo";
 
 export default function TermsPage() {
@@ -14,7 +14,7 @@ export default function TermsPage() {
         </Link>
         <div className="flex items-center gap-2">
           <BridgeLogo size={16} />
-          <span className="text-[13px] font-semibold text-white">FounderBridge Legal</span>
+          <span className="text-[13px] font-semibold text-white">Ruven Legal</span>
         </div>
       </header>
 
@@ -33,7 +33,7 @@ export default function TermsPage() {
             <CheckCircle2 size={16} className="text-[#D4FF3A]" /> 1. Account Types & Eligibility
           </h2>
           <p className="text-[#B3B3BA] text-[14px] leading-relaxed">
-            FounderBridge accommodates four distinct user roles: <strong>Startup Founder</strong>, <strong>Company Owner</strong>, <strong>Individual</strong>, and <strong>Investor</strong>.
+            Ruven accommodates four distinct user roles: <strong>Startup Founder</strong>, <strong>Company Owner</strong>, <strong>Individual</strong>, and <strong>Investor</strong>.
             Users may register exactly one account type per verified identity. Falsification of entity ownership, unauthorized impersonation, or misrepresenting accreditation status will result in immediate termination.
           </p>
         </section>
@@ -44,7 +44,7 @@ export default function TermsPage() {
           </h2>
           <p className="text-[#B3B3BA] text-[14px] leading-relaxed">
             All pitch decks, intellectual property, ideas, and workspace documents authored by you remain your exclusive property.
-            By posting in public directories (Discover, Founders Hub, Ideas Feed), you grant FounderBridge a non-exclusive license to index and display your publicly shared snippets.
+            By posting in public directories (Discover, Founders Hub, Ideas Feed), you grant Ruven a non-exclusive license to index and display your publicly shared snippets.
             Private workspaces and direct messages are strictly confidential and protected by Row-Level Security.
           </p>
         </section>
@@ -54,7 +54,7 @@ export default function TermsPage() {
             <CheckCircle2 size={16} className="text-[#D4FF3A]" /> 3. Verification & Pro Subscription
           </h2>
           <p className="text-[#B3B3BA] text-[14px] leading-relaxed">
-            FounderBridge Pro includes verified identity badges, advanced portfolio layouts, and priority discovery ranking.
+            Ruven Pro includes verified identity badges, advanced portfolio layouts, and priority discovery ranking.
             Subscriptions are billed through authorized Indian payment gateways (Razorpay / UPI / Cards).
             You may cancel at any time via your account settings; recurring charges will discontinue at the conclusion of the active billing cycle.
           </p>
@@ -70,7 +70,7 @@ export default function TermsPage() {
         </section>
 
         <div className="pt-4 border-t border-[#1C1C1E] flex items-center justify-between text-[13px] text-[#6E6E73]">
-          <span>© 2026 FounderBridge Technologies Pvt. Ltd.</span>
+          <span>© 2026 Ruven Technologies Pvt. Ltd.</span>
           <Link href="/privacy" className="text-[#A24BFF] hover:underline">
             Read Privacy Policy →
           </Link>

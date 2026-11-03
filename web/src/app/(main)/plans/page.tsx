@@ -48,7 +48,7 @@ const PLANS = [
       "Workspace documents (unlimited)",
       "Investor introductions",
       "Verified badge",
-      "Remove FounderBridge branding",
+      "Remove Ruven branding",
     ],
     locked: [],
   },
@@ -164,7 +164,7 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
 
             <div className="bg-[#1C1C1E] rounded-2xl p-4 space-y-2">
               <div className="flex justify-between text-[14px]">
-                <span className="text-[#A1A1A6]">FounderBridge Pro</span>
+                <span className="text-[#A1A1A6]">Ruven Pro</span>
                 <span className="text-white">₹168.64</span>
               </div>
               <div className="flex justify-between text-[14px]">

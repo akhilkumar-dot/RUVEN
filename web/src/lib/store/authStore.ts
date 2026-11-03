@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { authApi, setAccessToken, type AuthResponse, type ApiError } from "@/lib/api/client";
+import { setAccessToken, type AuthResponse } from "@/lib/api/client";
 import { mockAuthApi } from "@/lib/api/mockAuth";
 import { supabaseAuth } from "@/lib/api/supabaseAuth";
 

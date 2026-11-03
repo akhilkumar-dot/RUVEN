@@ -9,7 +9,7 @@ import { z } from "zod";
 import Link from "next/link";
 import {
   User, Building2, TrendingUp, ChevronRight, ChevronLeft,
-  Eye, EyeOff, CheckCircle2, LogIn
+  Eye, EyeOff, CheckCircle2
 } from "lucide-react";
 import { BridgeLogo } from "@/ui/BridgeLogo";
 import { GradientRingButton } from "@/ui/GradientRingButton";
@@ -153,7 +153,6 @@ function SignUpPageContent() {
   const [submitting, setSubmitting] = useState(false);
 
   // Sign in state
-  const [selectedLoginRole, setSelectedLoginRole] = useState<AccountType>("STARTUP_FOUNDER");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -223,8 +222,8 @@ function SignUpPageContent() {
     <div className="min-h-dvh bg-black flex flex-col">
       {/* TopBar */}
       <div className="flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-4">
-        <Link href="/" className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-          <BridgeLogo size={22} strokeColor="#000" accentColor="#000" />
+        <Link href="/" className="w-10 h-10 rounded-2xl bg-black border border-[#2A2A2E] flex items-center justify-center overflow-hidden">
+          <BridgeLogo size={36} />
         </Link>
         <button
           onClick={() => {

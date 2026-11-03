@@ -84,9 +84,9 @@ export function SplashScreen({ onFinish, persistent = false }: SplashScreenProps
                     "linear-gradient(135deg, #A24BFF 0%, #FF3D81 50%, #FF8A3D 100%)",
                 }}
               >
-                {/* White circular badge */}
-                <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-2xl">
-                  <BridgeLogo size={50} strokeColor="#000" accentColor="#000" />
+                {/* Ruven logo badge */}
+                <div className="w-24 h-24 rounded-3xl bg-black border border-[#2A2A2E] flex items-center justify-center shadow-2xl overflow-hidden">
+                  <BridgeLogo size={88} />
                 </div>
               </div>
             </motion.div>
@@ -101,7 +101,7 @@ export function SplashScreen({ onFinish, persistent = false }: SplashScreenProps
                   transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
                   className="text-white text-[38px] md:text-[42px] font-bold tracking-tight text-center mb-2"
                 >
-                  FounderBridge
+                  Ruven
                 </motion.h1>
               )}
             </AnimatePresence>

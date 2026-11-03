@@ -89,10 +89,10 @@ export function NavDrawer({ isOpen, onClose }: NavDrawerProps) {
             {/* Drawer Header */}
             <div className="flex items-center justify-between pb-4 border-b border-[#1C1C1E]">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                  <BridgeLogo size={18} strokeColor="#000" accentColor="#000" />
+                <div className="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shrink-0 border border-[#2A2A2E]">
+                  <BridgeLogo size={32} />
                 </div>
-                <span className="text-white font-bold text-[17px] tracking-tight">FounderBridge</span>
+                <span className="text-white font-bold text-[18px] tracking-tight">Ruven</span>
               </div>
               <button
                 onClick={onClose}

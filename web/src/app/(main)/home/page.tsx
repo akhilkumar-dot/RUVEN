@@ -2,9 +2,9 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { TopBar } from "@/ui/TopBar";
-import { BentoGrid, BentoCard } from "@/ui/BentoCard";
 import { BottomDock, FloatingActionStack } from "@/ui/BottomDock";
 import { Avatar } from "@/ui/Avatar";
 import { GradientRingButton } from "@/ui/GradientRingButton";
@@ -20,17 +20,10 @@ import {
   Building2,
   MapPin,
   Sparkles,
-  Send,
-  Plus,
   Briefcase,
   User,
   ExternalLink,
   ChevronRight,
-  Award,
-  DollarSign,
-  FileText,
-  Users,
-  Compass,
   Check,
   CheckSquare,
   Trash2
@@ -308,7 +301,7 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
         authorHandle: "rohan_angel",
         authorHeadline: "Angel Investor · 14 Portfolios",
         location: "Mumbai",
-        body: "Evaluating early-stage B2B SaaS and AI agent workflows for Q4 angel investments. Writing ₹25L-₹50L checks. If you have ₹10L+ ARR or 5+ pilot LOIs, send your deck to my FounderBridge inbox.",
+        body: "Evaluating early-stage B2B SaaS and AI agent workflows for Q4 angel investments. Writing ₹25L-₹50L checks. If you have ₹10L+ ARR or 5+ pilot LOIs, send your deck to my Ruven inbox.",
         likeCount: 489,
         commentCount: 73,
         createdAt: "2026-11-03T09:15:00.000Z",
@@ -320,7 +313,7 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
         authorHandle: "aarav_reddy",
         authorHeadline: "Founder & CEO @ NovaLeaf Labs",
         location: "Hyderabad",
-        body: "We just open-sourced our automated founder onboarding checklist for Indian startups (GST, DPIIT tax exemptions, current account & co-founder agreement templates). Free for all FounderBridge members!",
+        body: "We just open-sourced our automated founder onboarding checklist for Indian startups (GST, DPIIT tax exemptions, current account & co-founder agreement templates). Free for all Ruven members!",
         likeCount: 445,
         commentCount: 61,
         createdAt: "2026-11-03T08:00:00.000Z",
@@ -363,7 +356,7 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
       role: "Tier-4 Multi-Region Cloud & GPU Partner",
       location: "Mumbai & Hyderabad",
       statValue: "₹25L Credits",
-      statLabel: "Exclusive for FounderBridge Corporate Members",
+      statLabel: "Exclusive for Ruven Corporate Members",
       colorSeed: "CloudScale Infra",
       color: "#5E9C8A", // sage teal
     },
@@ -412,7 +405,7 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
         authorHandle: "cloudscale_in",
         authorHeadline: "Cloud & Infrastructure Partners",
         location: "Mumbai",
-        body: "Announcing the FounderBridge Enterprise Credit Program: Any registered company on FounderBridge can now access up to ₹25L in GPU and cloud infrastructure credits with dedicated 24/7 TAM support.",
+        body: "Announcing the Ruven Enterprise Credit Program: Any registered company on Ruven can now access up to ₹25L in GPU and cloud infrastructure credits with dedicated 24/7 TAM support.",
         likeCount: 395,
         commentCount: 49,
         createdAt: "2026-11-03T12:45:00.000Z",
@@ -544,6 +537,7 @@ const HOME_TABS = [
 ];
 
 function HomePageContent() {
+  const router = useRouter();
   const user = useAuthStore((s) => s.user);
 
   const activeRole: AccountType = user?.type && ROLE_CONFIGS[user.type]
@@ -742,7 +736,7 @@ function HomePageContent() {
                 <span className="text-[11px] text-[#6E6E73]">Daily Inspiration</span>
               </div>
               <blockquote className="text-white text-[13px] italic font-medium leading-relaxed">
-                "{ROLE_QUOTES[activeRole]?.quote || "Build relentlessly."}"
+                &ldquo;{ROLE_QUOTES[activeRole]?.quote || "Build relentlessly."}&rdquo;
               </blockquote>
               <p className="text-[#8E8E93] text-[11px] mt-1.5 text-right font-medium">
                 — {ROLE_QUOTES[activeRole]?.author || "Founder"}
@@ -831,11 +825,11 @@ function HomePageContent() {
                     key={i}
                     onClick={() => {
                       if (qa.actionKey === "gigs" || qa.actionKey === "deals" || qa.actionKey === "vendors") {
-                        window.location.href = "/discover";
+                        router.push("/discover");
                       } else if (qa.actionKey === "cofounder" || qa.actionKey === "mentors") {
-                        window.location.href = "/ideas";
+                        router.push("/ideas");
                       } else if (qa.actionKey === "grant" || qa.actionKey === "perks") {
-                        window.location.href = "/plans";
+                        router.push("/plans");
                       } else {
                         setActiveTab("feed");
                         setShowPostBox(true);
@@ -894,7 +888,7 @@ function HomePageContent() {
                       </div>
 
                       <button
-                        onClick={() => { window.location.href = "/discover"; }}
+                        onClick={() => { router.push("/discover"); }}
                         className="px-3 py-1.5 rounded-xl bg-black text-white text-[12px] font-semibold flex items-center gap-1 hover:bg-black/80 transition-colors"
                       >
                         <span>Connect</span>
@@ -928,7 +922,7 @@ function HomePageContent() {
                     </div>
 
                     <button
-                      onClick={() => { window.location.href = "/plans"; }}
+                      onClick={() => { router.push("/plans"); }}
                       className="self-start mt-4 px-3.5 py-2 bg-black text-white text-[12px] font-semibold rounded-xl flex items-center gap-1.5 hover:bg-black/80 transition-colors"
                     >
                       <span>View Application Details</span>
@@ -1032,7 +1026,7 @@ function HomePageContent() {
                 <div className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-3 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-white font-bold text-[15px]">Today's Meetups</h3>
+                      <h3 className="text-white font-bold text-[15px]">Today&apos;s Meetups</h3>
                       <Link href="/meetups" className="text-[12px] text-[#A24BFF] hover:underline">
                         View All →
                       </Link>

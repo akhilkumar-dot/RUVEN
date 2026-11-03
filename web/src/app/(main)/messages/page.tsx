@@ -53,7 +53,7 @@ const SEED_CONVOS: Conversation[] = [
 ];
 
 const SEED_THREAD: Message[] = [
-  { id: "1", senderId: "priya_founder", text: "Hey! Saw your idea on FounderBridge. Super interesting.",               sentAt: new Date("2026-11-03T17:30:00.000Z") },
+  { id: "1", senderId: "priya_founder", text: "Hey! Saw your idea on Ruven. Super interesting.",               sentAt: new Date("2026-11-03T17:30:00.000Z") },
   { id: "2", senderId: "me",            text: "Thanks! Yes, been working on it for 3 months now.",                    sentAt: new Date("2026-11-03T17:32:00.000Z"), status: "read" },
   { id: "3", senderId: "priya_founder", text: "The vernacular angle is 🔥 — would love to learn more.",               sentAt: new Date("2026-11-03T17:40:00.000Z") },
   { id: "4", senderId: "me",            text: "Let's do a quick call? I can show you the demo.",                      sentAt: new Date("2026-11-03T17:42:00.000Z"), status: "read" },
@@ -246,7 +246,7 @@ function ChatThread({
                   senderId: r.sender_id === user?.id ? "me" : convo.handle,
                   text: r.body,
                   sentAt: new Date(r.created_at),
-                  status: (r.status as any) || "delivered",
+                  status: (r.status as Message["status"]) || "delivered",
                 }))
               );
               return;
@@ -276,7 +276,14 @@ function ChatThread({
           filter: `room_id=eq.${convoId}`,
         },
         (payload) => {
-          const row = payload.new as any;
+          interface RealtimeMessageRow {
+            id: string;
+            sender_id: string;
+            body: string;
+            created_at?: string;
+            status?: Message["status"];
+          }
+          const row = payload.new as unknown as RealtimeMessageRow;
           setMessages((prev) => {
             if (prev.some((m) => m.id === row.id)) return prev;
             return [

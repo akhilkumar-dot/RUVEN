@@ -11,18 +11,18 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "FounderBridge — Connect · Collaborate · Launch",
-    template: "%s | FounderBridge",
+    default: "Ruven — Connect · Collaborate · Launch",
+    template: "%s | Ruven",
   },
   description:
-    "FounderBridge is the networking and collaboration platform for the Indian startup ecosystem. Connect with founders, investors, and talent.",
-  keywords: ["startup", "founder", "india", "investor", "networking", "collaboration"],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://founderbridge.in"),
+    "Ruven is the networking and collaboration platform for the Indian startup ecosystem. Connect with founders, investors, and talent.",
+  keywords: ["startup", "founder", "india", "investor", "networking", "collaboration", "ruven"],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://ruven.in"),
   openGraph: {
     type: "website",
     locale: "en_IN",
-    siteName: "FounderBridge",
-    title: "FounderBridge — Connect · Collaborate · Launch",
+    siteName: "Ruven",
+    title: "Ruven — Connect · Collaborate · Launch",
     description: "The networking & collaboration platform for the Indian startup ecosystem.",
   },
   twitter: {
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "FounderBridge",
+    title: "Ruven",
   },
 };
 

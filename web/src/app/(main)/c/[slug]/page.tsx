@@ -2,17 +2,12 @@
 
 import { use, Suspense } from "react";
 import Link from "next/link";
-import { BridgeLogo } from "@/ui/BridgeLogo";
-import { Avatar } from "@/ui/Avatar";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import {
-  Building2,
   MapPin,
   Globe,
   Mail,
   Phone,
-  Briefcase,
-  Users,
   ShieldCheck,
   Share2,
   ArrowLeft

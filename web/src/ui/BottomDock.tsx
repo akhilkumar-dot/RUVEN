@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Zap, Shield, Clock } from "lucide-react";
+import { Zap, Shield, Clock, ArrowRight } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { Avatar } from "./Avatar";
+import { NavDrawer } from "./NavDrawer";
 
 interface FloatingActionStackProps {
   className?: string;
@@ -83,6 +85,7 @@ interface BottomDockProps {
   /** Override visible tabs — defaults to 5 primary tabs */
   tabs?: Array<{ key: string; label: string }>;
   onTabChange?: (key: string) => void;
+  onMenuOpen?: () => void;
   onCreateOpen?: () => void;
   userPhotoUrl?: string | null;
   userName?: string;
@@ -98,7 +101,7 @@ export function BottomDock({
   activeTab: activeTabOverride,
   tabs,
   onTabChange,
-  onCreateOpen,
+  onMenuOpen,
   userPhotoUrl,
   userName = "Me",
   onProfileOpen,
@@ -106,6 +109,7 @@ export function BottomDock({
 }: BottomDockProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Derive active tab from route if not overridden
   const activeTab =
@@ -121,32 +125,47 @@ export function BottomDock({
     if (route) router.push(route.href);
   }
 
+  function handleArrowClick() {
+    if (onMenuOpen) {
+      onMenuOpen();
+    } else {
+      setIsDrawerOpen(true);
+    }
+  }
+
   return (
-    <nav
-      aria-label="Main navigation"
-      className={cn(
-        "fixed bottom-0 left-0 right-0 z-[var(--z-dock)]",
-        "flex items-center gap-2 px-3",
-        "pb-[calc(env(safe-area-inset-bottom,0px)+10px)] pt-3",
-        "bg-black/90 backdrop-blur-xl border-t border-[#1C1C1E]",
-        "md:bottom-6 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-auto md:max-w-xl",
-        "md:rounded-full md:border md:border-[#2A2A2E] md:shadow-2xl md:shadow-black/90 md:px-4 md:py-2 md:pb-2",
-        className
-      )}
-    >
-      {/* "+" Create button */}
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        transition={{ type: "spring", stiffness: 400, damping: 20 }}
-        onClick={onCreateOpen}
-        aria-label="Create"
-        className="w-11 h-11 rounded-full p-[2px] shrink-0"
-        style={{ background: "linear-gradient(135deg, #A24BFF, #FF3D81, #FF8A3D)" }}
+    <>
+      <NavDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
+
+      <nav
+        aria-label="Main navigation"
+        className={cn(
+          "fixed bottom-0 left-0 right-0 z-[var(--z-dock)]",
+          "flex items-center gap-2 px-3",
+          "pb-[calc(env(safe-area-inset-bottom,0px)+10px)] pt-3",
+          "bg-black/90 backdrop-blur-xl border-t border-[#1C1C1E]",
+          "md:bottom-6 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-auto md:max-w-xl",
+          "md:rounded-full md:border md:border-[#2A2A2E] md:shadow-2xl md:shadow-black/90 md:px-4 md:py-2 md:pb-2",
+          className
+        )}
       >
-        <span className="flex items-center justify-center w-full h-full rounded-full bg-black text-white text-xl font-light">
-          +
-        </span>
-      </motion.button>
+        {/* Arrow button to open sidebar */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          onClick={handleArrowClick}
+          aria-label="Open sidebar menu"
+          title="Open sidebar"
+          className="w-11 h-11 rounded-full p-[2px] shrink-0 group"
+          style={{ background: "linear-gradient(135deg, #A24BFF, #FF3D81, #FF8A3D)" }}
+        >
+          <span className="flex items-center justify-center w-full h-full rounded-full bg-black text-white group-hover:text-[#A24BFF] transition-colors">
+            <ArrowRight size={18} />
+          </span>
+        </motion.button>
 
       {/* Segmented tabs */}
       <div
@@ -188,5 +207,6 @@ export function BottomDock({
         <Avatar name={userName} photoUrl={userPhotoUrl} size="sm" />
       </button>
     </nav>
+  </>
   );
 }

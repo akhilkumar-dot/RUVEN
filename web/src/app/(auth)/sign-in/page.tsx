@@ -34,12 +34,12 @@ export default function SignInPage() {
         className="w-full max-w-[380px] flex flex-col items-center"
       >
         {/* Logo */}
-        <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 shadow-[0_0_40px_#A24BFF30]">
-          <BridgeLogo size={34} strokeColor="#000" accentColor="#000" />
+        <div className="w-20 h-20 rounded-3xl bg-black border border-[#2A2A2E] flex items-center justify-center mb-6 shadow-[0_0_40px_#A24BFF30] overflow-hidden">
+          <BridgeLogo size={72} />
         </div>
 
         <h1 className="text-white font-bold text-[32px] tracking-tight text-center leading-tight mb-2">
-          Welcome to<br />FounderBridge
+          Welcome to<br />Ruven
         </h1>
         <p className="text-[#6E6E73] text-[15px] text-center mb-10">
           India&apos;s founder community
