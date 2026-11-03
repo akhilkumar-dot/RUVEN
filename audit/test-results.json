@@ -1,0 +1,675 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\Akhil M\\Downloads\\RUVEN\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "audit/e2e/i-j-k-hub-plans-security.spec.ts"
+    ],
+    "configFile": "C:\\Users\\Akhil M\\Downloads\\RUVEN\\playwright.config.ts",
+    "rootDir": "C:/Users/Akhil M/Downloads/RUVEN/audit/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Akhil M/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "C:/Users/Akhil M/Downloads/RUVEN/audit/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 45000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\Akhil M\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "C:\\Users\\Akhil M\\Downloads\\RUVEN\\audit\\e2e",
+        "snapshotDir": "C:\\Users\\Akhil M\\Downloads\\RUVEN\\audit\\e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 45000,
+        "use": {
+          "baseURL": "http://localhost:3000",
+          "trace": "off",
+          "screenshot": "only-on-failure",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "C:\\Users\\Akhil M\\Downloads\\RUVEN\\audit\\test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "i-j-k-hub-plans-security.spec.ts",
+      "file": "i-j-k-hub-plans-security.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Section I, J, K: Hub, Plans, & Security Audit",
+          "file": "i-j-k-hub-plans-security.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "I1 - Founder card fields in Founders Hub",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1217,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:34.138Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-026517c3df68c51d531e",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 5,
+              "column": 7
+            },
+            {
+              "title": "I2 - Founders Hub Join/leave, industry filter, startup/company owner only",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 565,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:35.480Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-1911d8562dc68b324c4d",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 11,
+              "column": 7
+            },
+            {
+              "title": "J1 - Plans page matches PDF table (Free ₹0 / Pro ₹199 per month)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1014,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:36.058Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-d8ab7dc1e7acd42de2e5",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 16,
+              "column": 7
+            },
+            {
+              "title": "J2 - Real payment gateway in test mode vs mock checkout",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1036,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "J2 Payment modal pay button visible: \u001b[33mtrue\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:37.083Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-49f4b264f14785dbb9ad",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 30,
+              "column": 7
+            },
+            {
+              "title": "J3 - Pro features come from server subscription state",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 601,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:38.138Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-99e07fe13004da064abe",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 42,
+              "column": 7
+            },
+            {
+              "title": "J4 - Verified badge needs Pro + Udyam, CIN, GST regex formats",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 488,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "J4 Udyam test valid: \u001b[33mtrue\u001b[39m\n"
+                        },
+                        {
+                          "text": "J4 Udyam test invalid: \u001b[33mfalse\u001b[39m\n"
+                        },
+                        {
+                          "text": "J4 CIN test valid: \u001b[33mtrue\u001b[39m\n"
+                        },
+                        {
+                          "text": "J4 CIN test invalid: \u001b[33mfalse\u001b[39m\n"
+                        },
+                        {
+                          "text": "J4 GSTIN test valid: \u001b[33mtrue\u001b[39m\n"
+                        },
+                        {
+                          "text": "J4 GSTIN test invalid: \u001b[33mfalse\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:38.754Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-8f8e435f10c716547850",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 47,
+              "column": 7
+            },
+            {
+              "title": "J5 - Ad purchase flow from Plans to Advertise",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 570,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:39.253Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-f2d413fa754e00a86f07",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 63,
+              "column": 7
+            },
+            {
+              "title": "J6 - Profile analytics clearly labelled",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 574,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:39.834Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-2e1ced0a0984fb579289",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 68,
+              "column": 7
+            },
+            {
+              "title": "K1 - Own app data readable/editable only by owner",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 495,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "K1 Read profile directly with anon key: \u001b[33m200\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:40.423Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-6090b15fb01d37a06982",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 73,
+              "column": 7
+            },
+            {
+              "title": "K2 - Profiles, company sites editable only by owner",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 268,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "K2 Anon key insert company status: \u001b[33m400\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:40.931Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-fbb5a849f1dbdc434ada",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 79,
+              "column": 7
+            },
+            {
+              "title": "K3 - Posts, ideas, meetups edit rules",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 298,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "K3 Anon key insert post status: \u001b[33m400\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:41.213Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-683268267c8e733f0a8f",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 85,
+              "column": 7
+            },
+            {
+              "title": "K4 - Documents & chats permissions",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 254,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "K4 Anon key get docs status: \u001b[33m200\u001b[39m records count: \u001b[33m0\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:41.522Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-1701c92b1ba4331f416b",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 91,
+              "column": 7
+            },
+            {
+              "title": "K5 - 401 when signed out / RLS policies check",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 971,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "K5 Anon query users: status 200\n"
+                        },
+                        {
+                          "text": "K5 Anon query profiles: status 200\n"
+                        },
+                        {
+                          "text": "K5 Anon query companies: status 200\n"
+                        },
+                        {
+                          "text": "K5 Anon query jobs: status 200\n"
+                        },
+                        {
+                          "text": "K5 Anon query applications: status 200\n"
+                        },
+                        {
+                          "text": "K5 Anon query posts: status 200\n"
+                        },
+                        {
+                          "text": "K5 Anon query ideas: status 200\n"
+                        },
+                        {
+                          "text": "K5 Anon query meetups: status 200\n"
+                        },
+                        {
+                          "text": "K5 Anon query chat_messages: status 200\n"
+                        },
+                        {
+                          "text": "K5 Anon query workspace_docs: status 200\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:41.790Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-16891728b6ef6ba53783",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 97,
+              "column": 7
+            },
+            {
+              "title": "K6 - Storage objects vs Base64 in DB",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 45000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 221,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "K6 Supabase media_assets query: \u001b[33m200\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T16:05:42.773Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "03c91c62c2850218aa86-629120a78a1cfc97f501",
+              "file": "i-j-k-hub-plans-security.spec.ts",
+              "line": 106,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-03T16:05:33.592Z",
+    "duration": 9508.077000000001,
+    "expected": 14,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
