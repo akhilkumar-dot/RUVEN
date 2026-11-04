@@ -89,9 +89,10 @@ function AuthCallbackContent() {
         setUser({
           id: authUser.id,
           userHandle: resolvedHandle,
-          email: dbUser?.email || authUser.email || "",
+          email: (dbUser as any)?.email || authUser.email || "",
           type: resolvedType,
-          avatarUrl: dbUser?.avatar_url || avatarUrl || undefined,
+          avatarUrl: (dbUser as any)?.avatar_url || avatarUrl || undefined,
+          name: (dbUser as any)?.name || fullName || undefined,
         });
 
         // Google users sign in without any profile details, so prompt them to

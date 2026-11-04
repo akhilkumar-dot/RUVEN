@@ -31,7 +31,7 @@ async function buildAuthPayload(session: Session) {
   const [{ data: dbUser }, { data: profile }] = await Promise.all([
     supabase
       .from("users")
-      .select("id, user_handle, email, type, avatar_url")
+      .select("id, user_handle, email, type, avatar_url, name")
       .eq("id", authUser.id)
       .maybeSingle(),
     supabase
@@ -56,9 +56,9 @@ async function buildAuthPayload(session: Session) {
     userHandle: resolvedHandle,
     type: resolvedType,
     userId: authUser.id,
-    email: dbUser?.email || authUser.email || "",
-    avatarUrl: dbUser?.avatar_url || profile?.photo_url || undefined,
-    name: dbUser?.name || undefined,
+    email: (dbUser as any)?.email || authUser.email || "",
+    avatarUrl: (dbUser as any)?.avatar_url || (profile as any)?.photo_url || undefined,
+    name: (dbUser as any)?.name || undefined,
   };
 }
 

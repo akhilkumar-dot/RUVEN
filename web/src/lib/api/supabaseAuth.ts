@@ -72,6 +72,8 @@ export const supabaseAuth = {
         userHandle: handle,
         email: payload.email,
         type: payload.type as AccountType,
+        name: payload.name,
+        avatarUrl: undefined,
       },
     };
   },
