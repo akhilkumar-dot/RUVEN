@@ -8,7 +8,7 @@ import { GradientRingButton } from "@/ui/GradientRingButton";
 import { BridgeLogo } from "@/ui/BridgeLogo";
 import { useAuthStore } from "@/lib/store/authStore";
 import { useRouter } from "next/navigation";
-import { cn, truncate } from "@/lib/utils";
+import { cn, truncate, fileToDataUrl } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────
 interface ProfileData {
@@ -101,8 +101,23 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
   const [saving, setSaving] = useState(false);
   const [newSkill, setNewSkill] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const skillRef = useRef<HTMLInputElement>(null);
+  const photoRef = useRef<HTMLInputElement>(null);
   const logout = useAuthStore((s) => s.logout);
+
+  async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      setData(d => ({ ...d, photoUrl: dataUrl }));
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -189,13 +204,23 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
               <Avatar name={data.userHandle} photoUrl={data.photoUrl} size="xl" />
               {editing && (
                 <button
-                  aria-label="Change photo"
-                  className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60"
+                  type="button"
+                  onClick={() => photoRef.current?.click()}
+                  disabled={uploadingPhoto}
+                  aria-label={data.photoUrl ? "Change photo" : "Add photo"}
+                  className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 hover:bg-black/70 transition-colors"
                 >
                   <Camera size={20} className="text-white" />
                 </button>
               )}
             </div>
+            <input
+              ref={photoRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoSelect}
+            />
             <div className="flex-1 min-w-0">
               <p className="text-white font-bold text-[18px] sm:text-[20px] leading-tight break-all">
                 @{data.userHandle}
@@ -203,6 +228,16 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
               <p className="text-[#6E6E73] text-[12px] mt-0.5 capitalize">
                 {data.type.replace(/_/g, " ").toLowerCase()}
               </p>
+              {editing && (
+                <button
+                  type="button"
+                  onClick={() => photoRef.current?.click()}
+                  disabled={uploadingPhoto}
+                  className="text-[#A24BFF] text-[12px] font-medium mt-2 hover:underline disabled:opacity-60"
+                >
+                  {uploadingPhoto ? "Uploading…" : data.photoUrl ? "Change photo" : "Add photo"}
+                </button>
+              )}
               {editing ? (
                 <EditableText
                   value={data.headline}

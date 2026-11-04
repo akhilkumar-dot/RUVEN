@@ -130,15 +130,6 @@ export function BottomDock({
                       />
                     )}
                   </AnimatePresence>
-
-                  {isActive && (
-                    <motion.span 
-                      layoutId="active-dot"
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="absolute -bottom-1 w-1 h-1 bg-gradient-to-r from-[#A24BFF] to-[#FF3D81] rounded-full"
-                    />
-                  )}
                 </button>
               );
             })}

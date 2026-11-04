@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useRef, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -13,7 +13,8 @@ import {
   Building2,
   User,
   Briefcase,
-  Sparkles
+  Sparkles,
+  Camera
 } from "lucide-react";
 import { BridgeLogo } from "@/ui/BridgeLogo";
 import { PillInput } from "@/ui/PillInput";
@@ -21,7 +22,7 @@ import { GradientRingButton } from "@/ui/GradientRingButton";
 import { Avatar } from "@/ui/Avatar";
 import { useAuthStore, type AccountType } from "@/lib/store/authStore";
 import { dataService } from "@/lib/api/dataService";
-import { cn } from "@/lib/utils";
+import { cn, fileToDataUrl } from "@/lib/utils";
 
 const ACCOUNT_CLASSES = [
   {
@@ -111,9 +112,24 @@ function OnboardingContent() {
   const [bio, setBio] = useState("Passionate about building impactful solutions with strong product-market fit in India.");
   const [organizationName, setOrganizationName] = useState("");
   const [selectedSkills, setSelectedSkills] = useState<string[]>(["AI & ML", "B2B SaaS"]);
+  const [photoUrl, setPhotoUrl] = useState<string | undefined>(undefined);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [saving, setSaving] = useState(false);
+  const photoRef = useRef<HTMLInputElement>(null);
 
   const activeClassConfig = ACCOUNT_CLASSES.find((c) => c.key === selectedClass) || ACCOUNT_CLASSES[0];
+
+  async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      setPhotoUrl(await fileToDataUrl(file));
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
 
   function handleSelectClass(type: AccountType) {
     setSelectedClass(type);
@@ -149,6 +165,7 @@ function OnboardingContent() {
           bio: bio.trim(),
           location,
           skills: selectedSkills.join(", "),
+          photo_url: photoUrl,
         });
       }
     } catch {
@@ -328,6 +345,35 @@ function OnboardingContent() {
                   </button>
                 </div>
 
+                {/* Profile photo (optional) */}
+                <div className="p-3 rounded-xl bg-[#121216] border border-[#222226] flex items-center gap-4">
+                  <div className="relative shrink-0">
+                    <Avatar name={displayName} photoUrl={photoUrl} size="lg" />
+                    <button
+                      type="button"
+                      onClick={() => photoRef.current?.click()}
+                      disabled={uploadingPhoto}
+                      aria-label={photoUrl ? "Change photo" : "Add photo"}
+                      className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#A24BFF] flex items-center justify-center text-white border-2 border-[#121216] disabled:opacity-60"
+                    >
+                      <Camera size={13} />
+                    </button>
+                    <input
+                      ref={photoRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handlePhotoSelect}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-[13px] font-semibold">Profile photo</p>
+                    <p className="text-[#8E8E93] text-[11.5px] mt-0.5">
+                      {uploadingPhoto ? "Uploading…" : "Optional — add or change it anytime."}
+                    </p>
+                  </div>
+                </div>
+
                 {/* Organization or Venture Name */}
                 <PillInput
                   label={
@@ -454,7 +500,7 @@ function OnboardingContent() {
                 >
                   <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                      <Avatar name={displayName} size="md" />
+                      <Avatar name={displayName} photoUrl={photoUrl} size="md" />
                       <div className="min-w-0">
                         <p className="text-white font-bold text-[15px] truncate">{displayName}</p>
                         <p className="text-[#8E8E93] text-[11px] flex items-center gap-1 truncate">
