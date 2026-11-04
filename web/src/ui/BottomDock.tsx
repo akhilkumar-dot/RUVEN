@@ -3,67 +3,11 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Zap, Shield, Clock, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { Avatar } from "./Avatar";
 import { NavDrawer } from "./NavDrawer";
 
-interface FloatingActionStackProps {
-  className?: string;
-  onTodayMeetups?: () => void;
-  onQuickPost?: () => void;
-  onVerifiedStatus?: () => void;
-  verifiedCount?: number;
-}
-
-export function FloatingActionStack({
-  className,
-  onTodayMeetups,
-  onQuickPost,
-  onVerifiedStatus,
-  verifiedCount,
-}: FloatingActionStackProps) {
-  const router = useRouter();
-  const buttons = [
-    { icon: <Clock size={18} />, label: "Today's meetups", onClick: onTodayMeetups ?? (() => router.push("/meetups")) },
-    { icon: <Zap size={18} />,   label: "Quick post",      onClick: onQuickPost,
-      badge: verifiedCount && verifiedCount > 0 ? String(verifiedCount) : undefined },
-    { icon: <Shield size={18} />, label: "Verified status", onClick: onVerifiedStatus ?? (() => router.push("/plans")) },
-  ];
-
-  return (
-    <div
-      className={cn(
-        "fixed right-4 bottom-[calc(80px+env(safe-area-inset-bottom,0px))] md:bottom-24 md:right-8",
-        "flex flex-col gap-3 z-[var(--z-dock)]",
-        className
-      )}
-    >
-      {buttons.map(({ icon, label, onClick, badge }, i) => (
-        <motion.button
-          key={label}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: i * 0.06, type: "spring", stiffness: 300, damping: 22 }}
-          whileTap={{ scale: 0.88 }}
-          onClick={onClick}
-          aria-label={label}
-          className="relative w-11 h-11 rounded-full bg-[#1C1C1E] border border-[#2A2A2D] flex items-center justify-center text-[#A1A1A6] hover:text-white hover:border-[#A24BFF]/40 transition-colors shadow-lg"
-        >
-          {icon}
-          {badge && (
-            <span
-              className="absolute -top-1 -left-1 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center border-2 border-black"
-              style={{ background: "linear-gradient(135deg, #A24BFF, #FF3D81)" }}
-            >
-              {badge}
-            </span>
-          )}
-        </motion.button>
-      ))}
-    </div>
-  );
-}
 
 // ── Route map for bottom nav ──────────────────────────────────
 export const NAV_TABS = [
@@ -144,8 +88,8 @@ export function BottomDock({
         aria-label="Main navigation"
         className={cn(
           "fixed bottom-0 left-0 right-0 z-[var(--z-dock)]",
-          "flex items-center gap-2 px-3",
-          "pb-[calc(env(safe-area-inset-bottom,0px)+10px)] pt-3",
+          "flex items-center gap-1 sm:gap-2 px-2 sm:px-3",
+          "pb-[calc(env(safe-area-inset-bottom,0px)+8px)] pt-2 sm:pt-3",
           "bg-black/90 backdrop-blur-xl border-t border-[#1C1C1E]",
           "md:bottom-6 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-auto md:max-w-xl",
           "md:rounded-full md:border md:border-[#2A2A2E] md:shadow-2xl md:shadow-black/90 md:px-4 md:py-2 md:pb-2",
@@ -159,54 +103,54 @@ export function BottomDock({
           onClick={handleArrowClick}
           aria-label="Open sidebar menu"
           title="Open sidebar"
-          className="w-11 h-11 rounded-full p-[2px] shrink-0 group"
+          className="w-9 h-9 sm:w-11 sm:h-11 rounded-full p-[2px] shrink-0 group"
           style={{ background: "linear-gradient(135deg, #A24BFF, #FF3D81, #FF8A3D)" }}
         >
           <span className="flex items-center justify-center w-full h-full rounded-full bg-black text-white group-hover:text-[#A24BFF] transition-colors">
-            <ArrowRight size={18} />
+            <ArrowRight className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
           </span>
         </motion.button>
 
-      {/* Segmented tabs */}
-      <div
-        className="flex-1 flex items-center justify-center gap-1 overflow-x-auto scrollbar-hide"
-        role="tablist"
-      >
-        {visibleTabs.map((tab) => (
-          <button
-            key={tab.key}
-            role="tab"
-            aria-selected={activeTab === tab.key}
-            onClick={() => handleTabChange(tab.key)}
-            className={cn(
-              "relative px-3 py-1.5 text-[13px] font-medium rounded-full whitespace-nowrap transition-colors",
-              activeTab === tab.key
-                ? "text-white"
-                : "text-[#6E6E73] hover:text-[#A1A1A6]"
-            )}
-          >
-            {tab.label}
-            {activeTab === tab.key && (
-              <motion.span
-                layoutId="active-tab-pill"
-                className="absolute inset-0 rounded-full bg-[#1C1C1E]"
-                style={{ zIndex: -1 }}
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              />
-            )}
-          </button>
-        ))}
-      </div>
+        {/* Segmented tabs */}
+        <div
+          className="flex-1 flex items-center justify-center gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide px-0.5"
+          role="tablist"
+        >
+          {visibleTabs.map((tab) => (
+            <button
+              key={tab.key}
+              role="tab"
+              aria-selected={activeTab === tab.key}
+              onClick={() => handleTabChange(tab.key)}
+              className={cn(
+                "relative px-2 sm:px-3 py-1 sm:py-1.5 text-[11.5px] sm:text-[13px] font-medium rounded-full whitespace-nowrap transition-colors shrink-0",
+                activeTab === tab.key
+                  ? "text-white"
+                  : "text-[#6E6E73] hover:text-[#A1A1A6]"
+              )}
+            >
+              {tab.label}
+              {activeTab === tab.key && (
+                <motion.span
+                  layoutId="active-tab-pill"
+                  className="absolute inset-0 rounded-full bg-[#1C1C1E]"
+                  style={{ zIndex: -1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
 
-      {/* Avatar → Profile */}
-      <button
-        onClick={onProfileOpen ?? (() => router.push("/profile"))}
-        aria-label="Open profile"
-        className="shrink-0"
-      >
-        <Avatar name={userName} photoUrl={userPhotoUrl} size="sm" />
-      </button>
-    </nav>
+        {/* Avatar → Profile */}
+        <button
+          onClick={onProfileOpen ?? (() => router.push("/profile"))}
+          aria-label="Open profile"
+          className="shrink-0 p-0.5"
+        >
+          <Avatar name={userName} photoUrl={userPhotoUrl} size="sm" />
+        </button>
+      </nav>
   </>
   );
 }

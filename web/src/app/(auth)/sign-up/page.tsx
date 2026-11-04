@@ -119,11 +119,11 @@ function TypeCard({
       >
         {type.icon}
       </div>
-      <div>
+      <div className="flex-1 min-w-0">
         <p className={cn("font-semibold text-[15px]", selected ? "text-white" : "text-[#A1A1A6]")}>
           {type.label}
         </p>
-        <p className="text-[13px] text-[#6E6E73] mt-0.5 leading-snug">
+        <p className="text-[12.5px] sm:text-[13px] text-[#6E6E73] mt-0.5 leading-snug">
           {type.description}
         </p>
       </div>

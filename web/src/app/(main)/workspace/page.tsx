@@ -113,7 +113,6 @@ const FILTER_TABS = ["All", "Private", "Shared", "Public"];
 export default function WorkspacePage() {
   const [filter, setFilter] = useState("All");
   const [openDoc, setOpenDoc] = useState<Doc | null>(null);
-  const [navTab, setNavTab] = useState("workspace");
 
   const filtered = MOCK_DOCS.filter(d =>
     filter === "All"     ? true :
@@ -168,9 +167,7 @@ export default function WorkspacePage() {
         </main>
 
         <BottomDock
-          activeTab={navTab}
-          tabs={[{ key: "workspace", label: "Workspace" }]}
-          onTabChange={setNavTab}
+          activeTab="workspace"
           userName="Aarav Reddy"
         />
       </div>

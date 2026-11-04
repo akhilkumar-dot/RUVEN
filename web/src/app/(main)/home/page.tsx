@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { TopBar } from "@/ui/TopBar";
-import { BottomDock, FloatingActionStack } from "@/ui/BottomDock";
+import { BottomDock } from "@/ui/BottomDock";
 import { Avatar } from "@/ui/Avatar";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { TimeAgo } from "@/ui/TimeAgo";
@@ -1031,17 +1031,17 @@ function HomePageContent() {
                         View All →
                       </Link>
                     </div>
-                    <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] flex items-center justify-between">
-                      <div>
-                        <p className="text-white font-semibold text-[13px]">Bengaluru AI Founders Mixer</p>
-                        <p className="text-[#8E8E93] text-[11px]">Today · 6:30 PM IST · Koramangala, Bengaluru</p>
+                    <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] flex items-center justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-white font-semibold text-[13px] truncate">Bengaluru AI Founders Mixer</p>
+                        <p className="text-[#8E8E93] text-[11px] truncate">Today · 6:30 PM IST · Koramangala, Bengaluru</p>
                         <span className="inline-block mt-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                           18 founders attending
                         </span>
                       </div>
                       <Link
                         href="/meetups"
-                        className="px-3 py-1.5 bg-[#A24BFF] text-white text-[12px] font-medium rounded-xl hover:bg-[#8e3eee] transition-colors shrink-0 ml-2"
+                        className="px-3 py-1.5 bg-[#A24BFF] text-white text-[12px] font-medium rounded-xl hover:bg-[#8e3eee] transition-colors shrink-0"
                       >
                         RSVP
                       </Link>
@@ -1365,17 +1365,6 @@ function HomePageContent() {
           )}
         </div>
       </main>
-
-      {/* Floating action stack */}
-      <FloatingActionStack
-        onTodayMeetups={() => {}}
-        onQuickPost={() => {
-          setActiveTab("feed");
-          setShowPostBox(true);
-        }}
-        onVerifiedStatus={() => {}}
-        verifiedCount={2}
-      />
 
       {/* Bottom dock */}
       <BottomDock

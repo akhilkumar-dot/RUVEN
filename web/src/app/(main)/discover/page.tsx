@@ -66,7 +66,7 @@ function PersonCard({ person }: { person: (typeof PEOPLE)[0] }) {
         whileTap={{ scale: 0.9 }}
         onClick={() => setConnected(v => !v)}
         className={cn(
-          "px-3 py-1.5 rounded-full text-[13px] font-semibold transition-colors border",
+          "px-3 py-1.5 rounded-full text-[12px] sm:text-[13px] font-semibold transition-colors border shrink-0",
           connected
             ? "border-[#2A2A2D] text-[#6E6E73] bg-transparent"
             : "border-[#A24BFF] text-[#A24BFF] bg-[#A24BFF]/10 hover:bg-[#A24BFF]/20"
@@ -116,13 +116,13 @@ function InvestorCard({ inv }: { inv: (typeof INVESTORS)[0] }) {
         </div>
       </div>
       <p className="text-[#A1A1A6] text-[13px] leading-snug">{inv.thesis}</p>
-      <div className="flex items-center justify-between mt-3">
-        <span className="px-3 py-1 rounded-full bg-[#A24BFF]/10 border border-[#A24BFF]/30 text-[#A24BFF] text-[12px] font-semibold">
+      <div className="flex items-center justify-between mt-3 gap-2">
+        <span className="px-2.5 sm:px-3 py-1 rounded-full bg-[#A24BFF]/10 border border-[#A24BFF]/30 text-[#A24BFF] text-[11px] sm:text-[12px] font-semibold truncate">
           {inv.ticketSize}
         </span>
         <motion.button
           whileTap={{ scale: 0.9 }}
-          className="px-4 py-1.5 rounded-full border border-[#A24BFF] text-[#A24BFF] text-[13px] font-semibold hover:bg-[#A24BFF]/10"
+          className="px-3 sm:px-4 py-1.5 rounded-full border border-[#A24BFF] text-[#A24BFF] text-[12px] sm:text-[13px] font-semibold hover:bg-[#A24BFF]/10 shrink-0"
         >
           Request Intro
         </motion.button>
@@ -154,7 +154,6 @@ function JobCard({ job }: { job: (typeof JOBS)[0] }) {
 export default function DiscoverPage() {
   const [activeTab, setActiveTab] = useState("people");
   const [query, setQuery] = useState("");
-  const [navTab, setNavTab] = useState("discover");
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
@@ -207,9 +206,7 @@ export default function DiscoverPage() {
       </main>
 
       <BottomDock
-        activeTab={navTab}
-        tabs={[{ key: "discover", label: "Discover" }]}
-        onTabChange={setNavTab}
+        activeTab="discover"
         userName="Aarav Reddy"
       />
     </div>

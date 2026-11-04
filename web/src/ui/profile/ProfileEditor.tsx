@@ -131,8 +131,8 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
       {/* ── Header ── */}
       <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 bg-black/80 backdrop-blur-xl border-b border-[#1C1C1E]"
            style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}>
-        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-          <BridgeLogo size={22} strokeColor="#000" accentColor="#000" />
+        <div className="w-10 h-10 rounded-2xl bg-black border border-[#2A2A2E] flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
+          <BridgeLogo size={36} />
         </div>
         <h1 className="text-white font-semibold text-[16px]">My Profile</h1>
         {isOwner && (

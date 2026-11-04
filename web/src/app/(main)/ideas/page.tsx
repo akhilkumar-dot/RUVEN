@@ -337,7 +337,6 @@ function IdeasPageContent() {
   const [ideas, setIdeas] = useState<Idea[]>(SEED_IDEAS);
   const [showForm, setShowForm] = useState(false);
   const [collaboratingIdea, setCollaboratingIdea] = useState<Idea | null>(null);
-  const [navTab, setNavTab] = useState("ideas");
 
   // Load from Supabase
   useEffect(() => {
@@ -439,9 +438,7 @@ function IdeasPageContent() {
       )}
 
       <BottomDock
-        activeTab={navTab}
-        tabs={[{ key: "ideas", label: "Ideas" }]}
-        onTabChange={setNavTab}
+        activeTab="ideas"
         userName="Aarav Reddy"
       />
     </div>

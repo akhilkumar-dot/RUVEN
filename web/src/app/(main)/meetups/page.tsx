@@ -460,7 +460,6 @@ function MeetupsPageContent() {
   const [meetups, setMeetups] = useState<Meetup[]>(SEED_MEETUPS);
   const [selectedForApply, setSelectedForApply] = useState<Meetup | null>(null);
   const [showHostModal, setShowHostModal] = useState(false);
-  const [navTab, setNavTab] = useState("meet");
 
   // Load from Supabase
   useEffect(() => {
@@ -575,12 +574,12 @@ function MeetupsPageContent() {
                 </button>
               </div>
               <div className="p-4 rounded-2xl bg-[#0F0F12] border border-[#1E1E22] space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-white font-semibold text-[15px]">Angel Syndicate Pitch: SaaS & Fintech</h4>
+                <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+                  <div className="min-w-0">
+                    <h4 className="text-white font-semibold text-[15px] truncate">Angel Syndicate Pitch: SaaS & Fintech</h4>
                     <p className="text-[#8E8E93] text-[12px]">Sunday, 5:00 PM · 9 / 15 Confirmed</p>
                   </div>
-                  <span className="text-[11px] text-[#D4FF3A] bg-[#D4FF3A]/10 px-2.5 py-1 rounded-full border border-[#D4FF3A]/20 font-semibold">
+                  <span className="text-[11px] text-[#D4FF3A] bg-[#D4FF3A]/10 px-2.5 py-1 rounded-full border border-[#D4FF3A]/20 font-semibold shrink-0">
                     3 Applicants Pending
                   </span>
                 </div>
@@ -649,9 +648,7 @@ function MeetupsPageContent() {
       )}
 
       <BottomDock
-        activeTab={navTab}
-        tabs={[{ key: "meet", label: "Meetups" }]}
-        onTabChange={setNavTab}
+        activeTab="meetups"
         userName="Aarav Reddy"
       />
     </div>

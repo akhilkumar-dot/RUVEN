@@ -479,7 +479,6 @@ function MessagesPageContent() {
   const user = useAuthStore((s) => s.user);
   const [convos, setConvos] = useState<Conversation[]>(SEED_CONVOS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [navTab, setNavTab] = useState("msg");
 
   // Load user rooms from Supabase
   useEffect(() => {
@@ -576,9 +575,7 @@ function MessagesPageContent() {
 
       <BottomDock
         className={selectedId ? "hidden md:flex" : "flex"}
-        activeTab={navTab}
-        tabs={[{ key: "msg", label: "Messages" }]}
-        onTabChange={setNavTab}
+        activeTab="messages"
         userName={user?.userHandle || "Aarav Reddy"}
       />
     </div>

@@ -239,7 +239,7 @@ function OnboardingContent() {
                       type="button"
                       onClick={() => handleSelectClass(cls.key)}
                       className={cn(
-                        "w-full text-left p-3.5 sm:p-4 rounded-2xl border transition-all flex items-start gap-3.5 relative",
+                        "w-full text-left p-3 sm:p-4 rounded-2xl border transition-all flex items-start gap-3 sm:gap-3.5 relative",
                         isSelected
                           ? cn("border-2 bg-[#121216] shadow-lg", cls.borderClass)
                           : "border-[#1E1E22] bg-[#0E0E10] hover:border-[#2E2E34] hover:bg-[#141416]"
@@ -247,7 +247,7 @@ function OnboardingContent() {
                     >
                       <div
                         className={cn(
-                          "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
+                          "w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
                           isSelected
                             ? cn(cls.bgClass, cls.borderClass, "text-white")
                             : "bg-[#18181C] border-[#26262A] text-[#8E8E93]"
@@ -257,13 +257,13 @@ function OnboardingContent() {
                         {cls.icon}
                       </div>
 
-                      <div className="flex-1 min-w-0 pr-6">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h2 className="text-white font-bold text-[15px] sm:text-[16px] leading-tight">
+                      <div className="flex-1 min-w-0 pr-7 sm:pr-8">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <h2 className="text-white font-bold text-[14px] sm:text-[16px] leading-tight">
                             {cls.label}
                           </h2>
                           <span
-                            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
+                            className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0"
                             style={{
                               backgroundColor: `${cls.accent}15`,
                               color: cls.accent,
@@ -273,13 +273,13 @@ function OnboardingContent() {
                             {cls.badge}
                           </span>
                         </div>
-                        <p className="text-[#8E8E93] text-[12px] sm:text-[13px] mt-1 leading-snug">
+                        <p className="text-[#8E8E93] text-[11.5px] sm:text-[13px] mt-1 leading-snug">
                           {cls.description}
                         </p>
                       </div>
 
                       {/* Selection Radio / Checkmark */}
-                      <div className="absolute right-3.5 top-4">
+                      <div className="absolute right-3 sm:right-3.5 top-3.5 sm:top-4">
                         {isSelected ? (
                           <CheckCircle2 size={20} style={{ color: cls.accent }} />
                         ) : (
@@ -455,18 +455,18 @@ function OnboardingContent() {
                     background: "linear-gradient(135deg, #131316 0%, #0A0A0C 100%)",
                   }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
+                  <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <Avatar name={displayName} size="md" />
-                      <div>
-                        <p className="text-white font-bold text-[15px]">{displayName}</p>
-                        <p className="text-[#8E8E93] text-[11px] flex items-center gap-1">
-                          <MapPin size={11} className="text-[#A24BFF]" /> {location}
+                      <div className="min-w-0">
+                        <p className="text-white font-bold text-[15px] truncate">{displayName}</p>
+                        <p className="text-[#8E8E93] text-[11px] flex items-center gap-1 truncate">
+                          <MapPin size={11} className="text-[#A24BFF] shrink-0" /> {location}
                         </p>
                       </div>
                     </div>
                     <span
-                      className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border"
+                      className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border shrink-0"
                       style={{
                         backgroundColor: `${activeClassConfig.accent}15`,
                         color: activeClassConfig.accent,

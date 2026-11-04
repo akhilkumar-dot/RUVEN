@@ -111,7 +111,6 @@ export default function FoundersHubPage() {
   const [search, setSearch] = useState("");
   const [selectedIndustry, setSelectedIndustry] = useState("All");
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
-  const [navTab, setNavTab] = useState("hub");
 
   const filteredFounders = SEED_FOUNDERS.filter((founder) => {
     const matchesIndustry = selectedIndustry === "All" || founder.industry === selectedIndustry;
@@ -301,9 +300,7 @@ export default function FoundersHubPage() {
       </main>
 
       <BottomDock
-        activeTab={navTab}
-        tabs={[{ key: "hub", label: "Founders Hub" }]}
-        onTabChange={setNavTab}
+        activeTab="hub"
         userName={user?.userHandle ? `@${user.userHandle}` : "Founder"}
       />
     </div>
