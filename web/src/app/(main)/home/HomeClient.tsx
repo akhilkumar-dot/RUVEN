@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { TopBar } from "@/ui/TopBar";
-import { BottomDock } from "@/ui/BottomDock";
+import { BottomDock, NAV_TABS } from "@/ui/BottomDock";
 import { Avatar } from "@/ui/Avatar";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { TimeAgo } from "@/ui/TimeAgo";
@@ -219,8 +219,11 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
 };
 
 const HOME_TABS = [
-  { key: "dashboard", label: "Ecosystem" },
-  { key: "feed", label: "Community Feed" },
+  { key: "home", label: "Home" },
+  { key: "discover", label: "Discover" },
+  { key: "hub", label: "Hub" },
+  { key: "ideas", label: "Ideas" },
+  { key: "meetups", label: "Meetups" },
 ];
 
 export default function HomeClient() {
@@ -233,7 +236,7 @@ export default function HomeClient() {
 
   const config = ROLE_CONFIGS[activeRole];
 
-  const [activeTab, setActiveTab] = useState<string>("dashboard");
+  const [activeTab, setActiveTab] = useState("dashboard"); // Internal page tab: dashboard or feed
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [feedLoading, setFeedLoading] = useState(false);
   const [newPostText, setNewPostText] = useState("");
@@ -354,17 +357,17 @@ export default function HomeClient() {
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
-      {/* Top bar with internal NavDrawer */}
+      {/* Top bar */}
       <TopBar
         unreadCount={0}
       />
 
       {/* Main Content */}
       <main
-        className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24"
+        className="flex-1 overflow-y-auto pb-32 md:pb-24"
         id="main-content"
       >
-        <div className="px-3 sm:px-6 lg:px-8 pt-4 max-w-[440px] md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto w-full">
+        <div className="px-3 sm:px-6 lg:px-8 pt-6 max-w-[440px] md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto w-full">
           {/* ══════════ TOP ROW: ACCOUNT CLASS + DAILY QUOTE (B1) ══════════ */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             {/* Single Account Class Header */}
@@ -464,7 +467,7 @@ export default function HomeClient() {
               </div>
 
               {/* 4 Real Server-Computed Stats Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
                   {
                     label: "Connections",
@@ -507,10 +510,10 @@ export default function HomeClient() {
                         {s.trend}
                       </span>
                     </div>
-                    <p className="text-white text-[18px] sm:text-[22px] font-bold tracking-tight leading-tight truncate">
+                    <p className="text-white text-[16px] sm:text-[22px] font-bold tracking-tight leading-tight break-words">
                       {s.value}
                     </p>
-                    <p className="text-[#8E8E93] text-[11px] mt-0.5 truncate">
+                    <p className="text-[#8E8E93] text-[10px] sm:text-[11px] mt-0.5 break-words">
                       {s.sublabel}
                     </p>
                   </div>
@@ -534,7 +537,7 @@ export default function HomeClient() {
                         setShowPostBox(true);
                       }
                     }}
-                    className="whitespace-nowrap px-3.5 py-2 rounded-xl bg-[#1C1C1E] border border-[#2A2A2E] text-white text-[13px] font-medium hover:border-white/30 flex items-center gap-1.5 shrink-0 transition-colors"
+                    className="whitespace-nowrap md:whitespace-normal px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-[#1C1C1E] border border-[#2A2A2E] text-white text-[11px] sm:text-[13px] font-medium hover:border-white/30 flex items-center gap-1.5 shrink-0 md:shrink transition-colors"
                   >
                     <span>{qa.label}</span>
                     {qa.badge && (
@@ -603,7 +606,7 @@ export default function HomeClient() {
                               >
                                 ✓
                               </span>
-                              <span className={cn("truncate", item.done ? "line-through text-[#6E6E73]" : "text-white font-medium")}>
+                              <span className={cn("break-words pr-2", item.done ? "line-through text-[#6E6E73]" : "text-white font-medium")}>
                                 {item.label}
                               </span>
                             </div>
@@ -651,8 +654,8 @@ export default function HomeClient() {
                     ) : (
                       <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] flex items-center justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                          <p className="text-white font-semibold text-[13px] truncate">{todayMeetups[0].title}</p>
-                          <p className="text-[#8E8E93] text-[11px] truncate">
+                          <p className="text-white font-semibold text-[13px] break-words">{todayMeetups[0].title}</p>
+                          <p className="text-[#8E8E93] text-[11px] break-words mt-0.5">
                             {todayMeetups[0].location} · {todayMeetups[0].attendee_count} attending
                           </p>
                         </div>
@@ -1018,12 +1021,16 @@ export default function HomeClient() {
 
       {/* Bottom dock */}
       <BottomDock
-        activeTab={activeTab}
+        activeTab="home"
         tabs={HOME_TABS}
-        onTabChange={(key) => setActiveTab(key)}
-        onCreateOpen={() => {
-          setActiveTab("feed");
-          setShowPostBox(true);
+        onTabChange={(key) => {
+          if (key === "home") {
+            setActiveTab("dashboard");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            const route = NAV_TABS.find((t) => t.key === key);
+            if (route) router.push(route.href);
+          }
         }}
         userName={user?.name || user?.userHandle || ""}
       />

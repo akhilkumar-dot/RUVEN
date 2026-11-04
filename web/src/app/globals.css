@@ -63,7 +63,7 @@
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: env(safe-area-inset-top, 0px);
+    scroll-padding-top: 100px;
     -webkit-text-size-adjust: 100%;
     overscroll-behavior-y: none;
   }

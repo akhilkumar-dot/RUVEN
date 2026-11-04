@@ -1,25 +1,39 @@
 "use client";
 
-import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Home,
+  Compass,
+  Zap,
+  Lightbulb,
+  Coffee,
+  MessageSquare,
+  FileText,
+  Building2,
+  User,
+  Crown,
+  Plus,
+  LayoutDashboard,
+  Rss
+} from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { Avatar } from "./Avatar";
-import { NavDrawer } from "./NavDrawer";
 
 // ── Route map for bottom nav ──────────────────────────────────
 export const NAV_TABS = [
-  { key: "home",      label: "Home",      href: "/home"      },
-  { key: "discover",  label: "Discover",  href: "/discover"  },
-  { key: "hub",       label: "Hub",       href: "/hub"       },
-  { key: "ideas",     label: "Ideas",     href: "/ideas"     },
-  { key: "meetups",   label: "Meetups",   href: "/meetups"   },
-  { key: "messages",  label: "Messages",  href: "/messages"  },
-  { key: "workspace", label: "Docs",      href: "/workspace" },
-  { key: "company",   label: "Company",   href: "/company"   },
-  { key: "profile",   label: "Profile",   href: "/profile"   },
-  { key: "plans",     label: "Plans",     href: "/plans"     },
+  { key: "home",      label: "Home",      href: "/home",      icon: Home },
+  { key: "dashboard", label: "Ecosystem", href: "/home",      icon: LayoutDashboard },
+  { key: "feed",      label: "Feed",      href: "/home",      icon: Rss },
+  { key: "discover",  label: "Discover",  href: "/discover",  icon: Compass },
+  { key: "hub",       label: "Hub",       href: "/hub",       icon: Zap },
+  { key: "ideas",     label: "Ideas",     href: "/ideas",     icon: Lightbulb },
+  { key: "meetups",   label: "Meetups",   href: "/meetups",   icon: Coffee },
+  { key: "messages",  label: "Messages",  href: "/messages",  icon: MessageSquare },
+  { key: "workspace", label: "Docs",      href: "/workspace", icon: FileText },
+  { key: "company",   label: "Company",   href: "/company",   icon: Building2 },
+  { key: "profile",   label: "Profile",   href: "/profile",   icon: User },
+  { key: "plans",     label: "Plans",     href: "/plans",     icon: Crown },
 ] as const;
 
 const PRIMARY_TABS = NAV_TABS.filter(t =>
@@ -29,132 +43,136 @@ const PRIMARY_TABS = NAV_TABS.filter(t =>
 interface BottomDockProps {
   /** Override visible tabs — defaults to the 5 primary tabs */
   tabs?: Array<{ key: string; label: string }>;
-  onMenuOpen?: () => void;
   userPhotoUrl?: string | null;
   userName?: string;
   onProfileOpen?: () => void;
   className?: string;
+  activeTab?: string;
+  onTabChange?: (key: string) => void;
+  onCreateOpen?: () => void;
 }
 
 export function BottomDock({
   tabs,
-  onMenuOpen,
   userPhotoUrl,
   userName = "Me",
   onProfileOpen,
   className,
+  activeTab: controlledActiveTab,
+  onTabChange,
+  onCreateOpen,
 }: BottomDockProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Derive active tab from the current route (single source of truth)
-  const activeTab =
-    NAV_TABS.find((t) => pathname?.startsWith(t.href))?.key ?? "home";
+  // Derive active tab from controlled prop or current route
+  const activeTab = controlledActiveTab ?? 
+    (NAV_TABS.find((t) => pathname?.startsWith(t.href))?.key ?? "home");
 
   const visibleTabs = tabs ?? PRIMARY_TABS;
 
   function handleTabChange(key: string) {
-    const route = NAV_TABS.find((t) => t.key === key);
-    if (route) router.push(route.href);
-  }
-
-  function handleArrowClick() {
-    if (onMenuOpen) {
-      onMenuOpen();
+    if (onTabChange) {
+      onTabChange(key);
     } else {
-      setIsDrawerOpen(true);
+      const route = NAV_TABS.find((t) => t.key === key);
+      if (route) router.push(route.href);
     }
   }
 
   return (
-    <>
-      <NavDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
+    <nav
+      aria-label="Main navigation"
+      className={cn(
+        "fixed bottom-0 inset-x-0 z-50 pointer-events-none pb-[env(safe-area-inset-bottom)]",
+        className
+      )}
+    >
+      {/* Subtle gradient fade behind the dock */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
+        aria-hidden="true"
       />
 
-      <nav
-        aria-label="Main navigation"
-        className={cn(
-          // Full-width fixed dock at the bottom, clears the home indicator
-          "fixed bottom-0 inset-x-0 z-50 pointer-events-none",
-          "pb-[max(12px,env(safe-area-inset-bottom))]",
-          "bg-black/90 backdrop-blur-xl border-t border-[#1C1C1E]",
-          className
-        )}
-      >
-        {/* Subtle gradient fade so cards scroll out cleanly underneath the dock */}
-        <div
-          className="inset-x-0 top-[-96px] bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
-          aria-hidden="true"
-        />
-
+      <div className="relative mx-auto max-w-lg sm:max-w-2xl md:max-w-3xl px-4 pb-6 md:pb-8">
         <div
           className={cn(
-            // Centered pill; pointer-events restored so the pill is clickable
-            "mx-auto max-w-xl flex items-center gap-1.5 px-2 sm:px-3 pt-2 sm:pt-3",
+            "flex items-center justify-between gap-2 p-2",
+            "bg-[#0E0E10]/80 backdrop-blur-3xl border border-white/5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.6)]",
             "pointer-events-auto",
-            "md:px-4 md:py-2",
             className
           )}
         >
-          {/* Arrow button to open sidebar */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 400, damping: 20 }}
-            onClick={handleArrowClick}
-            aria-label="Open sidebar menu"
-            title="Open sidebar"
-            className="w-7 h-7 sm:w-9 sm:h-9 rounded-full p-[2px] shrink-0 group"
-            style={{ background: "linear-gradient(135deg, #A24BFF, #FF3D81, #FF8A3D)" }}
-          >
-            <span className="flex items-center justify-center w-full h-full rounded-full bg-black text-white group-hover:text-[#A24BFF] transition-colors">
-              <ArrowRight className="w-3 h-3 sm:w-[16px] sm:h-[16px]" />
-            </span>
-          </motion.button>
+          {/* Main Tabs */}
+          <div className="flex-1 flex items-center justify-around gap-1 px-1 sm:px-2">
+            {visibleTabs.map((tab) => {
+              const navTab = NAV_TABS.find(t => t.key === tab.key);
+              const Icon = navTab?.icon || Home;
+              const isActive = activeTab === tab.key;
 
-          {/* Segmented tabs */}
-          <div
-            className="flex-1 flex items-center justify-center gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide px-0.5"
-            role="tablist"
-          >
-            {visibleTabs.map((tab) => (
-              <button
-                key={tab.key}
-                role="tab"
-                aria-selected={activeTab === tab.key}
-                onClick={() => handleTabChange(tab.key)}
-                className={cn(
-                  "relative px-1 sm:px-2.5 py-0.5 sm:py-1 text-[9px] sm:text-[12px] font-medium rounded-full whitespace-nowrap transition-colors shrink-0",
-                  activeTab === tab.key
-                    ? "text-white"
-                    : "text-[#6E6E73] hover:text-[#A1A1A6]"
-                )}
-              >
-                {tab.label}
-                {activeTab === tab.key && (
-                  <motion.span
-                    layoutId="active-tab-pill"
-                    className="absolute inset-0 rounded-full bg-[#1C1C1E]"
-                    style={{ zIndex: -1 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-              </button>
-            ))}
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => handleTabChange(tab.key)}
+                  className={cn(
+                    "relative flex items-center justify-center gap-2 w-11 sm:w-auto sm:px-3.5 lg:px-4 h-11 rounded-2xl transition-all duration-300",
+                    isActive ? "text-white" : "text-[#8E8E93] hover:text-[#A1A1A6] hover:bg-white/5"
+                  )}
+                >
+                  <Icon className={cn("w-5 h-5 shrink-0 transition-transform duration-300", isActive ? "scale-110" : "scale-100")} />
+
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.span
+                        layoutId="active-pill"
+                        className="absolute inset-0 bg-white/10 rounded-2xl -z-10"
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  {isActive && (
+                    <motion.span 
+                      layoutId="active-dot"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="absolute -bottom-1 w-1 h-1 bg-gradient-to-r from-[#A24BFF] to-[#FF3D81] rounded-full"
+                    />
+                  )}
+
+                  {/* Label — hidden on small screens, shown once there is room */}
+                  <span className="hidden sm:inline text-[13px] font-medium whitespace-nowrap">
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Avatar → Profile */}
-          <button
-            onClick={onProfileOpen ?? (() => router.push("/profile"))}
-            aria-label="Open profile"
-            className="shrink-0 p-0.5"
-          >
-            <Avatar name={userName} photoUrl={userPhotoUrl} size="sm" />
-          </button>
+          {/* Create / Action Button or Avatar */}
+          <div className="flex items-center gap-2 pr-1">
+            {onCreateOpen && (
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                onClick={onCreateOpen}
+                className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#A24BFF] to-[#FF3D81] flex items-center justify-center text-white shadow-lg shadow-[#A24BFF]/20 transition-all"
+              >
+                <Plus className="w-5 h-5" />
+              </motion.button>
+            )}
+            
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.05 }}
+              onClick={onProfileOpen ?? (() => router.push("/profile"))}
+              className="w-10 h-10 rounded-full border border-white/10 overflow-hidden transition-all shrink-0"
+            >
+              <Avatar name={userName} photoUrl={userPhotoUrl} size="sm" className="w-full h-full" />
+            </motion.button>
+          </div>
         </div>
-      </nav>
-    </>
+      </div>
+    </nav>
   );
 }

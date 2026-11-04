@@ -29,7 +29,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-black flex flex-col items-center justify-center px-6">
+    <div className="min-h-dvh bg-black flex flex-col items-center justify-center px-6 pb-24">
       {/* Background glow */}
       <div
         className="pointer-events-none fixed inset-0 -z-10"

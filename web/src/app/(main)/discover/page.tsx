@@ -389,25 +389,27 @@ export default function DiscoverPage() {
 
       {/* Discover sub-tabs */}
       <div className="flex overflow-x-auto scrollbar-hide gap-2 px-4 sm:px-6 lg:px-8 pb-3 max-w-6xl mx-auto w-full">
-        {DISCOVER_TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
-            className={cn(
-              "flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors shrink-0",
-              activeTab === t.key
-                ? "bg-[#A24BFF] text-white"
-                : "bg-[#1C1C1E] text-[#6E6E73] hover:text-white border border-[#2A2A2D]"
-            )}
-          >
-            {t.icon}
-            {t.label}
-          </button>
-        ))}
+        <div className="flex gap-2 pr-10">
+          {DISCOVER_TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setActiveTab(t.key)}
+              className={cn(
+                "flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors shrink-0",
+                activeTab === t.key
+                  ? "bg-[#A24BFF] text-white"
+                  : "bg-[#1C1C1E] text-[#6E6E73] hover:text-white border border-[#2A2A2D]"
+              )}
+            >
+              {t.icon}
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24">
+      <main className="flex-1 overflow-y-auto pb-32 md:pb-24">
         <div className="px-4 sm:px-6 lg:px-8 py-2 max-w-6xl mx-auto w-full">
           {/* Skeletons while loading */}
           {loading && (
