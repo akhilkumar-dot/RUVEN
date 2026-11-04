@@ -49,7 +49,7 @@ function AuthCallbackContent() {
         // Fetch or create the user record in public.users to get their class
         let { data: dbUser } = await supabase
           .from("users")
-          .select("id, user_handle, email, type, name")
+          .select("id, user_handle, email, type, name, avatar_url")
           .eq("id", authUser.id)
           .maybeSingle();
 
@@ -71,7 +71,7 @@ function AuthCallbackContent() {
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             })
-            .select("id, user_handle, email, type, name")
+            .select("id, user_handle, email, type, name, avatar_url")
             .maybeSingle();
           dbUser = created ?? dbUser;
         }
@@ -91,6 +91,7 @@ function AuthCallbackContent() {
           userHandle: resolvedHandle,
           email: dbUser?.email || authUser.email || "",
           type: resolvedType,
+          avatarUrl: dbUser?.avatar_url || avatarUrl || undefined,
         });
 
         // Google users sign in without any profile details, so prompt them to

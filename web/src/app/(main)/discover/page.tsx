@@ -80,7 +80,7 @@ function PersonCard({
       animate={{ opacity: 1, y: 0 }}
       className="flex items-center gap-3 bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 hover:border-[#2A2A2D] transition-colors min-w-0"
     >
-      <Avatar name={person.name} size="md" className="shrink-0" />
+      <Avatar name={person.name} photoUrl={person.avatar_url} size="md" className="shrink-0" />
       <div className="flex-1 min-w-0">
         <Link href={`/u/${person.user_handle}`} className="text-white font-semibold text-[15px] leading-tight hover:underline truncate block">
           @{person.user_handle}
@@ -207,7 +207,7 @@ function InvestorCard({
     >
       <div>
         <div className="flex items-center gap-3 mb-2.5">
-          <Avatar name={inv.name} size="md" />
+          <Avatar name={inv.name} photoUrl={inv.avatar_url} size="md" />
           <div className="min-w-0 flex-1">
             <Link href={`/u/${inv.user_handle}`} className="text-white font-semibold text-[15px] hover:underline truncate block">
               {inv.name}

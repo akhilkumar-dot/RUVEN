@@ -17,6 +17,7 @@ export interface AuthUser {
   email: string;
   name?: string;
   type: AccountType;
+  avatarUrl?: string;
 }
 
 interface AuthState {
@@ -39,8 +40,10 @@ interface AuthState {
   logoutAll: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
   setUser: (user: AuthUser | null) => void;
+  /** Update the signed-in user's avatar so nav/home reflect a photo change instantly */
+  setAvatarUrl: (url: string) => void;
   /** Called by OAuth callback page to hydrate session from redirect params */
-  setAuth: (opts: { accessToken: string; userHandle: string; type?: AccountType; userId?: string; email?: string }) => void;
+  setAuth: (opts: { accessToken: string; userHandle: string; type?: AccountType; userId?: string; email?: string; avatarUrl?: string }) => void;
 }
 
 // ── Store with sessionStorage persistence ───────────────────────
@@ -54,6 +57,11 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user) =>
         set({ user, isAuthenticated: user !== null }),
+
+      setAvatarUrl: (url) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, avatarUrl: url } : null,
+        })),
 
       switchAccountType: async (type: AccountType) => {
         const currentUser = get().user;
@@ -72,7 +80,7 @@ export const useAuthStore = create<AuthState>()(
         set({ user: { ...currentUser, type } });
       },
 
-      setAuth: ({ accessToken, userHandle, type = "STARTUP_FOUNDER", userId, email }) => {
+      setAuth: ({ accessToken, userHandle, type = "STARTUP_FOUNDER", userId, email, avatarUrl }) => {
         setAccessToken(accessToken);
         set({
           accessToken,
@@ -82,6 +90,7 @@ export const useAuthStore = create<AuthState>()(
             userHandle,
             email: email || `${userHandle}@ruven.app`,
             type,
+            avatarUrl,
           },
         });
       },

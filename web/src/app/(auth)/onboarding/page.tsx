@@ -96,6 +96,7 @@ function OnboardingContent() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const switchAccountType = useAuthStore((s) => s.switchAccountType);
+  const setAvatarUrl = useAuthStore((s) => s.setAvatarUrl);
 
   const [step, setStep] = useState(0); // 0=Class selection, 1=Profile details, 2=Welcome preview
   const [selectedClass, setSelectedClass] = useState<AccountType>(user?.type || "STARTUP_FOUNDER");
@@ -167,6 +168,7 @@ function OnboardingContent() {
           skills: selectedSkills.join(", "),
           photo_url: photoUrl,
         });
+        if (photoUrl) setAvatarUrl(photoUrl);
       }
     } catch {
       // Ignore background persistence errors

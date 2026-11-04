@@ -138,7 +138,7 @@ function ConvoList({
                 )}
               >
                 <div className="relative shrink-0">
-                  <Avatar name={c.counterpart.name || c.counterpart.user_handle} size="md" />
+                  <Avatar name={c.counterpart.name || c.counterpart.user_handle} photoUrl={c.counterpart.avatar_url} size="md" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
@@ -271,7 +271,7 @@ function ChatThread({
           <ChevronLeft size={20} />
         </button>
 
-        <Avatar name={convo.counterpart.name || counterpartHandle} size="md" />
+        <Avatar name={convo.counterpart.name || counterpartHandle} photoUrl={convo.counterpart.avatar_url} size="md" />
 
         <div className="flex-1 min-w-0">
           <p className="text-white font-semibold text-[15px] truncate">{counterpartName}</p>
@@ -318,6 +318,7 @@ function ChatThread({
                   {!isMe && (
                     <Avatar
                       name={convo.counterpart.name || convo.counterpart.user_handle}
+                      photoUrl={convo.counterpart.avatar_url}
                       size="sm"
                       className="shrink-0 mt-auto mb-1"
                     />

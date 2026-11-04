@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { Avatar } from "./Avatar";
+import { useAuthStore } from "@/lib/store/authStore";
 
 // ── Route map for bottom nav ──────────────────────────────────
 export const NAV_TABS = [
@@ -64,6 +65,12 @@ export function BottomDock({
 }: BottomDockProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const authUser = useAuthStore((s) => s.user);
+
+  // Fall back to the signed-in user's own photo/handle when not overridden,
+  // so the dock reflects the profile photo on every page.
+  const resolvedPhotoUrl = userPhotoUrl ?? authUser?.avatarUrl ?? undefined;
+  const resolvedName = userName === "Me" ? (authUser?.userHandle || "Me") : userName;
 
   // Derive active tab from controlled prop or current route
   const activeTab = controlledActiveTab ?? 
@@ -154,7 +161,7 @@ export function BottomDock({
               onClick={onProfileOpen ?? (() => router.push("/profile"))}
               className="w-10 h-10 rounded-full border border-white/10 overflow-hidden transition-all shrink-0"
             >
-              <Avatar name={userName} photoUrl={userPhotoUrl} size="sm" className="w-full h-full" />
+              <Avatar name={resolvedName} photoUrl={resolvedPhotoUrl} size="sm" className="w-full h-full" />
             </motion.button>
           </div>
         </div>

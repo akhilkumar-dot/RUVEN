@@ -118,7 +118,7 @@ export const supabaseAuth = {
     // Fetch user row from public.users to get their immutable single account class
     const { data: dbUser } = await supabase
       .from("users")
-      .select("id, user_handle, email, type, name")
+      .select("id, user_handle, email, type, name, avatar_url")
       .eq("id", authUser.id)
       .maybeSingle();
 
@@ -133,6 +133,8 @@ export const supabaseAuth = {
         userHandle: resolvedHandle,
         email: dbUser?.email || authUser.email || emailToUse,
         type: resolvedType,
+        name: dbUser?.name || undefined,
+        avatarUrl: dbUser?.avatar_url || undefined,
       },
     };
   },
@@ -177,7 +179,7 @@ export const supabaseAuth = {
     const authUser = data.session.user;
     const { data: dbUser } = await supabase
       .from("users")
-      .select("id, user_handle, email, type")
+      .select("id, user_handle, email, type, name, avatar_url")
       .eq("id", authUser.id)
       .maybeSingle();
 
@@ -192,6 +194,8 @@ export const supabaseAuth = {
         userHandle: resolvedHandle,
         email: authUser.email || "",
         type: resolvedType,
+        name: dbUser?.name || undefined,
+        avatarUrl: dbUser?.avatar_url || undefined,
       },
     };
   },

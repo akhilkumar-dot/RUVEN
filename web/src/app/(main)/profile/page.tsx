@@ -58,6 +58,7 @@ function ProfileSkeleton() {
 
 export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
+  const setAvatarUrl = useAuthStore((s) => s.setAvatarUrl);
   const [profileData, setProfileData] = useState<ProfileState | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -162,6 +163,7 @@ export default function ProfilePage() {
             photo_url: data.photoUrl,
           }
         );
+        if (data.photoUrl) setAvatarUrl(data.photoUrl);
       }}
     />
   );

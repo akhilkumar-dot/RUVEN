@@ -1452,13 +1452,20 @@ export const dataService = {
 
     if (profileResult.error) throw profileResult.error;
 
-    if (userUpdates && Object.keys(userUpdates).length > 0) {
+    // Mirror the profile photo onto users.avatar_url so it also shows up
+    // everywhere avatars are rendered (nav dock, feed, discover, other users).
+    const userSyncUpdates: { name?: string; avatar_url?: string; updated_at: string } = {
+      ...userUpdates,
+      updated_at: new Date().toISOString(),
+    };
+    if (profileUpdates.photo_url) {
+      userSyncUpdates.avatar_url = profileUpdates.photo_url;
+    }
+
+    if (Object.keys(userSyncUpdates).length > 1) {
       const userResult = await supabase
         .from("users")
-        .update({
-          ...userUpdates,
-          updated_at: new Date().toISOString(),
-        })
+        .update(userSyncUpdates)
         .eq("id", userId);
 
       if (userResult.error) throw userResult.error;

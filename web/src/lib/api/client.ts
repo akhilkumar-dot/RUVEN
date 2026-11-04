@@ -33,6 +33,8 @@ export interface AuthResponse {
     userHandle: string;
     email: string;
     type: "INDIVIDUAL" | "INVESTOR" | "STARTUP_FOUNDER" | "COMPANY_OWNER";
+    name?: string;
+    avatarUrl?: string;
   };
 }
 

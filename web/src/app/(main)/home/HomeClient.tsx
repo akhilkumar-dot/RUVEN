@@ -52,6 +52,7 @@ interface FeedPost {
   authorName: string;
   authorHandle: string;
   authorHeadline: string;
+  authorAvatarUrl?: string | null;
   body: string;
   likeCount: number;
   commentCount: number;
@@ -65,6 +66,7 @@ function dbPostToUiPost(p: DbFeedPost): FeedPost {
     authorName: p.author.name || p.author.user_handle || "Community Member",
     authorHandle: p.author.user_handle,
     authorHeadline: p.author.type?.replace(/_/g, " ") || "Community Member",
+    authorAvatarUrl: p.author.avatar_url,
     body: p.body,
     likeCount: p.like_count,
     commentCount: p.comment_count,
@@ -382,6 +384,7 @@ export default function HomeClient() {
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <Avatar 
                     name={user?.userHandle ? `@${user.userHandle}` : "Founder"} 
+                    photoUrl={user?.avatarUrl}
                     size="md" 
                     className="shrink-0"
                   />
@@ -788,7 +791,7 @@ export default function HomeClient() {
                       onClick={() => setShowPostBox(true)}
                       className="w-full flex items-center gap-3 text-left py-2 px-3 rounded-xl bg-[#1C1C1E] text-[#8E8E93] text-[14px] hover:text-white transition-colors"
                     >
-                      <Avatar name={user?.name || user?.userHandle || "Me"} size="sm" />
+                      <Avatar name={user?.name || user?.userHandle || "Me"} photoUrl={user?.avatarUrl} size="sm" />
                       <span>Share an update…</span>
                     </button>
                   ) : (
@@ -872,7 +875,7 @@ export default function HomeClient() {
                       <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 hover:border-[#2A2A2E] transition-colors">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
-                            <Avatar name={post.authorName} size="md" />
+                            <Avatar name={post.authorName} photoUrl={post.authorAvatarUrl} size="md" />
                             <div>
                               <div className="flex items-center gap-1.5">
                                 <p className="text-white font-semibold text-[15px] leading-tight truncate max-w-[120px]">
