@@ -18,6 +18,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
+import { BridgeLogo } from "@/ui/BridgeLogo";
 import { TopBar } from "@/ui/TopBar";
 import { BottomDock } from "@/ui/BottomDock";
 import { GradientRingButton } from "@/ui/GradientRingButton";
