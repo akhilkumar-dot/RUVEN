@@ -28,14 +28,24 @@ interface NavDrawerProps {
   onClose: () => void;
 }
 
-const NAV_ITEMS = [
+interface NavItem {
+  key: string;
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+  badge?: string;
+  highlight?: boolean;
+  count?: number;
+}
+
+const NAV_ITEMS: NavItem[] = [
   { key: "home", label: "Home & Feed", href: "/home", icon: <Home size={18} /> },
   { key: "discover", label: "Discover Ecosystem", href: "/discover", icon: <Compass size={18} />, badge: "Explore" },
   { key: "ideas", label: "Ideas & Co-founders", href: "/ideas", icon: <Lightbulb size={18} /> },
   { key: "hub", label: "Founders Hub", href: "/hub", icon: <Zap size={18} /> },
   { key: "meetups", label: "Meetups & Pitch", href: "/meetups", icon: <Coffee size={18} /> },
   { key: "company", label: "My Company", href: "/company", icon: <Building2 size={18} /> },
-  { key: "messages", label: "Messages", href: "/messages", icon: <MessageSquare size={18} />, count: 3 },
+  { key: "messages", label: "Messages", href: "/messages", icon: <MessageSquare size={18} /> },
   { key: "workspace", label: "Workspace Docs", href: "/workspace", icon: <FileText size={18} /> },
   { key: "plans", label: "Pro & Verification", href: "/plans", icon: <Crown size={18} />, highlight: true },
   { key: "profile", label: "My Profile", href: "/profile", icon: <User size={18} /> },
@@ -47,8 +57,8 @@ export function NavDrawer({ isOpen, onClose }: NavDrawerProps) {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
-  const displayName = user?.userHandle ? `@${user.userHandle}` : "Aarav Reddy";
-  const userType = user?.type ? user.type.replace(/_/g, " ") : "Startup Founder";
+  const displayName = user?.name || (user?.userHandle ? `@${user.userHandle}` : "Ecosystem Member");
+  const userType = user?.type ? user.type.replace(/_/g, " ") : "Member";
 
   function handleLogout() {
     logout();

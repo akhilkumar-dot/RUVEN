@@ -308,7 +308,7 @@ function SignUpPageContent() {
               label="Email or Username"
               type="text"
               autoComplete="username"
-              placeholder="aarav@startup.in or handle"
+              placeholder="you@example.com or handle"
               value={loginEmail}
               onChange={(e) => setLoginEmail(e.target.value)}
             />
@@ -460,7 +460,7 @@ function SignUpPageContent() {
                       <PillInput
                         label="Full Name"
                         autoComplete="name"
-                        placeholder="Aarav Reddy"
+                        placeholder="Alex Kumar"
                         error={errors.name?.message}
                         {...reg("name")}
                       />
@@ -468,7 +468,7 @@ function SignUpPageContent() {
                         label="Email"
                         type="email"
                         autoComplete="email"
-                        placeholder="aarav@startup.in"
+                        placeholder="alex@company.com"
                         error={errors.email?.message}
                         {...reg("email")}
                       />

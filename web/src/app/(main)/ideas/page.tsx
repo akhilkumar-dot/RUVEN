@@ -2,87 +2,49 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lightbulb, ThumbsUp, MessageCircle, Tag, Plus, X, ChevronRight, Flame, Send, CheckCircle2 } from "lucide-react";
+import { Lightbulb, ThumbsUp, Tag, Plus, X, ChevronRight, Flame, Send, CheckCircle2 } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
 import { TopBar } from "@/ui/TopBar";
 import { BottomDock } from "@/ui/BottomDock";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { TimeAgo } from "@/ui/TimeAgo";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase/client";
 import { useAuthStore } from "@/lib/store/authStore";
-
-interface Idea {
-  id: string;
-  authorHandle: string;
-  title: string;
-  description: string;
-  tags: string[];
-  upvotes: number;
-  comments: number;
-  createdAt: string;
-  upvoted?: boolean;
-  lookingFor?: string;
-}
-
-const SEED_IDEAS: Idea[] = [
-  {
-    id: "e0000000-0000-0000-0000-000000000001",
-    authorHandle: "priya_founder",
-    title: "Vernacular Voice AI for Rural Kiranas",
-    description: "Rural NBFCs and kiranas lose 40% of customers due to language friction. An offline-first voice ordering LLM in 8 Indian regional languages.",
-    tags: ["Fintech", "AI/ML", "Rural India", "B2B SaaS"],
-    upvotes: 84,
-    comments: 12,
-    createdAt: "2026-11-03T16:00:00.000Z",
-    lookingFor: "Technical co-founder (ML / Whisper fine-tuning)",
-  },
-  {
-    id: "e0000000-0000-0000-0000-000000000002",
-    authorHandle: "arjun_indiv",
-    title: "DevSecOps Compliance Guardrails for FinTechs",
-    description: "Automated RBI cybersecurity compliance auditor for early-stage payment aggregators and NBFCs. Auto-generates audit reports.",
-    tags: ["Cybersecurity", "Fintech", "DevTools"],
-    upvotes: 56,
-    comments: 7,
-    createdAt: "2026-11-03T13:00:00.000Z",
-    lookingFor: "GTM co-founder with banking relationships",
-  },
-  {
-    id: "3",
-    authorHandle: "neha_design",
-    title: "Mental health platform for Indian startup founders",
-    description: "Burnout is an epidemic in India's startup ecosystem. A peer-support network + curated therapist connect platform specifically designed for founder stress.",
-    tags: ["Healthtech", "Mental Health", "Founders"],
-    upvotes: 231,
-    comments: 54,
-    createdAt: "2026-11-03T00:00:00.000Z",
-    lookingFor: "Clinical psychologist co-founder or advisor",
-  },
-  {
-    id: "4",
-    authorHandle: "deepstack_ai",
-    title: "Automated GST compliance engine using document AI",
-    description: "99% of Indian SMEs struggle with GST filing. A document AI that reads invoices, auto-categorises, and files returns seamlessly.",
-    tags: ["Fintech", "AI/ML", "SME", "GovTech"],
-    upvotes: 178,
-    comments: 41,
-    createdAt: "2026-11-02T18:00:00.000Z",
-  },
-];
+import { dataService, type StartupIdea } from "@/lib/api/dataService";
 
 // ── Collaborate Modal ─────────────────────────────────────────
-function CollaborateModal({ idea, onClose }: { idea: Idea; onClose: () => void }) {
+function CollaborateModal({
+  idea,
+  currentUserId,
+  onClose,
+}: {
+  idea: StartupIdea;
+  currentUserId?: string;
+  onClose: () => void;
+}) {
   const [pitch, setPitch] = useState("");
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!pitch.trim()) return;
-    setSent(true);
-    setTimeout(() => {
-      onClose();
-    }, 1800);
+    if (!pitch.trim() || !currentUserId || submitting) return;
+    setSubmitting(true);
+    try {
+      await dataService.createDirectChat(currentUserId, idea.author_id, `[Collaboration Ask for "${idea.title}"]\n${pitch.trim()}`);
+      setSent(true);
+      setTimeout(() => {
+        onClose();
+      }, 1600);
+    } catch (err) {
+      console.error("Collaborate request error:", err);
+      setSent(true);
+      setTimeout(() => {
+        onClose();
+      }, 1600);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -95,25 +57,27 @@ function CollaborateModal({ idea, onClose }: { idea: Idea; onClose: () => void }
       >
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-[16px] text-white">Apply to Collaborate</h3>
-          <button onClick={onClose} className="text-[#8E8E93] hover:text-white"><X size={18} /></button>
+          <button onClick={onClose} className="text-[#8E8E93] hover:text-white">
+            <X size={18} />
+          </button>
         </div>
 
         <div>
           <p className="text-[13px] text-[#A24BFF] font-semibold">{idea.title}</p>
-          <p className="text-[12px] text-[#8E8E93] mt-0.5">Author: @{idea.authorHandle}</p>
-          {idea.lookingFor && (
+          <p className="text-[12px] text-[#8E8E93] mt-0.5">Author: @{idea.author.user_handle}</p>
+          {idea.looking_for && (
             <p className="text-[11px] text-[#D4FF3A] bg-[#D4FF3A]/10 border border-[#D4FF3A]/20 px-2 py-1 rounded-lg mt-2">
-              Looking for: {idea.lookingFor}
+              Looking for: {idea.looking_for}
             </p>
           )}
         </div>
 
         {sent ? (
           <div className="py-6 text-center space-y-2">
-            <CheckCircle2 size={36} className="text-emerald-400 mx-auto animate-bounce" />
-            <p className="font-bold text-white text-[15px]">Collaboration Request Sent!</p>
+            <CheckCircle2 size={36} className="text-emerald-400 mx-auto" />
+            <p className="font-bold text-white text-[15px]">Message & Request Sent!</p>
             <p className="text-[#8E8E93] text-[12px]">
-              @{idea.authorHandle} will review your application. Upon acceptance, a direct chat will open automatically.
+              A direct conversation has been started with @{idea.author.user_handle}.
             </p>
           </div>
         ) : (
@@ -130,8 +94,8 @@ function CollaborateModal({ idea, onClose }: { idea: Idea; onClose: () => void }
                 className="w-full bg-[#1A1A1E] text-white rounded-xl p-3 text-[13px] border border-[#2A2A2E] outline-none focus:border-[#A24BFF] resize-none"
               />
             </div>
-            <GradientRingButton size="md" type="submit" className="w-full" disabled={!pitch.trim()}>
-              <Send size={14} /> Send Collaboration Application
+            <GradientRingButton size="md" type="submit" className="w-full" disabled={!pitch.trim() || submitting}>
+              <Send size={14} /> {submitting ? "Sending…" : "Send Collaboration Application"}
             </GradientRingButton>
           </form>
         )}
@@ -140,136 +104,135 @@ function CollaborateModal({ idea, onClose }: { idea: Idea; onClose: () => void }
   );
 }
 
-function IdeaCard({ idea, onCollaborate }: { idea: Idea; onCollaborate: (idea: Idea) => void }) {
-  const [upvoted, setUpvoted] = useState(idea.upvoted ?? false);
-  const [count, setCount] = useState(idea.upvotes);
+// ── Idea Card ─────────────────────────────────────────────────
+function IdeaCard({
+  idea,
+  currentUserId,
+  onCollaborate,
+  onUpvoteToggle,
+}: {
+  idea: StartupIdea;
+  currentUserId?: string;
+  onCollaborate: (idea: StartupIdea) => void;
+  onUpvoteToggle: (ideaId: string) => void;
+}) {
+  const isUpvoted = Boolean(idea.hasUpvoted);
+  const tagList = idea.tags ? idea.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 h-full flex flex-col justify-between hover:border-[#2A2A2E] transition-colors"
+      className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 h-full flex flex-col justify-between hover:border-[#2A2A2D] transition-colors"
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Avatar name={idea.authorHandle} size="sm" />
-          <span className="text-[#A1A1A6] text-[13px]">@{idea.authorHandle}</span>
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Avatar name={idea.author.name || idea.author.user_handle} size="sm" />
+            <span className="text-[#A1A1A6] text-[13px]">@{idea.author.user_handle}</span>
+          </div>
+          <TimeAgo date={idea.created_at} fallback="today" className="text-[#6E6E73] text-[12px]" />
         </div>
-        <TimeAgo date={idea.createdAt} fallback="2h" className="text-[#6E6E73] text-[12px]" />
+
+        <h3 className="text-white font-semibold text-[16px] leading-snug">{idea.title}</h3>
+        <p className="text-[#A1A1A6] text-[14px] leading-relaxed line-clamp-3">{idea.description}</p>
+
+        {tagList.length > 0 && (
+          <div className="flex gap-1.5 flex-wrap pt-1">
+            {tagList.map((tag) => (
+              <span key={tag} className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#1C1C1E] border border-[#2A2A2D] text-[11px] text-[#A1A1A6]">
+                <Tag size={9} />
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {idea.looking_for && (
+          <div className="flex items-start gap-2 bg-[#A24BFF]/10 border border-[#A24BFF]/20 rounded-xl px-3 py-2">
+            <span className="text-[#A24BFF] text-[11px] font-semibold shrink-0 mt-0.5">Looking for</span>
+            <span className="text-[#A24BFF] text-[12px] leading-snug">{idea.looking_for}</span>
+          </div>
+        )}
       </div>
 
-      <h3 className="text-white font-semibold text-[16px] leading-snug">{idea.title}</h3>
-      <p className="text-[#A1A1A6] text-[14px] leading-relaxed">{idea.description}</p>
-
-      <div className="flex gap-1.5 flex-wrap">
-        {idea.tags.map((tag) => (
-          <span key={tag} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#1C1C1E] border border-[#2A2A2D] text-[11px] text-[#A1A1A6]">
-            <Tag size={9} />{tag}
-          </span>
-        ))}
-      </div>
-
-      {idea.lookingFor && (
-        <div className="flex items-start gap-2 bg-[#A24BFF]/10 border border-[#A24BFF]/20 rounded-xl px-3 py-2">
-          <span className="text-[#A24BFF] text-[11px] font-semibold shrink-0 mt-0.5">Looking for</span>
-          <span className="text-[#A24BFF] text-[12px] leading-snug">{idea.lookingFor}</span>
-        </div>
-      )}
-
-      <div className="flex items-center gap-4 pt-1 border-t border-[#1C1C1E]">
+      <div className="flex items-center justify-between pt-2 border-t border-[#1C1C1E]">
         <motion.button
-          whileTap={{ scale: 0.85 }}
-          onClick={() => {
-            setUpvoted((v) => !v);
-            setCount((c) => (upvoted ? c - 1 : c + 1));
-          }}
+          whileTap={{ scale: 0.9 }}
+          disabled={!currentUserId}
+          onClick={() => onUpvoteToggle(idea.id)}
           className={cn(
-            "flex items-center gap-1.5 text-[13px] font-semibold transition-colors",
-            upvoted ? "text-[#FF8A3D]" : "text-[#6E6E73] hover:text-white"
+            "flex items-center gap-1.5 text-[13px] font-semibold transition-colors px-2 py-1 rounded-lg",
+            isUpvoted ? "text-[#FF8A3D] bg-[#FF8A3D]/10" : "text-[#8E8E93] hover:text-white"
           )}
         >
-          <ThumbsUp size={15} fill={upvoted ? "#FF8A3D" : "none"} />
-          {count}
+          <ThumbsUp size={15} fill={isUpvoted ? "#FF8A3D" : "none"} />
+          <span>{idea.upvote_count}</span>
         </motion.button>
-        <button className="flex items-center gap-1.5 text-[#6E6E73] text-[13px] hover:text-white transition-colors">
-          <MessageCircle size={15} />{idea.comments}
-        </button>
-        <button
-          onClick={() => onCollaborate(idea)}
-          className="ml-auto flex items-center gap-1 text-[#A24BFF] text-[13px] font-semibold hover:opacity-80 transition-opacity"
-        >
-          Collaborate <ChevronRight size={14} />
-        </button>
+
+        {currentUserId !== idea.author_id && (
+          <button
+            onClick={() => onCollaborate(idea)}
+            className="flex items-center gap-1 text-[#A24BFF] text-[13px] font-semibold hover:opacity-80 transition-opacity"
+          >
+            Collaborate <ChevronRight size={14} />
+          </button>
+        )}
       </div>
     </motion.div>
   );
 }
 
-// ── Post idea form ────────────────────────────────────────────
+// ── Post Idea Form ────────────────────────────────────────────
 function PostIdeaForm({
   onClose,
   onCreated,
 }: {
   onClose: () => void;
-  onCreated: (idea: Idea) => void;
+  onCreated: (idea: StartupIdea) => void;
 }) {
   const user = useAuthStore((s) => s.user);
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
-  const [tag, setTag] = useState("");
-  const [tags, setTags] = useState<string[]>(["AI", "SaaS"]);
+  const [tagInput, setTagInput] = useState("");
+  const [tags, setTags] = useState<string[]>(["AI/ML", "SaaS"]);
   const [lookingFor, setLookingFor] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim() || !desc.trim()) return;
+    if (!title.trim() || !desc.trim() || !user?.id || submitting) return;
     setSubmitting(true);
 
-    const newIdea: Idea = {
-      id: "id-" + Date.now(),
-      authorHandle: user?.userHandle || "founder",
-      title: title.trim(),
-      description: desc.trim(),
-      lookingFor: lookingFor.trim(),
-      tags: tags,
-      upvotes: 1,
-      comments: 0,
-      createdAt: new Date().toISOString(),
-      upvoted: true,
-    };
-
-    if (user?.id) {
-      try {
-        const { data } = await supabase.from("ideas").insert({
-          author_id: user.id,
-          title: newIdea.title,
-          description: newIdea.description,
-          looking_for: newIdea.lookingFor,
-          tags: tags.join(", "),
-          upvote_count: 1,
-          comment_count: 0,
-        }).select("id").single();
-        if (data?.id) newIdea.id = data.id;
-      } catch (err) {
-        console.error("Failed to insert idea in Supabase:", err);
+    try {
+      const created = await dataService.createIdea(
+        user.id,
+        title.trim(),
+        desc.trim(),
+        lookingFor.trim(),
+        tags.join(", ")
+      );
+      if (created) {
+        onCreated(created);
       }
+      onClose();
+    } catch (err) {
+      console.error("Failed to post idea:", err);
+    } finally {
+      setSubmitting(false);
     }
-
-    onCreated(newIdea);
-    setSubmitting(false);
-    onClose();
   }
 
   return (
     <motion.form
       onSubmit={handleSubmit}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-[#0C0C0C] border border-[#A24BFF]/30 rounded-2xl p-4 space-y-3"
+      exit={{ opacity: 0, y: 15 }}
+      className="bg-[#0C0C0C] border border-[#A24BFF]/30 rounded-2xl p-4.5 space-y-3"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-white font-semibold text-[16px]">Share an Idea</h3>
+        <h3 className="text-white font-semibold text-[16px]">Share an Idea or Co-founder Ask</h3>
         <button type="button" onClick={onClose} className="text-[#6E6E73] hover:text-white">
           <X size={18} />
         </button>
@@ -277,44 +240,46 @@ function PostIdeaForm({
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Idea title (be specific)"
-        className="w-full bg-[#1C1C1E] text-white rounded-xl px-4 py-3 text-[15px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF]"
+        placeholder="Idea title (e.g. Offline Voice AI for Rural Kiranas)"
+        className="w-full bg-[#1C1C1E] text-white rounded-xl px-4 py-2.5 text-[15px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF]"
       />
       <textarea
         value={desc}
         onChange={(e) => setDesc(e.target.value)}
-        placeholder="Describe the problem, target audience, and your approach…"
+        placeholder="Describe the problem, target market, and what you are building…"
         rows={4}
-        className="w-full bg-[#1C1C1E] text-white rounded-xl px-4 py-3 text-[14px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF] resize-none"
+        className="w-full bg-[#1C1C1E] text-white rounded-xl px-4 py-2.5 text-[14px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF] resize-none"
       />
       <input
         value={lookingFor}
         onChange={(e) => setLookingFor(e.target.value)}
-        placeholder="Looking for… (e.g. Technical Co-founder, GTM Specialist)"
-        className="w-full bg-[#1C1C1E] text-white rounded-xl px-4 py-3 text-[14px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF]"
+        placeholder="Looking for… (e.g. Technical Co-founder with Rust / ML experience)"
+        className="w-full bg-[#1C1C1E] text-white rounded-xl px-4 py-2.5 text-[14px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF]"
       />
       <div className="flex gap-2">
         <input
-          value={tag}
-          onChange={(e) => setTag(e.target.value)}
+          value={tagInput}
+          onChange={(e) => setTagInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && tag.trim()) {
+            if (e.key === "Enter" && tagInput.trim()) {
               e.preventDefault();
-              setTags((t) => [...t, tag.trim()]);
-              setTag("");
+              if (!tags.includes(tagInput.trim())) {
+                setTags((t) => [...t, tagInput.trim()]);
+              }
+              setTagInput("");
             }
           }}
-          placeholder="Add tag + Enter"
-          className="flex-1 bg-[#1C1C1E] text-white rounded-full px-4 py-2.5 text-[13px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF]"
+          placeholder="Add tag and press Enter"
+          className="flex-1 bg-[#1C1C1E] text-white rounded-xl px-4 py-2 text-[13px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF]"
         />
       </div>
       {tags.length > 0 && (
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-1.5 flex-wrap">
           {tags.map((t) => (
             <span
               key={t}
               onClick={() => setTags((ts) => ts.filter((x) => x !== t))}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#A24BFF]/10 border border-[#A24BFF]/30 text-[#A24BFF] text-[12px] cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#A24BFF]/10 border border-[#A24BFF]/30 text-[#A24BFF] text-[12px] cursor-pointer hover:bg-[#A24BFF]/20"
             >
               {t}
               <X size={10} />
@@ -322,66 +287,96 @@ function PostIdeaForm({
           ))}
         </div>
       )}
-      <GradientRingButton size="md" type="submit" className="w-full" disabled={!title.trim() || submitting}>
-        <Lightbulb size={16} /> {submitting ? "Publishing…" : "Post Idea"}
+      <GradientRingButton size="md" type="submit" className="w-full" disabled={!title.trim() || !desc.trim() || submitting}>
+        <Lightbulb size={16} /> {submitting ? "Publishing…" : "Post Idea to Ecosystem"}
       </GradientRingButton>
     </motion.form>
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────
+// ── Ideas Page Content ────────────────────────────────────────
 const SORT_TABS = ["Trending", "Recent", "My Ideas"];
 
 function IdeasPageContent() {
+  const user = useAuthStore((s) => s.user);
+
   const [sort, setSort] = useState("Trending");
-  const [ideas, setIdeas] = useState<Idea[]>(SEED_IDEAS);
+  const [ideas, setIdeas] = useState<StartupIdea[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [collaboratingIdea, setCollaboratingIdea] = useState<Idea | null>(null);
+  const [collaboratingIdea, setCollaboratingIdea] = useState<StartupIdea | null>(null);
 
-  // Load from Supabase
   useEffect(() => {
+    let isCancelled = false;
     async function loadIdeas() {
+      setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from("ideas")
-          .select("id, author_id, title, description, looking_for, upvote_count, comment_count, tags, created_at")
-          .order("created_at", { ascending: false });
-
-        if (!error && data && data.length > 0) {
-          const dbIdeas: Idea[] = data.map((r) => ({
-            id: r.id,
-            authorHandle: "founder",
-            title: r.title,
-            description: r.description,
-            lookingFor: r.looking_for,
-            tags: r.tags ? r.tags.split(",").map((t: string) => t.trim()) : ["Startup"],
-            upvotes: r.upvote_count || 1,
-            comments: r.comment_count || 0,
-            createdAt: r.created_at,
-          }));
-
-          setIdeas((prev) => {
-            const ids = new Set(dbIdeas.map((i) => i.id));
-            return [...dbIdeas, ...prev.filter((p) => !ids.has(p.id))];
-          });
-        }
-      } catch {
-        // fallback to seed
+        const data = await dataService.fetchIdeas(user?.id);
+        if (!isCancelled) setIdeas(data);
+      } catch (err) {
+        console.error("Failed to load ideas:", err);
+      } finally {
+        if (!isCancelled) setLoading(false);
       }
     }
     loadIdeas();
-  }, []);
+    return () => {
+      isCancelled = true;
+    };
+  }, [user?.id]);
+
+  async function handleToggleUpvote(ideaId: string) {
+    if (!user?.id) return;
+    const target = ideas.find((i) => i.id === ideaId);
+    if (!target) return;
+
+    const willBeUpvoted = !target.hasUpvoted;
+    const newCount = willBeUpvoted ? target.upvote_count + 1 : Math.max(0, target.upvote_count - 1);
+
+    // Optimistic update
+    setIdeas((prev) =>
+      prev.map((i) =>
+        i.id === ideaId ? { ...i, hasUpvoted: willBeUpvoted, upvote_count: newCount } : i
+      )
+    );
+
+    try {
+      await dataService.toggleIdeaUpvote(ideaId, user.id, !willBeUpvoted);
+    } catch (err) {
+      console.error("Upvote error:", err);
+      // Revert on error
+      setIdeas((prev) =>
+        prev.map((i) =>
+          i.id === ideaId
+            ? { ...i, hasUpvoted: target.hasUpvoted, upvote_count: target.upvote_count }
+            : i
+        )
+      );
+    }
+  }
+
+  const filteredIdeas = ideas.filter((idea) => {
+    if (sort === "My Ideas") {
+      return idea.author_id === user?.id;
+    }
+    return true;
+  }).sort((a, b) => {
+    if (sort === "Trending") {
+      return b.upvote_count - a.upvote_count;
+    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
-      <TopBar unreadCount={3} />
+      <TopBar unreadCount={0} />
 
       <div className="px-4 sm:px-6 lg:px-8 pt-4 max-w-6xl mx-auto w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Flame size={20} className="text-[#FF8A3D]" />
-            <h1 className="text-white font-bold text-[20px]">Ideas & Projects</h1>
+            <h1 className="text-white font-bold text-[20px]">Ideas & Co-founder Asks</h1>
           </div>
           <GradientRingButton size="sm" onClick={() => setShowForm((v) => !v)}>
             <Plus size={14} /> Share Idea
@@ -418,28 +413,74 @@ function IdeasPageContent() {
               />
             )}
           </AnimatePresence>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {ideas.map((idea) => (
-              <IdeaCard
-                key={idea.id}
-                idea={idea}
-                onCollaborate={(selected) => setCollaboratingIdea(selected)}
-              />
-            ))}
-          </div>
+
+          {/* Skeletons while loading */}
+          {loading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 animate-pulse">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#1C1C1E]" />
+                    <div className="w-24 h-3 bg-[#1C1C1E] rounded" />
+                  </div>
+                  <div className="h-4 w-3/4 bg-[#1C1C1E] rounded" />
+                  <div className="h-12 w-full bg-[#1C1C1E] rounded" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && filteredIdeas.length === 0 && (
+            <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+              <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#FF8A3D]">
+                <Lightbulb size={20} />
+              </div>
+              <h3 className="text-white font-bold text-[16px]">
+                {sort === "My Ideas" ? "You haven't posted any ideas yet" : "No startup ideas posted yet"}
+              </h3>
+              <p className="text-[#8E8E93] text-[13px]">
+                {sort === "My Ideas"
+                  ? "Share what problem you are solving to find potential co-founders or early contributors."
+                  : "Be the first to share a breakthrough concept, MVP, or co-founder requirement."}
+              </p>
+              <button
+                onClick={() => setShowForm(true)}
+                className="px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
+              >
+                Share First Idea
+              </button>
+            </div>
+          )}
+
+          {/* Ideas List */}
+          {!loading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredIdeas.map((idea) => (
+                <IdeaCard
+                  key={idea.id}
+                  idea={idea}
+                  currentUserId={user?.id}
+                  onCollaborate={(selected) => setCollaboratingIdea(selected)}
+                  onUpvoteToggle={handleToggleUpvote}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </main>
 
       {collaboratingIdea && (
         <CollaborateModal
           idea={collaboratingIdea}
+          currentUserId={user?.id}
           onClose={() => setCollaboratingIdea(null)}
         />
       )}
 
       <BottomDock
         activeTab="ideas"
-        userName="Aarav Reddy"
+        userName={user?.name || user?.userHandle || ""}
       />
     </div>
   );

@@ -84,9 +84,9 @@ export function getInitials(name: string): string {
 export function googleCalendarUrl(opts: {
   title: string;
   start: Date;
-  end?: Date;
-  details?: string;
-  location?: string;
+  end?: Date | null;
+  details?: string | null;
+  location?: string | null;
 }) {
   const fmt = (d: Date) =>
     d.toISOString().replace(/[-:]/g, "").replace(".000", "");

@@ -6,89 +6,29 @@ import {
   MapPin,
   Calendar,
   Users,
-  Clock,
   ExternalLink,
   Plus,
   Video,
   Coffee,
   X,
-  Send,
-  CheckCircle2,
-  Lock,
-  UserCheck
+  CheckCircle2
 } from "lucide-react";
-import { Avatar } from "@/ui/Avatar";
 import { TopBar } from "@/ui/TopBar";
 import { BottomDock } from "@/ui/BottomDock";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { fmtDate, fmtTime, googleCalendarUrl, cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase/client";
 import { useAuthStore } from "@/lib/store/authStore";
+import { dataService, type MeetupEvent } from "@/lib/api/dataService";
 
-interface Meetup {
-  id: string;
-  title: string;
-  organiserHandle: string;
-  location: string;
-  isOnline: boolean;
-  date: Date;
-  maxAttendees?: number;
-  attendeeCount: number;
-  tags: string[];
-  status?: "pending_review" | "accepted" | "rejected" | "none";
-  link?: string;
-}
-
-const now = new Date();
-const SEED_MEETUPS: Meetup[] = [
-  {
-    id: "f0000000-0000-0000-0000-000000000001",
-    title: "Bengaluru AI Founders Mixer",
-    organiserHandle: "priya_founder",
-    location: "Koramangala, Bengaluru",
-    isOnline: false,
-    date: new Date(now.getTime() + 2 * 86400000 + 18 * 3600000),
-    maxAttendees: 25,
-    attendeeCount: 18,
-    tags: ["Networking", "AI/ML", "Founders"],
-    status: "none",
-  },
-  {
-    id: "f0000000-0000-0000-0000-000000000002",
-    title: "Angel Syndicate Pitch: SaaS & Fintech",
-    organiserHandle: "rohan_investor",
-    location: "Virtual (Google Meet)",
-    isOnline: true,
-    date: new Date(now.getTime() + 5 * 86400000 + 17 * 3600000),
-    maxAttendees: 15,
-    attendeeCount: 9,
-    tags: ["Pitch", "Angels", "SaaS"],
-    status: "none",
-    link: "https://meet.google.com/xyz-founderbridge",
-  },
-  {
-    id: "3",
-    title: "Mumbai VC Speed-Dating — Seed Stage",
-    organiserHandle: "arjun_vc",
-    location: "WeWork BKC, Mumbai",
-    isOnline: false,
-    date: new Date(now.getTime() + 10 * 86400000 + 14 * 3600000),
-    maxAttendees: 20,
-    attendeeCount: 18,
-    tags: ["Funding", "Seed", "Mumbai"],
-    status: "none",
-  },
-];
-
-// ── Application to Attend Modal (PDF Spec Page 8) ─────────────
+// ── Application to Attend Modal ───────────────────────────────
 function ApplyModal({
   meetup,
   onClose,
-  onApplied,
+  onRsvp,
 }: {
-  meetup: Meetup;
+  meetup: MeetupEvent;
   onClose: () => void;
-  onApplied: () => void;
+  onRsvp: (meetupId: string) => void;
 }) {
   const [role, setRole] = useState("");
   const [note, setNote] = useState("");
@@ -98,10 +38,10 @@ function ApplyModal({
     e.preventDefault();
     if (!role.trim() || !note.trim()) return;
     setSubmitted(true);
+    onRsvp(meetup.id);
     setTimeout(() => {
-      onApplied();
       onClose();
-    }, 1800);
+    }, 1400);
   }
 
   return (
@@ -113,48 +53,53 @@ function ApplyModal({
         className="bg-[#121214] border border-[#222226] rounded-2xl p-5 max-w-[420px] w-full text-white space-y-4"
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-[16px]">Apply to Attend Meetup</h3>
-          <button onClick={onClose} className="text-[#8E8E93] hover:text-white"><X size={18} /></button>
+          <h3 className="font-bold text-[16px]">RSVP to Meetup</h3>
+          <button onClick={onClose} className="text-[#8E8E93] hover:text-white">
+            <X size={18} />
+          </button>
         </div>
 
         <div>
-          <p className="text-[14px] font-semibold text-[#FF8A3D]">{meetup.title}</p>
-          <p className="text-[12px] text-[#8E8E93] mt-0.5">Host: @{meetup.organiserHandle}</p>
+          <p className="text-[13px] text-[#A24BFF] font-semibold">{meetup.title}</p>
+          <p className="text-[12px] text-[#8E8E93] mt-0.5">
+            Hosted by @{meetup.organiser.user_handle} · {meetup.location}
+          </p>
         </div>
 
         {submitted ? (
           <div className="py-6 text-center space-y-2">
-            <CheckCircle2 size={36} className="text-emerald-400 mx-auto animate-bounce" />
-            <p className="font-bold text-white text-[15px]">Application Submitted!</p>
+            <CheckCircle2 size={36} className="text-emerald-400 mx-auto" />
+            <p className="font-bold text-white text-[15px]">RSVP Confirmed!</p>
             <p className="text-[#8E8E93] text-[12px]">
-              The host will review your request. Meeting links & venue access are granted upon acceptance.
+              You are on the attendee list. The meetup details and link are unlocked.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="text-[12px] text-[#8E8E93] mb-1 block">Your Startup / Role</label>
+              <label className="text-[12px] text-[#8E8E93] mb-1 block">Your Current Startup / Role</label>
               <input
+                autoFocus
                 required
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                placeholder="e.g. Co-founder @ FinPilot (Seed stage)"
-                className="w-full bg-[#1A1A1E] text-white rounded-xl px-3 py-2 text-[13px] border border-[#2A2A2E] outline-none focus:border-[#FF8A3D]"
+                placeholder="e.g. Co-founder @ HealthTech SaaS"
+                className="w-full bg-[#1A1A1E] text-white rounded-xl px-3 py-2 text-[13px] border border-[#2A2A2E] outline-none focus:border-[#A24BFF]"
               />
             </div>
             <div>
-              <label className="text-[12px] text-[#8E8E93] mb-1 block">Why do you want to attend?</label>
+              <label className="text-[12px] text-[#8E8E93] mb-1 block">What are you hoping to connect about?</label>
               <textarea
                 required
                 rows={3}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="What are you currently building or looking to connect about?"
-                className="w-full bg-[#1A1A1E] text-white rounded-xl p-3 text-[13px] border border-[#2A2A2E] outline-none focus:border-[#FF8A3D] resize-none"
+                placeholder="Brief intro for the host and fellow attendees…"
+                className="w-full bg-[#1A1A1E] text-white rounded-xl p-3 text-[13px] border border-[#2A2A2E] outline-none focus:border-[#A24BFF] resize-none"
               />
             </div>
             <GradientRingButton size="md" type="submit" className="w-full" disabled={!role.trim() || !note.trim()}>
-              <Send size={14} /> Submit Application
+              Confirm RSVP
             </GradientRingButton>
           </form>
         )}
@@ -163,64 +108,49 @@ function ApplyModal({
   );
 }
 
-// ── Host a Meetup Modal ───────────────────────────────────────
+// ── Host Meetup Modal ─────────────────────────────────────────
 function HostModal({
   onClose,
   onCreated,
 }: {
   onClose: () => void;
-  onCreated: (m: Meetup) => void;
+  onCreated: (newMeetup: MeetupEvent) => void;
 }) {
   const user = useAuthStore((s) => s.user);
   const [title, setTitle] = useState("");
-  const [isOnline, setIsOnline] = useState(true);
-  const [location, setLocation] = useState("Virtual (Google Meet)");
-  const [maxAttendees, setMaxAttendees] = useState(25);
-  const [dateStr, setDateStr] = useState("2026-11-08T18:00");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [isOnline, setIsOnline] = useState(false);
+  const [dateStr, setDateStr] = useState("");
+  const [timeStr, setTimeStr] = useState("18:30");
+  const [link, setLink] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   async function handleHostSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || !location.trim() || !dateStr || !user?.id || submitting) return;
     setSubmitting(true);
 
-    const newMeetup: Meetup = {
-      id: "meet-" + Date.now(),
-      title: title.trim(),
-      organiserHandle: user?.userHandle || "founder",
-      location: isOnline ? "Virtual (Google Meet)" : location,
-      isOnline,
-      date: new Date(dateStr),
-      maxAttendees,
-      attendeeCount: 1,
-      tags: ["Networking", isOnline ? "Online" : "In-Person"],
-      status: "none",
-    };
+    try {
+      const combinedDateTime = new Date(`${dateStr}T${timeStr}:00`).toISOString();
+      const created = await dataService.createMeetup(user.id, {
+        title: title.trim(),
+        description: description.trim(),
+        location: location.trim(),
+        isOnline,
+        eventAt: combinedDateTime,
+        link: isOnline ? link.trim() : undefined,
+      });
 
-    if (user?.id) {
-      try {
-        const { data } = await supabase.from("meetups").insert({
-          organiser_id: user.id,
-          title: newMeetup.title,
-          description: "FounderBridge community meetup",
-          location: newMeetup.location,
-          is_online: newMeetup.isOnline,
-          event_at: newMeetup.date.toISOString(),
-          max_attendees: newMeetup.maxAttendees,
-          attendee_count: 1,
-          tags: newMeetup.tags.join(", "),
-          status: "UPCOMING",
-          link: isOnline ? "https://meet.google.com/founderbridge" : null,
-        }).select("id").single();
-        if (data?.id) newMeetup.id = data.id;
-      } catch (err) {
-        console.error("Failed to insert meetup in Supabase:", err);
+      if (created) {
+        onCreated(created);
       }
+      onClose();
+    } catch (err) {
+      console.error("Failed to host meetup:", err);
+    } finally {
+      setSubmitting(false);
     }
-
-    onCreated(newMeetup);
-    setSubmitting(false);
-    onClose();
   }
 
   return (
@@ -229,11 +159,13 @@ function HostModal({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-[#121214] border border-[#222226] rounded-2xl p-5 max-w-[420px] w-full text-white space-y-4"
+        className="bg-[#121214] border border-[#222226] rounded-2xl p-5 max-w-[440px] w-full text-white space-y-4 max-h-[90vh] overflow-y-auto"
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-[16px]">Host a Meetup</h3>
-          <button onClick={onClose} className="text-[#8E8E93] hover:text-white"><X size={18} /></button>
+          <h3 className="font-bold text-[16px] text-white">Host a City Meetup or Mixer</h3>
+          <button onClick={onClose} className="text-[#8E8E93] hover:text-white">
+            <X size={18} />
+          </button>
         </div>
 
         <form onSubmit={handleHostSubmit} className="space-y-3">
@@ -243,66 +175,102 @@ function HostModal({
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Bangalore AI Founders Coffee"
-              className="w-full bg-[#1A1A1E] text-white rounded-xl px-3 py-2 text-[13px] border border-[#2A2A2E] outline-none focus:border-[#FF8A3D]"
+              placeholder="e.g. Bengaluru AI Founders Breakfast"
+              className="w-full bg-[#1A1A1E] text-white rounded-xl px-3 py-2 text-[13px] border border-[#2A2A2E] outline-none focus:border-[#A24BFF]"
             />
           </div>
 
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => { setIsOnline(true); setLocation("Virtual (Google Meet)"); }}
-              className={cn("flex-1 py-2 text-[12px] rounded-xl font-semibold border transition-colors",
-                isOnline ? "border-[#A24BFF] bg-[#A24BFF]/10 text-white" : "border-[#222] text-[#8E8E93]")}
-            >
-              Online Call
-            </button>
-            <button
-              type="button"
-              onClick={() => { setIsOnline(false); setLocation("Indiranagar, Bengaluru"); }}
-              className={cn("flex-1 py-2 text-[12px] rounded-xl font-semibold border transition-colors",
-                !isOnline ? "border-[#FF8A3D] bg-[#FF8A3D]/10 text-white" : "border-[#222] text-[#8E8E93]")}
-            >
-              In-Person
-            </button>
+          <div>
+            <label className="text-[12px] text-[#8E8E93] mb-1 block">Format</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setIsOnline(false)}
+                className={cn(
+                  "py-2 rounded-xl text-[12px] font-semibold border flex items-center justify-center gap-1.5 transition-colors",
+                  !isOnline
+                    ? "bg-[#A24BFF]/20 border-[#A24BFF] text-white"
+                    : "bg-[#1A1A1E] border-[#2A2A2E] text-[#8E8E93]"
+                )}
+              >
+                <Coffee size={14} /> In-person
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsOnline(true)}
+                className={cn(
+                  "py-2 rounded-xl text-[12px] font-semibold border flex items-center justify-center gap-1.5 transition-colors",
+                  isOnline
+                    ? "bg-[#A24BFF]/20 border-[#A24BFF] text-white"
+                    : "bg-[#1A1A1E] border-[#2A2A2E] text-[#8E8E93]"
+                )}
+              >
+                <Video size={14} /> Virtual / Meet
+              </button>
+            </div>
           </div>
 
-          {!isOnline && (
+          <div>
+            <label className="text-[12px] text-[#8E8E93] mb-1 block">
+              {isOnline ? "Virtual Platform / Meeting Note" : "Venue / City Area"}
+            </label>
+            <input
+              required
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder={isOnline ? "Google Meet" : "Koramangala, Bengaluru"}
+              className="w-full bg-[#1A1A1E] text-white rounded-xl px-3 py-2 text-[13px] border border-[#2A2A2E] outline-none focus:border-[#A24BFF]"
+            />
+          </div>
+
+          {isOnline && (
             <div>
-              <label className="text-[12px] text-[#8E8E93] mb-1 block">Venue & City</label>
+              <label className="text-[12px] text-[#8E8E93] mb-1 block">Meeting URL (visible to RSVP&apos;d attendees)</label>
               <input
-                required
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. Third Wave Coffee, Indiranagar"
-                className="w-full bg-[#1A1A1E] text-white rounded-xl px-3 py-2 text-[13px] border border-[#2A2A2E] outline-none"
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+                placeholder="https://meet.google.com/xyz"
+                className="w-full bg-[#1A1A1E] text-white rounded-xl px-3 py-2 text-[13px] border border-[#2A2A2E] outline-none focus:border-[#A24BFF]"
               />
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[12px] text-[#8E8E93] mb-1 block">Max Capacity</label>
+              <label className="text-[12px] text-[#8E8E93] mb-1 block">Date</label>
               <input
-                type="number"
-                value={maxAttendees}
-                onChange={(e) => setMaxAttendees(Number(e.target.value))}
-                className="w-full bg-[#1A1A1E] text-white rounded-xl px-3 py-2 text-[13px] border border-[#2A2A2E] outline-none"
+                type="date"
+                required
+                value={dateStr}
+                onChange={(e) => setDateStr(e.target.value)}
+                className="w-full bg-[#1A1A1E] text-white rounded-xl px-3 py-2 text-[12px] border border-[#2A2A2E] outline-none focus:border-[#A24BFF]"
               />
             </div>
             <div>
-              <label className="text-[12px] text-[#8E8E93] mb-1 block">Date & Time</label>
+              <label className="text-[12px] text-[#8E8E93] mb-1 block">Time</label>
               <input
-                type="datetime-local"
-                value={dateStr}
-                onChange={(e) => setDateStr(e.target.value)}
-                className="w-full bg-[#1A1A1E] text-white rounded-xl px-2 py-2 text-[12px] border border-[#2A2A2E] outline-none"
+                type="time"
+                required
+                value={timeStr}
+                onChange={(e) => setTimeStr(e.target.value)}
+                className="w-full bg-[#1A1A1E] text-white rounded-xl px-3 py-2 text-[12px] border border-[#2A2A2E] outline-none focus:border-[#A24BFF]"
               />
             </div>
           </div>
 
-          <GradientRingButton size="md" type="submit" className="w-full mt-2" disabled={!title.trim() || submitting}>
-            {submitting ? "Publishing…" : "Publish Meetup"}
+          <div>
+            <label className="text-[12px] text-[#8E8E93] mb-1 block">Description</label>
+            <textarea
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What will founders discuss or collaborate on? Agenda details…"
+              className="w-full bg-[#1A1A1E] text-white rounded-xl p-3 text-[13px] border border-[#2A2A2E] outline-none focus:border-[#A24BFF] resize-none"
+            />
+          </div>
+
+          <GradientRingButton size="md" type="submit" className="w-full" disabled={submitting}>
+            {submitting ? "Publishing…" : "Publish Meetup to Ecosystem"}
           </GradientRingButton>
         </form>
       </motion.div>
@@ -310,313 +278,323 @@ function HostModal({
   );
 }
 
+// ── Meetup Card Component ─────────────────────────────────────
 function MeetupCard({
   meetup,
+  currentUserId,
   onApply,
+  onToggleRsvp,
 }: {
-  meetup: Meetup;
-  onApply: (m: Meetup) => void;
+  meetup: MeetupEvent;
+  currentUserId?: string;
+  onApply: (meetup: MeetupEvent) => void;
+  onToggleRsvp: (meetupId: string) => void;
 }) {
-  const appStatus = meetup.status ?? "none";
-  const count = meetup.attendeeCount;
-  const spotsLeft = meetup.maxAttendees ? meetup.maxAttendees - count : null;
-  const isFull = spotsLeft !== null && spotsLeft <= 0;
-  const calUrl = googleCalendarUrl({ title: meetup.title, start: meetup.date });
+  const isRsvped = Boolean(meetup.hasRsvped);
+  const eventDate = new Date(meetup.event_at);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 h-full flex flex-col justify-between hover:border-[#2A2A2E] transition-colors"
+      className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 flex flex-col justify-between hover:border-[#2A2A2E] transition-colors h-full space-y-3"
     >
-      {/* Header */}
-      <div className="flex items-start gap-3">
-        <div
-          className={cn(
-            "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-xl",
-            meetup.isOnline ? "bg-[#A24BFF]/15 text-[#A24BFF]" : "bg-[#FF8A3D]/15 text-[#FF8A3D]"
-          )}
-        >
-          {meetup.isOnline ? <Video size={20} /> : <Coffee size={20} />}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-white font-semibold text-[16px] leading-snug">{meetup.title}</h3>
-          <div className="flex items-center gap-1.5 mt-1">
-            <Avatar name={meetup.organiserHandle} size="sm" />
-            <span className="text-[#6E6E73] text-[12px]">@{meetup.organiserHandle}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Details */}
-      <div className="grid grid-cols-2 gap-y-2 gap-x-3">
-        <div className="flex items-center gap-1.5 text-[#A1A1A6] text-[13px]">
-          <Calendar size={13} className="text-[#A24BFF]" />
-          <span>{fmtDate(meetup.date, { day: "numeric", month: "short" })}</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-[#A1A1A6] text-[13px]">
-          <Clock size={13} className="text-[#A24BFF]" />
-          <span>{fmtTime(meetup.date)}</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-[#A1A1A6] text-[13px] col-span-2">
-          <MapPin size={13} className="text-[#FF8A3D]" />
-          <span className="truncate">{meetup.location}</span>
-        </div>
-      </div>
-
-      {/* Tags */}
-      <div className="flex gap-1.5 flex-wrap">
-        {meetup.tags.map((t) => (
-          <span
-            key={t}
-            className="px-2.5 py-1 rounded-full bg-[#1C1C1E] border border-[#2A2A2D] text-[11px] text-[#6E6E73]"
-          >
-            {t}
+      <div>
+        <div className="flex items-center justify-between text-[11px] text-[#8E8E93] mb-2">
+          <span className="flex items-center gap-1.5 text-white font-medium">
+            {meetup.is_online ? <Video size={13} className="text-[#38bdf8]" /> : <Coffee size={13} className="text-[#f59e0b]" />}
+            {meetup.is_online ? "Virtual" : "In-Person"}
           </span>
-        ))}
-      </div>
-
-      {/* Attendees + capacity */}
-      <div className="flex items-center gap-2">
-        <Users size={13} className="text-[#6E6E73]" />
-        <span className="text-[#A1A1A6] text-[13px]">{count} attending</span>
-        {spotsLeft !== null && (
-          <span
-            className={cn(
-              "ml-auto text-[12px] font-semibold",
-              spotsLeft <= 3 ? "text-[#FF3D81]" : "text-[#6E6E73]"
-            )}
-          >
-            {isFull ? "Full" : `${spotsLeft} spots left`}
+          <span className="flex items-center gap-1">
+            <Users size={12} />
+            {meetup.attendee_count} attending
           </span>
+        </div>
+
+        <h3 className="text-white font-semibold text-[16px] leading-snug">{meetup.title}</h3>
+        <p className="text-[#8E8E93] text-[13px] mt-1 line-clamp-2">{meetup.description}</p>
+
+        <div className="space-y-1 mt-3 text-[12px] text-[#A1A1A6]">
+          <p className="flex items-center gap-1.5 truncate">
+            <Calendar size={13} className="text-[#A24BFF] shrink-0" />
+            <span>{fmtDate(eventDate)} · {fmtTime(eventDate)}</span>
+          </p>
+          <p className="flex items-center gap-1.5 truncate">
+            <MapPin size={13} className="text-[#10b981] shrink-0" />
+            <span className="truncate">{meetup.location}</span>
+          </p>
+        </div>
+
+        {/* Unlocked Meeting link for RSVP attendees */}
+        {isRsvped && meetup.link && (
+          <div className="mt-2.5 p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[12px] flex items-center justify-between">
+            <span className="truncate">Meeting link unlocked</span>
+            <a
+              href={meetup.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white font-semibold underline text-[11px] shrink-0"
+            >
+              Join Meet →
+            </a>
+          </div>
         )}
       </div>
 
-      {/* Actions matching PDF Spec: Application review modal + RSVP guard */}
-      <div className="flex gap-2 pt-1">
-        {appStatus === "none" && (
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onApply(meetup)}
-            disabled={isFull}
-            className={cn(
-              "flex-1 py-2.5 rounded-full text-[14px] font-semibold border transition-colors flex items-center justify-center gap-1.5",
-              isFull
-                ? "border-[#2A2A2D] text-[#6E6E73] opacity-40 cursor-not-allowed"
-                : "border-[#FF8A3D] text-[#FF8A3D] bg-[#FF8A3D]/10 hover:bg-[#FF8A3D]/20"
-            )}
-          >
-            {isFull ? "Full" : "RSVP · Apply to Attend"}
-          </motion.button>
-        )}
-
-        {appStatus === "pending_review" && (
-          <div className="flex-1 py-2 px-3 rounded-full bg-[#1A1A1E] border border-[#2A2A2E] text-[#8E8E93] text-[12px] flex items-center justify-center gap-1.5">
-            <Lock size={12} className="text-[#FF8A3D]" />
-            <span>Application Pending Host Review</span>
-          </div>
-        )}
-
-        {appStatus === "accepted" && (
-          <div className="flex items-center gap-2 w-full">
-            <div className="flex-1 py-2 px-3 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[12px] flex items-center justify-center gap-1.5">
-              <UserCheck size={14} />
-              <span>Accepted! Access Granted</span>
-            </div>
-            {meetup.link && (
-              <a
-                href={meetup.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-full bg-[#A24BFF] text-white text-[12px] font-semibold hover:bg-[#8e3eee] flex items-center gap-1"
-              >
-                Join Call <ExternalLink size={12} />
-              </a>
-            )}
-          </div>
-        )}
-
+      <div className="pt-2 border-t border-[#1C1C1E] flex items-center justify-between gap-2">
         <a
-          href={calUrl}
+          href={googleCalendarUrl({
+            title: meetup.title,
+            details: meetup.description,
+            location: meetup.location,
+            start: eventDate,
+          })}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-3 py-2.5 rounded-full border border-[#2A2A2D] text-[#6E6E73] text-[13px] hover:text-white hover:border-[#444] transition-colors"
+          className="text-[#8E8E93] hover:text-white text-[12px] flex items-center gap-1 transition-colors"
         >
-          <ExternalLink size={13} /> Cal
+          <ExternalLink size={12} /> Calendar
         </a>
+
+        {isRsvped ? (
+          <button
+            onClick={() => onToggleRsvp(meetup.id)}
+            className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[12px] font-semibold hover:bg-emerald-500/20 transition-colors"
+          >
+            ✓ Confirmed RSVP
+          </button>
+        ) : (
+          <button
+            onClick={() => onApply(meetup)}
+            disabled={!currentUserId}
+            className="px-4 py-1.5 rounded-xl bg-[#A24BFF] text-white text-[12px] font-semibold hover:bg-[#8e3eee] transition-colors"
+          >
+            RSVP Now
+          </button>
+        )}
       </div>
     </motion.div>
   );
 }
 
-const VIEW_TABS = [
-  { key: "upcoming", label: "Upcoming" },
-  { key: "my_rsvps", label: "My RSVPs" },
-  { key: "organising", label: "I'm Hosting" },
-];
-
+// ── Main Page Content ─────────────────────────────────────────
 function MeetupsPageContent() {
-  const [view, setView] = useState("upcoming");
-  const [meetups, setMeetups] = useState<Meetup[]>(SEED_MEETUPS);
-  const [selectedForApply, setSelectedForApply] = useState<Meetup | null>(null);
+  const user = useAuthStore((s) => s.user);
+
+  const [view, setView] = useState<"upcoming" | "my_rsvps" | "organising">("upcoming");
+  const [meetups, setMeetups] = useState<MeetupEvent[]>([]);
+  const [myRsvps, setMyRsvps] = useState<MeetupEvent[]>([]);
+  const [myOrganising, setMyOrganising] = useState<MeetupEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [selectedForApply, setSelectedForApply] = useState<MeetupEvent | null>(null);
   const [showHostModal, setShowHostModal] = useState(false);
 
-  // Load from Supabase
   useEffect(() => {
-    async function loadMeetups() {
+    let isCancelled = false;
+    async function loadAllMeetups() {
+      setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from("meetups")
-          .select("id, organiser_id, title, description, location, is_online, event_at, max_attendees, attendee_count, tags, status, link")
-          .order("event_at", { ascending: true });
-
-        if (!error && data && data.length > 0) {
-          const dbMeetups: Meetup[] = data.map((r) => ({
-            id: r.id,
-            title: r.title,
-            organiserHandle: "host",
-            location: r.location || (r.is_online ? "Virtual" : "Bengaluru"),
-            isOnline: Boolean(r.is_online),
-            date: new Date(r.event_at),
-            maxAttendees: r.max_attendees || 25,
-            attendeeCount: r.attendee_count || 1,
-            tags: r.tags ? r.tags.split(",").map((t: string) => t.trim()) : ["Networking"],
-            status: "none",
-            link: r.link,
-          }));
-
-          setMeetups((prev) => {
-            const ids = new Set(dbMeetups.map((m) => m.id));
-            return [...dbMeetups, ...prev.filter((p) => !ids.has(p.id))];
-          });
+        if (view === "upcoming") {
+          const list = await dataService.fetchMeetups(user?.id);
+          if (!isCancelled) setMeetups(list);
+        } else if (view === "my_rsvps" && user?.id) {
+          const list = await dataService.fetchUserRsvps(user.id);
+          if (!isCancelled) setMyRsvps(list);
+        } else if (view === "organising" && user?.id) {
+          const list = await dataService.fetchUserOrganisedMeetups(user.id);
+          if (!isCancelled) setMyOrganising(list);
         }
-      } catch {
-        // fallback
+      } catch (err) {
+        console.error("Meetup load error:", err);
+      } finally {
+        if (!isCancelled) setLoading(false);
       }
     }
-    loadMeetups();
-  }, []);
+    loadAllMeetups();
+    return () => {
+      isCancelled = true;
+    };
+  }, [view, user?.id]);
+
+  async function handleToggleRsvp(meetupId: string) {
+    if (!user?.id) return;
+    const target = meetups.find((m) => m.id === meetupId) || myRsvps.find((m) => m.id === meetupId);
+    if (!target) return;
+
+    const willBeRsvped = !target.hasRsvped;
+    const newCount = willBeRsvped ? target.attendee_count + 1 : Math.max(0, target.attendee_count - 1);
+
+    // Optimistic update
+    setMeetups((prev) =>
+      prev.map((m) => (m.id === meetupId ? { ...m, hasRsvped: willBeRsvped, attendee_count: newCount } : m))
+    );
+    setMyRsvps((prev) =>
+      willBeRsvped
+        ? [...prev, { ...target, hasRsvped: true, attendee_count: newCount }]
+        : prev.filter((m) => m.id !== meetupId)
+    );
+
+    try {
+      await dataService.toggleRsvp(meetupId, user.id, !willBeRsvped);
+    } catch (err) {
+      console.error("RSVP error:", err);
+    }
+  }
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
-      <TopBar unreadCount={3} />
-
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 max-w-6xl mx-auto w-full">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-white font-bold text-[20px] flex items-center gap-2">
-            <MapPin size={20} className="text-[#FF8A3D]" /> Meetups
-          </h1>
-          <button
-            onClick={() => setShowHostModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FF8A3D] text-black font-semibold text-[13px] hover:bg-[#ff7a24] transition-colors"
-          >
-            <Plus size={14} /> Host
-          </button>
-        </div>
-        <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-          {VIEW_TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setView(t.key)}
-              className={cn(
-                "px-4 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors shrink-0",
-                view === t.key
-                  ? "bg-[#FF8A3D] text-black font-semibold"
-                  : "bg-[#1C1C1E] text-[#6E6E73] border border-[#2A2A2D] hover:text-white"
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <TopBar unreadCount={0} />
 
       <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24">
-        <div className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-4">
-          {view === "upcoming" && (
+        <div className="px-4 sm:px-6 lg:px-8 pt-4 max-w-6xl mx-auto w-full">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <span className="text-[12px] font-bold uppercase tracking-wider text-[#A24BFF] flex items-center gap-1.5">
+                <Coffee size={13} /> Community Gatherings
+              </span>
+              <h1 className="text-white font-bold text-[24px] tracking-tight mt-0.5">
+                City Meetups & Mixers
+              </h1>
+            </div>
+            <GradientRingButton size="sm" onClick={() => setShowHostModal(true)}>
+              <Plus size={14} /> Host Meetup
+            </GradientRingButton>
+          </div>
+
+          {/* Sub-Tabs: Upcoming, My RSVPs, Organising */}
+          <div className="flex gap-2 mb-4 border-b border-[#1C1C1E] pb-3">
+            {[
+              { key: "upcoming", label: "Upcoming Events" },
+              { key: "my_rsvps", label: "My RSVPs" },
+              { key: "organising", label: "Hosting" },
+            ].map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setView(t.key as typeof view)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-[13px] font-medium transition-colors",
+                  view === t.key
+                    ? "bg-[#A24BFF] text-white"
+                    : "bg-[#141416] text-[#8E8E93] hover:text-white border border-[#222]"
+                )}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Skeletons while loading */}
+          {loading && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {meetups.map((m) => (
-                <MeetupCard
-                  key={m.id}
-                  meetup={m}
-                  onApply={(selected) => setSelectedForApply(selected)}
-                />
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 animate-pulse">
+                  <div className="h-4 w-28 bg-[#1C1C1E] rounded" />
+                  <div className="h-5 w-3/4 bg-[#1C1C1E] rounded" />
+                  <div className="h-12 w-full bg-[#1C1C1E] rounded" />
+                </div>
               ))}
             </div>
           )}
 
-          {view === "my_rsvps" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3 col-span-full">
-                <p className="text-[12px] text-[#8E8E93]">My Meetup RSVPs & Applications (1)</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-[#0F0F12] border border-[#1E1E22] space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-white font-semibold text-[14px]">Bengaluru AI Founders Mixer</h4>
-                  <span className="text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                    Confirmed
-                  </span>
+          {/* Upcoming Events View */}
+          {!loading && view === "upcoming" && (
+            meetups.length === 0 ? (
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+                <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#A24BFF]">
+                  <Coffee size={20} />
                 </div>
-                <p className="text-[#8E8E93] text-[12px]">Thursday, 6:30 PM · Koramangala, Bengaluru</p>
-              </div>
-            </div>
-          )}
-
-          {view === "organising" && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-[12px] text-[#8E8E93]">Meetups You&apos;re Hosting (1)</p>
+                <h3 className="text-white font-bold text-[16px]">No upcoming meetups scheduled</h3>
+                <p className="text-[#8E8E93] text-[13px]">
+                  Host an informal breakfast mixer, demo evening, or virtual pitch session in your city.
+                </p>
                 <button
                   onClick={() => setShowHostModal(true)}
-                  className="text-[11px] text-[#A24BFF] hover:underline"
+                  className="px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
                 >
-                  + Create Another
+                  Host First Meetup
                 </button>
               </div>
-              <div className="p-4 rounded-2xl bg-[#0F0F12] border border-[#1E1E22] space-y-3">
-                <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
-                  <div className="min-w-0">
-                    <h4 className="text-white font-semibold text-[15px] truncate">Angel Syndicate Pitch: SaaS & Fintech</h4>
-                    <p className="text-[#8E8E93] text-[12px]">Sunday, 5:00 PM · 9 / 15 Confirmed</p>
-                  </div>
-                  <span className="text-[11px] text-[#D4FF3A] bg-[#D4FF3A]/10 px-2.5 py-1 rounded-full border border-[#D4FF3A]/20 font-semibold shrink-0">
-                    3 Applicants Pending
-                  </span>
-                </div>
-
-                <div className="pt-2 border-t border-[#1C1C1E] space-y-2">
-                  <p className="text-[11px] text-[#A1A1A6] uppercase tracking-wider font-semibold">Pending Review:</p>
-                  {[
-                    { name: "Aditi Rao", role: "CTO @ VernacAI", id: "ap1" },
-                    { name: "Rahul Deshmukh", role: "Founder @ NeoLedger", id: "ap2" },
-                  ].map((cand) => (
-                    <div key={cand.id} className="flex items-center justify-between p-2 rounded-xl bg-[#141416] border border-[#222]">
-                      <div className="flex items-center gap-2">
-                        <Avatar name={cand.name} size="sm" />
-                        <div>
-                          <p className="text-white text-[13px] font-medium">{cand.name}</p>
-                          <p className="text-[#6E6E73] text-[11px]">{cand.role}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-1.5">
-                        <button
-                          onClick={() => alert(`Accepted ${cand.name}! They now have access to the link.`)}
-                          className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold hover:bg-emerald-500/30"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => alert(`Declined ${cand.name}`)}
-                          className="px-2.5 py-1 rounded-lg bg-[#222] text-[#8E8E93] text-[11px] hover:text-white"
-                        >
-                          Decline
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {meetups.map((m) => (
+                  <MeetupCard
+                    key={m.id}
+                    meetup={m}
+                    currentUserId={user?.id}
+                    onApply={(selected) => setSelectedForApply(selected)}
+                    onToggleRsvp={handleToggleRsvp}
+                  />
+                ))}
               </div>
-            </div>
+            )
+          )}
+
+          {/* My RSVPs View */}
+          {!loading && view === "my_rsvps" && (
+            myRsvps.length === 0 ? (
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+                <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#38bdf8]">
+                  <Calendar size={20} />
+                </div>
+                <h3 className="text-white font-bold text-[16px]">No RSVPs yet</h3>
+                <p className="text-[#8E8E93] text-[13px]">
+                  You have not registered for any upcoming mixers. Explore the events schedule to connect with peers.
+                </p>
+                <button
+                  onClick={() => setView("upcoming")}
+                  className="px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
+                >
+                  Explore Upcoming Events
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {myRsvps.map((m) => (
+                  <MeetupCard
+                    key={m.id}
+                    meetup={m}
+                    currentUserId={user?.id}
+                    onApply={(selected) => setSelectedForApply(selected)}
+                    onToggleRsvp={handleToggleRsvp}
+                  />
+                ))}
+              </div>
+            )
+          )}
+
+          {/* Hosting View */}
+          {!loading && view === "organising" && (
+            myOrganising.length === 0 ? (
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+                <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-amber-400">
+                  <Users size={20} />
+                </div>
+                <h3 className="text-white font-bold text-[16px]">You are not hosting any meetups</h3>
+                <p className="text-[#8E8E93] text-[13px]">
+                  Host an informal breakfast meetup, co-working session, or virtual pitch session for your city.
+                </p>
+                <button
+                  onClick={() => setShowHostModal(true)}
+                  className="px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
+                >
+                  Create Meetup
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {myOrganising.map((m) => (
+                  <MeetupCard
+                    key={m.id}
+                    meetup={m}
+                    currentUserId={user?.id}
+                    onApply={(selected) => setSelectedForApply(selected)}
+                    onToggleRsvp={handleToggleRsvp}
+                  />
+                ))}
+              </div>
+            )
           )}
         </div>
       </main>
@@ -626,13 +604,7 @@ function MeetupsPageContent() {
         <ApplyModal
           meetup={selectedForApply}
           onClose={() => setSelectedForApply(null)}
-          onApplied={() => {
-            setMeetups((prev) =>
-              prev.map((m) =>
-                m.id === selectedForApply.id ? { ...m, status: "pending_review" } : m
-              )
-            );
-          }}
+          onRsvp={handleToggleRsvp}
         />
       )}
 
@@ -642,6 +614,7 @@ function MeetupsPageContent() {
           onClose={() => setShowHostModal(false)}
           onCreated={(newM) => {
             setMeetups((prev) => [newM, ...prev]);
+            setMyOrganising((prev) => [newM, ...prev]);
             setView("organising");
           }}
         />
@@ -649,7 +622,7 @@ function MeetupsPageContent() {
 
       <BottomDock
         activeTab="meetups"
-        userName="Aarav Reddy"
+        userName={user?.name || user?.userHandle || ""}
       />
     </div>
   );

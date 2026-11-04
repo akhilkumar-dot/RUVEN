@@ -10,7 +10,7 @@ import { Avatar } from "@/ui/Avatar";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { TimeAgo } from "@/ui/TimeAgo";
 import { useAuthStore, type AccountType } from "@/lib/store/authStore";
-import { supabase } from "@/lib/supabase/client";
+import { dataService, type FeedPost as DbFeedPost, type MeetupEvent, type AdItem, type UserStats } from "@/lib/api/dataService";
 import { cn } from "@/lib/utils";
 import {
   Heart,
@@ -18,18 +18,16 @@ import {
   Share2,
   TrendingUp,
   Building2,
-  MapPin,
   Sparkles,
   Briefcase,
   User,
-  ExternalLink,
-  ChevronRight,
   Check,
   CheckSquare,
   Trash2
 } from "lucide-react";
 
-const ROLE_QUOTES: Record<AccountType, { quote: string; author: string }> = {
+// Fallback quotes (used only if DB is empty)
+const FALLBACK_QUOTES: Record<AccountType, { quote: string; author: string }> = {
   STARTUP_FOUNDER: {
     quote: "Move fast, be bold, and build what customers genuinely cannot live without.",
     author: "Naveen Tewari, InMobi",
@@ -48,19 +46,31 @@ const ROLE_QUOTES: Record<AccountType, { quote: string; author: string }> = {
   },
 };
 
-// ── Types ─────────────────────────────────────────────────────
+// ── Local UI adapter for FeedPost ─────────────────────────────
 interface FeedPost {
   id: string;
   authorName: string;
   authorHandle: string;
   authorHeadline: string;
-  location: string;
   body: string;
   likeCount: number;
   commentCount: number;
   createdAt: string;
-  tag?: string;
   liked?: boolean;
+}
+
+function dbPostToUiPost(p: DbFeedPost): FeedPost {
+  return {
+    id: p.id,
+    authorName: p.author.name || p.author.user_handle || "Community Member",
+    authorHandle: p.author.user_handle,
+    authorHeadline: p.author.type?.replace(/_/g, " ") || "Community Member",
+    body: p.body,
+    likeCount: p.like_count,
+    commentCount: p.comment_count,
+    createdAt: p.created_at,
+    liked: p.hasLiked,
+  };
 }
 
 interface RoleDashboardConfig {
@@ -90,7 +100,7 @@ interface RoleDashboardConfig {
     color: string;
     headline: string;
     meta: string;
-  };
+  } | null;
   featuredProfile: {
     name: string;
     role: string;
@@ -99,7 +109,7 @@ interface RoleDashboardConfig {
     statLabel: string;
     colorSeed: string;
     color: string;
-  };
+  } | null;
   bentoGrid: {
     name: string;
     headline: string;
@@ -113,6 +123,7 @@ interface RoleDashboardConfig {
 }
 
 // ── 4 Dedicated Role Dashboard Configurations ─────────────────
+// NOTE: Only UI metadata here — labels, colors, icons. No fake data.
 const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
   // 1. INDIVIDUAL: Freelancer, student, or professional
   INDIVIDUAL: {
@@ -125,97 +136,16 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
     roleDescription: "Freelancer, student, or professional looking to connect & work with startups",
     greetingTitle: "Welcome back, Talent & Freelance 👋",
     greetingSubtitle: "Explore startup project gigs, 1:1 mentorship & hackathon challenges.",
-    stats: [
-      { label: "Active Proposals", value: "4", sublabel: "2 shortlisted", trend: "+2 new" },
-      { label: "Profile Views", value: "1.8k", sublabel: "From founders", trend: "+28%" },
-      { label: "Founder Intros", value: "12", sublabel: "3 interviews pending", trend: "Hot" },
-      { label: "Skill Match", value: "98%", sublabel: "Verified Talent", trend: "Top 5%" },
-    ],
+    stats: [],
     quickActions: [
-      { label: "Browse Startup Gigs", badge: "18 Open", actionKey: "gigs" },
-      { label: "Book 1:1 Mentor", badge: "Free", actionKey: "mentors" },
+      { label: "Browse Startup Gigs", actionKey: "gigs" },
+      { label: "Book 1:1 Mentor", actionKey: "mentors" },
       { label: "Submit Portfolio", actionKey: "portfolio" },
     ],
-    featuredOpportunity: {
-      organization: "Build with AI Hackathon Bengaluru",
-      statValue: "₹10L Prize",
-      color: "#D8BF4A", // mustard
-      headline: "Autonomous LLM Agents Hackathon 2026: Direct founder interviews & angel scouts",
-      meta: "Organized by AI Collective · 16 days left · Open to students & independent engineers",
-    },
-    featuredProfile: {
-      name: "Senior Next.js & AI Engineer",
-      role: "Featured Contract Project @ FinPilot",
-      location: "Remote / Bengaluru",
-      statValue: "₹1.8L - ₹2.5L / mo",
-      statLabel: "Full-Time or Contract · Immediate",
-      colorSeed: "Freelance Project",
-      color: "#5E9C8A", // sage teal
-    },
-    bentoGrid: [
-      {
-        name: "Sriram K.",
-        headline: "Principal Engineer @ Ex-Google · System Design & Cloud Mentor",
-        location: "Bengaluru",
-        statValue: "4 slots open",
-        statLabel: "Engineering Mentor",
-        colorSeed: "Sriram K",
-        color: "#9A6BB8", // lavender
-      },
-      {
-        name: "Tanya Bhalla",
-        headline: "Product Design Lead @ Razorpay · Reviewing mobile UX portfolios",
-        location: "Gurugram",
-        statValue: "Design Mentor",
-        statLabel: "1:1 Portfolio Review",
-        colorSeed: "Tanya Bhalla",
-        color: "#C48E69", // tan
-      },
-      {
-        name: "Karan Verma",
-        headline: "Full-Stack Contract Lead · Ex-Swiggy · 38 Completed Contracts",
-        location: "Pune",
-        statValue: "Top Rated",
-        statLabel: "Talent Showcase",
-        colorSeed: "Karan Verma",
-        color: "#D9694A", // coral
-      },
-      {
-        name: "HealthFlow Labs",
-        headline: "Seed Stage HealthTech hiring 2 Frontend & 1 ML Engineer",
-        location: "Hyderabad",
-        statValue: "Hiring 3",
-        statLabel: "Startup Job",
-        colorSeed: "HealthFlow Labs",
-        color: "#5E9C8A", // sage teal
-      },
-    ],
-    feedPosts: [
-      {
-        id: "ind-1",
-        authorName: "Priya Nair",
-        authorHandle: "priya_cto",
-        authorHeadline: "Co-founder & CTO @ FinPilot",
-        location: "Bengaluru",
-        body: "We are hiring a freelance UI/UX designer who understands Indian SME fintech workflows! 3-week project with competitive cash compensation + optional conversion. DM your portfolio or Figma link.",
-        likeCount: 312,
-        commentCount: 42,
-        createdAt: "2026-11-03T14:30:00.000Z",
-        tag: "Gig Opportunity",
-      },
-      {
-        id: "ind-2",
-        authorName: "Sriram K.",
-        authorHandle: "sriram_mentor",
-        authorHeadline: "Staff Engineer & Tech Advisor",
-        location: "Bengaluru",
-        body: "Hosting a live 1-hour workshop this Sunday: 'How to transition from freelance software contractor to founding engineer at high-growth Indian startups'. Drop your questions or RSVP in comments!",
-        likeCount: 520,
-        commentCount: 88,
-        createdAt: "2026-11-03T11:00:00.000Z",
-        tag: "Mentorship",
-      },
-    ],
+    featuredOpportunity: null,
+    featuredProfile: null,
+    bentoGrid: [],
+    feedPosts: [],
   },
 
   // 2. STARTUP_FOUNDER: Building own startup, looking for co-founders/investors
@@ -229,97 +159,16 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
     roleDescription: "Building your own startup and looking for co-founders or investors",
     greetingTitle: "Founder Command Center 🚀",
     greetingSubtitle: "Cap table momentum, co-founder match pipeline & investor intros.",
-    stats: [
-      { label: "Target Raise", value: "₹1.5 Cr", sublabel: "Seed round open", trend: "65% committed" },
-      { label: "Pitch Views", value: "32", sublabel: "7 verified VCs", trend: "+12 this week" },
-      { label: "Investor Intros", value: "6", sublabel: "2 partner meetings", trend: "High intent" },
-      { label: "Co-founder Chats", value: "8", sublabel: "CTO / Growth leads", trend: "3 new" },
-    ],
+    stats: [],
     quickActions: [
-      { label: "Pitch to Angels", badge: "Active", actionKey: "pitch" },
-      { label: "Find Co-founder", badge: "Matched", actionKey: "cofounder" },
-      { label: "Apply to T-Hub Grant", actionKey: "grant" },
+      { label: "Pitch to Angels", actionKey: "pitch" },
+      { label: "Find Co-founder", actionKey: "cofounder" },
+      { label: "Apply to Grant", actionKey: "grant" },
     ],
-    featuredOpportunity: {
-      organization: "T-Hub Hyderabad",
-      statValue: "₹5L Grant",
-      color: "#9A6BB8", // lavender
-      headline: "Startup Pitch Challenge 2026: Win equity-free funding & VC mentorship",
-      meta: "T-Hub · Open to student and early-stage founders · 12 days left to apply",
-    },
-    featuredProfile: {
-      name: "Priya Nair",
-      role: "Co-founder & CTO @ FinPilot",
-      location: "Koramangala, Bengaluru",
-      statValue: "₹1.2 Cr ARR",
-      statLabel: "Seed · T-Hub Cohort 7",
-      colorSeed: "Priya Nair",
-      color: "#C48E69", // tan-peach
-    },
-    bentoGrid: [
-      {
-        name: "Rohan Mehta",
-        headline: "Angel Investor · 14 Startups Backed · Writing ₹15L-₹50L checks",
-        location: "Mumbai",
-        statValue: "14 Portfolios",
-        statLabel: "Angel Investor",
-        colorSeed: "Rohan Mehta",
-        color: "#D8BF4A", // mustard gold
-      },
-      {
-        name: "Aarav Reddy",
-        headline: "Technical Co-founder · Distributed Systems & AI Infrastructure",
-        location: "Hyderabad",
-        statValue: "Seeking Match",
-        statLabel: "Co-founder",
-        colorSeed: "Aarav Reddy",
-        color: "#5E9C8A", // sage teal
-      },
-      {
-        name: "Peak XV Surge",
-        headline: "Cohort 12 Applications Open: ₹8 Cr initial seed check & global immersion",
-        location: "Bengaluru",
-        statValue: "Cohort 12",
-        statLabel: "Accelerator",
-        colorSeed: "Peak XV Surge",
-        color: "#D9694A", // coral
-      },
-      {
-        name: "Ananya Das",
-        headline: "Fractional Growth Lead · Scaled D2C brands past ₹10 Cr ARR",
-        location: "Delhi",
-        statValue: "Advisor",
-        statLabel: "Growth Advisor",
-        colorSeed: "Ananya Das",
-        color: "#5E9C8A", // sage teal
-      },
-    ],
-    feedPosts: [
-      {
-        id: "fnd-1",
-        authorName: "Rohan Mehta",
-        authorHandle: "rohan_angel",
-        authorHeadline: "Angel Investor · 14 Portfolios",
-        location: "Mumbai",
-        body: "Evaluating early-stage B2B SaaS and AI agent workflows for Q4 angel investments. Writing ₹25L-₹50L checks. If you have ₹10L+ ARR or 5+ pilot LOIs, send your deck to my Ruven inbox.",
-        likeCount: 489,
-        commentCount: 73,
-        createdAt: "2026-11-03T09:15:00.000Z",
-        tag: "Angel Deal Flow",
-      },
-      {
-        id: "fnd-2",
-        authorName: "Aarav Reddy",
-        authorHandle: "aarav_reddy",
-        authorHeadline: "Founder & CEO @ NovaLeaf Labs",
-        location: "Hyderabad",
-        body: "We just open-sourced our automated founder onboarding checklist for Indian startups (GST, DPIIT tax exemptions, current account & co-founder agreement templates). Free for all Ruven members!",
-        likeCount: 445,
-        commentCount: 61,
-        createdAt: "2026-11-03T08:00:00.000Z",
-        tag: "Resource",
-      },
-    ],
+    featuredOpportunity: null,
+    featuredProfile: null,
+    bentoGrid: [],
+    feedPosts: [],
   },
 
   // 3. COMPANY_OWNER: Running established company, hiring or partnering
@@ -333,97 +182,16 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
     roleDescription: "Running an established company, hiring or partnering",
     greetingTitle: "Enterprise & Business Hub 🏢",
     greetingSubtitle: "Corporate vendor proposals, B2B deal flow & executive recruitment.",
-    stats: [
-      { label: "Open Requisitions", value: "5", sublabel: "34 candidate matches", trend: "2 in final round" },
-      { label: "Inbound B2B Bids", value: "18", sublabel: "Verified vendors", trend: "+6 this week" },
-      { label: "Synergy Inquiries", value: "12", sublabel: "Enterprise scaleups", trend: "High value" },
-      { label: "Govt Subsidies", value: "₹45L", sublabel: "MSME tech grant ready", trend: "Eligible" },
-    ],
+    stats: [],
     quickActions: [
-      { label: "Post Job / RFP", badge: "New", actionKey: "rfp" },
+      { label: "Post Job / RFP", actionKey: "rfp" },
       { label: "B2B Vendor Directory", actionKey: "vendors" },
-      { label: "Corporate Tax Perks", badge: "2026 Scheme", actionKey: "perks" },
+      { label: "Corporate Tax Perks", actionKey: "perks" },
     ],
-    featuredOpportunity: {
-      organization: "MSME Digital India Scheme 2026",
-      statValue: "40% Subsidy",
-      color: "#9A6BB8", // lavender
-      headline: "Government Enterprise Tech Scheme: Up to ₹15L reimbursement on ERP & cloud licenses",
-      meta: "Ministry of MSME · Fast-track 14-day approval for registered private limited companies",
-    },
-    featuredProfile: {
-      name: "CloudScale Infrastructure",
-      role: "Tier-4 Multi-Region Cloud & GPU Partner",
-      location: "Mumbai & Hyderabad",
-      statValue: "₹25L Credits",
-      statLabel: "Exclusive for Ruven Corporate Members",
-      colorSeed: "CloudScale Infra",
-      color: "#5E9C8A", // sage teal
-    },
-    bentoGrid: [
-      {
-        name: "Apex Legal & Tax Partners",
-        headline: "Cross-border entity setup, ESOP pools & GST optimization",
-        location: "Bengaluru",
-        statValue: "Top Counsel",
-        statLabel: "Corporate Legal",
-        colorSeed: "Apex Legal",
-        color: "#C48E69", // tan
-      },
-      {
-        name: "Pre-Vetted Senior Engineers",
-        headline: "18 Senior consultants ready for fractional enterprise architecture",
-        location: "Remote / Pan-India",
-        statValue: "Available Now",
-        statLabel: "Staff Augmentation",
-        colorSeed: "Pre-Vetted Senior Engineers",
-        color: "#D8BF4A", // mustard gold
-      },
-      {
-        name: "Metro Logistics Network",
-        headline: "Cold chain & B2B express logistics across 28 Indian cities",
-        location: "Delhi NCR",
-        statValue: "Enterprise SLA",
-        statLabel: "Logistics Partner",
-        colorSeed: "Metro Logistics",
-        color: "#D9694A", // coral
-      },
-      {
-        name: "SecureAudit India",
-        headline: "CERT-In certified cybersecurity & SOC2 compliance auditing",
-        location: "Bengaluru",
-        statValue: "Fast Audit",
-        statLabel: "Security Partner",
-        colorSeed: "SecureAudit India",
-        color: "#9A6BB8", // lavender
-      },
-    ],
-    feedPosts: [
-      {
-        id: "cmp-1",
-        authorName: "CloudScale Infra",
-        authorHandle: "cloudscale_in",
-        authorHeadline: "Cloud & Infrastructure Partners",
-        location: "Mumbai",
-        body: "Announcing the Ruven Enterprise Credit Program: Any registered company on Ruven can now access up to ₹25L in GPU and cloud infrastructure credits with dedicated 24/7 TAM support.",
-        likeCount: 395,
-        commentCount: 49,
-        createdAt: "2026-11-03T12:45:00.000Z",
-        tag: "B2B Perk",
-      },
-      {
-        id: "cmp-2",
-        authorName: "Apex Legal",
-        authorHandle: "apex_legal",
-        authorHeadline: "Corporate Legal & Tax Advisory",
-        location: "Bengaluru",
-        body: "Reminder for Indian Private Limited companies: Filing deadline for annual returns and Director KYC is coming up. Here is our free 5-point compliance checklist to prevent late fee penalties.",
-        likeCount: 268,
-        commentCount: 31,
-        createdAt: "2026-11-03T10:20:00.000Z",
-        tag: "Compliance",
-      },
-    ],
+    featuredOpportunity: null,
+    featuredProfile: null,
+    bentoGrid: [],
+    feedPosts: [],
   },
 
   // 4. INVESTOR: Angel, VC, or family office looking for deal flow
@@ -437,97 +205,16 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
     roleDescription: "Angel, VC, or family office looking for deal flow",
     greetingTitle: "Investor Deal Flow Terminal 💼",
     greetingSubtitle: "Curated Indian startup pipeline, due diligence rooms & syndicate deals.",
-    stats: [
-      { label: "New Deals / Wk", value: "18", sublabel: "12 Seed / 6 Pre-seed", trend: "+5 vs last week" },
-      { label: "Active Diligence", value: "4", sublabel: "Cap tables & LOIs", trend: "2 in term sheet" },
-      { label: "Capital Deployed", value: "₹8.5 Cr", sublabel: "Across 14 startups", trend: "3.4x MOIC" },
-      { label: "Syndicate Invites", value: "6", sublabel: "Co-invest opportunities", trend: "High quality" },
-    ],
+    stats: [],
     quickActions: [
-      { label: "Browse Deal Pipeline", badge: "18 New", actionKey: "deals" },
-      { label: "Lead a Syndicate", badge: "Open", actionKey: "syndicate" },
+      { label: "Browse Deal Pipeline", actionKey: "deals" },
+      { label: "Lead a Syndicate", actionKey: "syndicate" },
       { label: "Request Founder Demo", actionKey: "demo" },
     ],
-    featuredOpportunity: {
-      organization: "GreenFleet Commercial EV Syndicate",
-      statValue: "₹3.5 Cr Round",
-      color: "#C48E69", // tan
-      headline: "Commercial EV Fleet Operating in 6 Metros: ₹1.4 Cr Monthly Run Rate",
-      meta: "Co-investing with Blume Ventures scout pool · ₹25L minimum ticket size · Closes Friday",
-    },
-    featuredProfile: {
-      name: "Deal Spotlight: DataSync AI",
-      role: "Autonomous Enterprise ETL Agents · Seed Stage",
-      location: "Indiranagar, Bengaluru",
-      statValue: "₹2 Cr @ ₹18 Cr",
-      statLabel: "Seed Round · ₹80L Committed",
-      colorSeed: "DataSync AI",
-      color: "#D8BF4A", // mustard gold
-    },
-    bentoGrid: [
-      {
-        name: "Priya Nair (FinPilot)",
-        headline: "₹1.2 Cr ARR · 240% YoY ARR growth · 15 Enterprise bank contracts",
-        location: "Bengaluru",
-        statValue: "Pre-Series A",
-        statLabel: "Raising Q1",
-        colorSeed: "FinPilot Seed",
-        color: "#5E9C8A", // sage teal
-      },
-      {
-        name: "MedHealth AI Labs",
-        headline: "AI pathology assistant approved by 8 Indian hospital networks",
-        location: "Hyderabad",
-        statValue: "Raising ₹1.5 Cr",
-        statLabel: "Seed Stage",
-        colorSeed: "MedHealth AI",
-        color: "#D9694A", // coral
-      },
-      {
-        name: "Rohan Mehta (Angel)",
-        headline: "Leading ₹75L syndicate in B2B supply chain SaaS · 2 spots left",
-        location: "Mumbai",
-        statValue: "Syndicate Lead",
-        statLabel: "Co-Investment",
-        colorSeed: "Rohan Mehta Syndicate",
-        color: "#9A6BB8", // lavender
-      },
-      {
-        name: "Due Diligence Room",
-        headline: "Audited financial models, GST verification, and IP reviews for 2 finalist startups",
-        location: "Platform Verified",
-        statValue: "2 Data Rooms",
-        statLabel: "Due Diligence",
-        colorSeed: "Due Diligence Room",
-        color: "#5E9C8A", // sage teal
-      },
-    ],
-    feedPosts: [
-      {
-        id: "inv-1",
-        authorName: "Rohan Mehta",
-        authorHandle: "rohan_angel",
-        authorHeadline: "Angel Investor · 14 Portfolios",
-        location: "Mumbai",
-        body: "Market note: Indian B2B SaaS valuations are stabilizing at 8-12x forward ARR for profitable/capital-efficient teams. Founders with under ₹2 Cr ARR focusing on customer retention are raising within 3 weeks.",
-        likeCount: 612,
-        commentCount: 94,
-        createdAt: "2026-11-03T13:10:00.000Z",
-        tag: "Venture Insights",
-      },
-      {
-        id: "inv-2",
-        authorName: "Priya Nair",
-        authorHandle: "priya_cto",
-        authorHeadline: "Co-founder & CTO @ FinPilot",
-        location: "Bengaluru",
-        body: "FinPilot investor update: Closed October at ₹12.5L monthly revenue, up from ₹4.2L in March. We have opened our data room for our upcoming pre-Series A syndicate round. Accredited angels can request access.",
-        likeCount: 430,
-        commentCount: 52,
-        createdAt: "2026-11-03T09:40:00.000Z",
-        tag: "Investor Update",
-      },
-    ],
+    featuredOpportunity: null,
+    featuredProfile: null,
+    bentoGrid: [],
+    feedPosts: [],
   },
 };
 
@@ -547,16 +234,20 @@ function HomePageContent() {
   const config = ROLE_CONFIGS[activeRole];
 
   const [activeTab, setActiveTab] = useState<string>("dashboard");
-  const [posts, setPosts] = useState<FeedPost[]>(config.feedPosts);
+  const [posts, setPosts] = useState<FeedPost[]>([]);
+  const [feedLoading, setFeedLoading] = useState(false);
   const [newPostText, setNewPostText] = useState("");
   const [showPostBox, setShowPostBox] = useState(false);
 
-  // Private To-Do list state (B7)
-  const [todos, setTodos] = useState<{ id: string; text: string; done: boolean }[]>([
-    { id: "1", text: "Finalize seed round pitch deck", done: true },
-    { id: "2", text: "Follow up with Priya regarding AI demo", done: false },
-    { id: "3", text: "Review candidate applications in My Company", done: false },
-  ]);
+  // Real data states
+  const [dailyQuote, setDailyQuote] = useState<{ quote: string; author: string }>(FALLBACK_QUOTES[activeRole]);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [todayMeetups, setTodayMeetups] = useState<MeetupEvent[]>([]);
+  const [activeAd, setActiveAd] = useState<AdItem | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  // Private To-Do list (session-local only, no fake pre-filled data)
+  const [todos, setTodos] = useState<{ id: string; text: string; done: boolean }[]>([]);
   const [newTodo, setNewTodo] = useState("");
 
   const handleAddTodo = () => {
@@ -573,46 +264,54 @@ function HomePageContent() {
     setTodos((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Load database posts from Supabase on mount
+  // Load all data from Supabase on mount
   useEffect(() => {
-    async function loadDbPosts() {
+    async function loadData() {
+      setStatsLoading(true);
       try {
-        const { data, error } = await supabase
-          .from("posts")
-          .select("id, author_id, body, like_count, comment_count, created_at")
-          .order("created_at", { ascending: false })
-          .limit(20);
+        const [quote, ad, meetups] = await Promise.all([
+          dataService.fetchDailyQuote(activeRole),
+          dataService.fetchActiveAd(),
+          dataService.fetchTodayMeetups(),
+        ]);
+        setDailyQuote(quote);
+        setActiveAd(ad);
+        setTodayMeetups(meetups);
 
-        if (!error && data && data.length > 0) {
-          const dbPosts: FeedPost[] = data.map((p) => ({
-            id: p.id,
-            authorName: "Founder",
-            authorHandle: "founder",
-            authorHeadline: config.badgeLabel,
-            location: "India",
-            body: p.body,
-            likeCount: p.like_count || 0,
-            commentCount: p.comment_count || 0,
-            createdAt: p.created_at,
-            liked: false,
-            tag: "Update",
-          }));
-          setPosts((prev) => {
-            const ids = new Set(dbPosts.map((d) => d.id));
-            return [...dbPosts, ...prev.filter((p) => !ids.has(p.id))];
-          });
+        if (user?.id) {
+          const stats = await dataService.fetchUserStats(user.id);
+          setUserStats(stats);
         }
-      } catch {
-        // fallback
+      } catch (e) {
+        console.warn("Failed to load home data:", e);
+      } finally {
+        setStatsLoading(false);
       }
     }
-    loadDbPosts();
-  }, [config.badgeLabel]);
+    loadData();
+  }, [user?.id, activeRole]);
+
+  useEffect(() => {
+    async function loadFeed() {
+      setFeedLoading(true);
+      try {
+        const dbPosts = await dataService.fetchFeedPosts(user?.id);
+        setPosts(dbPosts.map(dbPostToUiPost));
+      } catch {
+        // keep empty
+      } finally {
+        setFeedLoading(false);
+      }
+    }
+    loadFeed();
+  }, [user?.id]);
 
   async function handleLike(id: string) {
+    if (!user?.id) return;
     const post = posts.find((p) => p.id === id);
     const willBeLiked = !post?.liked;
 
+    // Optimistic update
     setPosts((prev) =>
       prev.map((p) =>
         p.id === id
@@ -621,58 +320,35 @@ function HomePageContent() {
       )
     );
 
-    if (user?.id && id.includes("-")) {
-      try {
-        if (willBeLiked) {
-          await supabase.from("post_likes").insert({ post_id: id, user_id: user.id });
-        } else {
-          await supabase.from("post_likes").delete().eq("post_id", id).eq("user_id", user.id);
-        }
-      } catch (err) {
-        console.error("Like toggle error:", err);
-      }
+    try {
+      await dataService.togglePostLike(id, user.id, !willBeLiked);
+    } catch (err) {
+      // Revert on failure
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? { ...p, liked: !willBeLiked, likeCount: !willBeLiked ? p.likeCount + 1 : Math.max(0, p.likeCount - 1) }
+            : p
+        )
+      );
+      console.error("Like toggle error:", err);
     }
   }
 
   async function handleCreatePost(e: React.FormEvent) {
     e.preventDefault();
-    if (!newPostText.trim()) return;
+    if (!newPostText.trim() || !user?.id) return;
     const bodyText = newPostText.trim();
-    const tempPost: FeedPost = {
-      id: "post-" + Date.now(),
-      authorName: user?.userHandle ? `@${user.userHandle}` : "Aarav Reddy",
-      authorHandle: user?.userHandle ?? "founder",
-      authorHeadline: config.badgeLabel,
-      location: "India",
-      body: bodyText,
-      likeCount: 0,
-      commentCount: 0,
-      createdAt: new Date().toISOString(),
-      liked: false,
-      tag: "Update",
-    };
-    setPosts((prev) => [tempPost, ...prev]);
     setNewPostText("");
     setShowPostBox(false);
 
-    if (user?.id) {
-      try {
-        const { data } = await supabase
-          .from("posts")
-          .insert({
-            author_id: user.id,
-            body: bodyText,
-            like_count: 0,
-            comment_count: 0,
-          })
-          .select("id")
-          .single();
-        if (data?.id) {
-          setPosts((prev) => prev.map((p) => (p.id === tempPost.id ? { ...p, id: data.id } : p)));
-        }
-      } catch (err) {
-        console.error("Failed to insert post:", err);
+    try {
+      const newPost = await dataService.createPost(user.id, bodyText);
+      if (newPost) {
+        setPosts((prev) => [dbPostToUiPost(newPost), ...prev]);
       }
+    } catch (err) {
+      console.error("Failed to create post:", err);
     }
   }
 
@@ -680,9 +356,7 @@ function HomePageContent() {
     <div className="min-h-dvh bg-black flex flex-col">
       {/* Top bar with internal NavDrawer */}
       <TopBar
-        unreadCount={3}
-        onSearchOpen={() => {}}
-        onNotificationsOpen={() => {}}
+        unreadCount={0}
       />
 
       {/* Main Content */}
@@ -736,10 +410,10 @@ function HomePageContent() {
                 <span className="text-[10px] sm:text-[11px] text-[#6E6E73] shrink-0">Daily Inspiration</span>
               </div>
               <blockquote className="text-white text-[13px] italic font-medium leading-relaxed">
-                &ldquo;{ROLE_QUOTES[activeRole]?.quote || "Build relentlessly."}&rdquo;
+                &ldquo;{dailyQuote?.quote || FALLBACK_QUOTES[activeRole]?.quote || "Build relentlessly."}&rdquo;
               </blockquote>
               <p className="text-[#8E8E93] text-[11px] mt-1.5 text-right font-medium">
-                — {ROLE_QUOTES[activeRole]?.author || "Founder"}
+                — {dailyQuote?.author || FALLBACK_QUOTES[activeRole]?.author || "Founder"}
               </p>
             </div>
           </div>
@@ -789,9 +463,34 @@ function HomePageContent() {
                 </p>
               </div>
 
-              {/* 4 Dedicated Stats Cards */}
+              {/* 4 Real Server-Computed Stats Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                {config.stats.map((s, idx) => (
+                {[
+                  {
+                    label: "Connections",
+                    value: statsLoading ? "…" : (userStats?.connectionsCount ?? 0).toString(),
+                    sublabel: "Active network peers",
+                    trend: "Real",
+                  },
+                  {
+                    label: "Feed Updates",
+                    value: statsLoading ? "…" : (userStats?.postsCount ?? 0).toString(),
+                    sublabel: "Published posts",
+                    trend: "Live",
+                  },
+                  {
+                    label: "Profile Complete",
+                    value: statsLoading ? "…" : `${userStats?.profileCompleteness ?? 20}%`,
+                    sublabel: "Setup status",
+                    trend: (userStats?.profileCompleteness ?? 20) === 100 ? "Done" : "Action",
+                  },
+                  {
+                    label: "Upcoming RSVPs",
+                    value: statsLoading ? "…" : (userStats?.upcomingMeetupsCount ?? 0).toString(),
+                    sublabel: "Events attending",
+                    trend: "Meetups",
+                  },
+                ].map((s, idx) => (
                   <div
                     key={idx}
                     className="p-3.5 rounded-2xl bg-[#121214] border border-[#1E1E22] hover:border-[#2A2A2E] transition-colors"
@@ -853,171 +552,82 @@ function HomePageContent() {
                 ))}
               </div>
 
-              {/* Hero Bento Profile & Opportunity row */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Hero Bento Profile / Entity */}
-                <div
-                  className="rounded-3xl p-5 relative overflow-hidden h-full flex flex-col justify-between"
-                  style={{ backgroundColor: config.featuredProfile.color }}
-                >
-                  <div className="relative z-10 flex flex-col justify-between min-h-[170px] h-full">
-                    <div>
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-black/70 px-2 py-0.5 rounded-full bg-black/10">
-                        {config.label} Spotlight
-                      </span>
-                      <h2 className="text-black font-bold text-[22px] leading-tight tracking-tight mt-2">
-                        {config.featuredProfile.name}
-                      </h2>
-                      <p className="text-black/80 text-[13px] font-medium mt-1">
-                        {config.featuredProfile.role}
-                      </p>
-                      <p className="text-black/60 text-[12px] flex items-center gap-1 mt-0.5">
-                        <MapPin size={12} />
-                        <span>{config.featuredProfile.location}</span>
-                      </p>
-                    </div>
-
-                    <div className="flex items-end justify-between pt-3 border-t border-black/10 mt-4 gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-black font-extrabold text-[20px] sm:text-[24px] leading-none">
-                          {config.featuredProfile.statValue}
-                        </p>
-                        <p className="text-black/70 text-[11px] font-medium mt-0.5 truncate">
-                          {config.featuredProfile.statLabel}
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={() => { router.push("/discover"); }}
-                        className="px-3 py-1.5 rounded-xl bg-black text-white text-[12px] font-semibold flex items-center gap-1 hover:bg-black/80 transition-colors shrink-0"
-                      >
-                        <span>Connect</span>
-                        <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tailored Opportunity Banner */}
-                <div
-                  className="rounded-3xl p-5 text-white relative overflow-hidden h-full flex flex-col justify-between"
-                  style={{ backgroundColor: config.featuredOpportunity.color }}
-                >
-                  <div className="relative z-10 flex flex-col justify-between min-h-[170px] h-full">
-                    <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-white/80 px-2 py-0.5 rounded-full bg-black/20 truncate">
-                          {config.featuredOpportunity.organization}
-                        </span>
-                        <span className="text-white font-extrabold text-[14px] sm:text-[15px] shrink-0">
-                          {config.featuredOpportunity.statValue}
-                        </span>
-                      </div>
-                      <h3 className="text-white font-bold text-[18px] leading-snug mt-2">
-                        {config.featuredOpportunity.headline}
-                      </h3>
-                      <p className="text-white/80 text-[13px] mt-1">
-                        {config.featuredOpportunity.meta}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => { router.push("/plans"); }}
-                      className="self-start mt-4 px-3.5 py-2 bg-black text-white text-[12px] font-semibold rounded-xl flex items-center gap-1.5 hover:bg-black/80 transition-colors"
-                    >
-                      <span>View Application Details</span>
-                      <ExternalLink size={13} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* 4 Bento Items Tailored to this Role */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                {config.bentoGrid.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="rounded-2xl p-3.5 flex flex-col justify-between min-h-[145px] transition-transform hover:-translate-y-0.5"
-                    style={{ backgroundColor: item.color }}
-                  >
-                    <div>
-                      <p className="text-black font-bold text-[15px] leading-snug truncate">
-                        {item.name}
-                      </p>
-                      <p className="text-black/75 text-[11px] line-clamp-2 mt-1 leading-tight font-medium">
-                        {item.headline}
-                      </p>
-                    </div>
-
-                    <div className="pt-2 border-t border-black/10 flex items-center justify-between">
-                      <div>
-                        <p className="text-black font-extrabold text-[15px] leading-none">
-                          {item.statValue}
-                        </p>
-                        <p className="text-black/70 text-[10px] font-medium">
-                          {item.statLabel}
-                        </p>
-                      </div>
-                      <ChevronRight size={14} className="text-black/60" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
               {/* ══════════ LAUNCH CHECKLIST (B10) ══════════ */}
               <div className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-white font-bold text-[15px] flex items-center gap-2">
-                      <Sparkles size={16} className="text-[#D4FF3A]" /> Launch Checklist
-                    </h3>
-                    <p className="text-[#8E8E93] text-[11px] mt-0.5">3 of 5 milestones achieved</p>
-                  </div>
-                  <span className="text-[12px] font-bold text-[#D4FF3A] bg-[#D4FF3A]/10 px-2 py-0.5 rounded-full border border-[#D4FF3A]/20">
-                    60%
-                  </span>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="w-full h-1.5 bg-[#1C1C1E] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#A24BFF] to-[#D4FF3A] rounded-full transition-all duration-500"
-                    style={{ width: "60%" }}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1 text-[12px]">
-                  {[
-                    { label: "Complete founder profile & headline", done: true },
-                    { label: "Publish company profile & verification", done: true },
-                    { label: "Post first job or talent requirement", done: true },
+                {(() => {
+                  const checklist = [
+                    { label: "Complete founder profile & headline", done: (userStats?.profileCompleteness ?? 20) >= 50, href: "/profile" },
+                    { label: "Connect with verified founders", done: (userStats?.connectionsCount ?? 0) > 0, href: "/hub" },
                     { label: "Share your startup ask or idea in Ecosystem", done: false, href: "/ideas" },
-                    { label: "Connect with 3 verified founders or investors", done: false, href: "/hub" },
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-[#141416] border border-[#1E1E22]">
-                      <div className="flex items-center gap-2.5">
-                        <span
-                          className={cn(
-                            "w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[10px]",
-                            item.done
-                              ? "bg-[#D4FF3A] text-black font-bold"
-                              : "border border-[#3A3A3E] text-transparent"
-                          )}
-                        >
-                          ✓
-                        </span>
-                        <span className={item.done ? "line-through text-[#6E6E73]" : "text-white font-medium"}>
-                          {item.label}
+                    { label: "Publish first community update in feed", done: (userStats?.postsCount ?? 0) > 0, href: "#feed-anchor" },
+                    { label: "RSVP to a city meetup or pitch session", done: (userStats?.upcomingMeetupsCount ?? 0) > 0, href: "/meetups" },
+                  ];
+                  const doneCount = checklist.filter((c) => c.done).length;
+                  const percent = Math.round((doneCount / checklist.length) * 100);
+
+                  return (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-white font-bold text-[15px] flex items-center gap-2">
+                            <Sparkles size={16} className="text-[#D4FF3A]" /> Launch Checklist
+                          </h3>
+                          <p className="text-[#8E8E93] text-[11px] mt-0.5">
+                            {doneCount} of {checklist.length} milestones achieved
+                          </p>
+                        </div>
+                        <span className="text-[12px] font-bold text-[#D4FF3A] bg-[#D4FF3A]/10 px-2 py-0.5 rounded-full border border-[#D4FF3A]/20">
+                          {percent}%
                         </span>
                       </div>
-                      {item.href && !item.done && (
-                        <Link href={item.href} className="text-[#A24BFF] hover:underline text-[11px] font-semibold shrink-0">
-                          Start →
-                        </Link>
-                      )}
-                    </div>
-                  ))}
-                </div>
+
+                      {/* Progress Bar */}
+                      <div className="w-full h-1.5 bg-[#1C1C1E] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-[#A24BFF] to-[#D4FF3A] rounded-full transition-all duration-500"
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1 text-[12px]">
+                        {checklist.map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-[#141416] border border-[#1E1E22]">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span
+                                className={cn(
+                                  "w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[10px]",
+                                  item.done
+                                    ? "bg-[#D4FF3A] text-black font-bold"
+                                    : "border border-[#3A3A3E] text-transparent"
+                                )}
+                              >
+                                ✓
+                              </span>
+                              <span className={cn("truncate", item.done ? "line-through text-[#6E6E73]" : "text-white font-medium")}>
+                                {item.label}
+                              </span>
+                            </div>
+                            {item.href && !item.done && (
+                              <button
+                                onClick={() => {
+                                  if (item.href === "#feed-anchor") {
+                                    setActiveTab("feed");
+                                    setShowPostBox(true);
+                                  } else {
+                                    router.push(item.href);
+                                  }
+                                }}
+                                className="text-[#A24BFF] hover:underline text-[11px] font-semibold shrink-0 ml-2"
+                              >
+                                Start →
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Lower 3-column widgets row on tablet/desktop */}
@@ -1031,21 +641,29 @@ function HomePageContent() {
                         View All →
                       </Link>
                     </div>
-                    <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] flex items-center justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-white font-semibold text-[13px] truncate">Bengaluru AI Founders Mixer</p>
-                        <p className="text-[#8E8E93] text-[11px] truncate">Today · 6:30 PM IST · Koramangala, Bengaluru</p>
-                        <span className="inline-block mt-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                          18 founders attending
-                        </span>
+                    {todayMeetups.length === 0 ? (
+                      <div className="p-4 rounded-xl bg-[#141416] border border-[#222226] text-center space-y-1.5">
+                        <p className="text-[#8E8E93] text-[12px]">No meetups scheduled for today.</p>
+                        <Link href="/meetups" className="inline-block text-[11px] text-[#A24BFF] hover:underline font-semibold">
+                          Browse upcoming mixers or host one →
+                        </Link>
                       </div>
-                      <Link
-                        href="/meetups"
-                        className="px-3 py-1.5 bg-[#A24BFF] text-white text-[12px] font-medium rounded-xl hover:bg-[#8e3eee] transition-colors shrink-0"
-                      >
-                        RSVP
-                      </Link>
-                    </div>
+                    ) : (
+                      <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-white font-semibold text-[13px] truncate">{todayMeetups[0].title}</p>
+                          <p className="text-[#8E8E93] text-[11px] truncate">
+                            {todayMeetups[0].location} · {todayMeetups[0].attendee_count} attending
+                          </p>
+                        </div>
+                        <Link
+                          href="/meetups"
+                          className="px-3 py-1.5 bg-[#A24BFF] text-white text-[12px] font-medium rounded-xl hover:bg-[#8e3eee] transition-colors shrink-0"
+                        >
+                          RSVP
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1054,26 +672,34 @@ function HomePageContent() {
                   <div>
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-[#A1A1A6] px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-                        Sponsored
+                        {activeAd ? "Sponsored" : "Ruven Ecosystem"}
                       </span>
-                      <span className="text-[11px] text-[#6E6E73]">Promoted Ecosystem Partner</span>
+                      <span className="text-[11px] text-[#6E6E73]">
+                        {activeAd?.sponsor_name || "Startup Perks"}
+                      </span>
                     </div>
                     <div className="mt-2">
-                      <h4 className="text-white font-bold text-[15px]">$25,000 in Cloud Credits · AWS for Startups</h4>
-                      <p className="text-[#8E8E93] text-[12px] mt-1">
-                        Scale your AI inference workflows with dedicated Nvidia H100 clusters and credits.
+                      <h4 className="text-white font-bold text-[15px]">
+                        {activeAd ? activeAd.title : "Access Verified Startup Grants & Perks"}
+                      </h4>
+                      <p className="text-[#8E8E93] text-[12px] mt-1 leading-snug">
+                        {activeAd
+                          ? activeAd.description
+                          : "Get cloud credits, legal templates, and priority intros with verified angels across India."}
                       </p>
                     </div>
                   </div>
                   <div className="pt-2 flex items-center justify-between border-t border-[#1E1E22]">
-                    <span className="text-[#D4FF3A] text-[12px] font-medium">AWS for Startups</span>
+                    <span className="text-[#D4FF3A] text-[12px] font-medium">
+                      {activeAd?.tag || activeAd?.sponsor_name || "Ruven Pro"}
+                    </span>
                     <a
-                      href="https://aws.amazon.com/startups"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href={activeAd?.cta_link || "/plans"}
+                      target={activeAd?.cta_link?.startsWith("http") ? "_blank" : undefined}
+                      rel={activeAd?.cta_link?.startsWith("http") ? "noopener noreferrer" : undefined}
                       className="px-3 py-1 bg-white text-black text-[11px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
                     >
-                      Claim Credits
+                      {activeAd?.cta_text || "Explore Perks"}
                     </a>
                   </div>
                 </div>
@@ -1163,7 +789,7 @@ function HomePageContent() {
                       onClick={() => setShowPostBox(true)}
                       className="w-full flex items-center gap-3 text-left py-2 px-3 rounded-xl bg-[#1C1C1E] text-[#8E8E93] text-[14px] hover:text-white transition-colors"
                     >
-                      <Avatar name={user?.userHandle ? `@${user.userHandle}` : "Aarav Reddy"} size="sm" />
+                      <Avatar name={user?.name || user?.userHandle || "Me"} size="sm" />
                       <span>Share an update as {config.label}…</span>
                     </button>
                   ) : (
@@ -1200,90 +826,97 @@ function HomePageContent() {
                   )}
                 </div>
 
-                {/* Feed Posts */}
-                {posts.map((post, idx) => (
-                  <div key={post.id} className="space-y-4">
-                    <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 hover:border-[#2A2A2D] transition-colors">
-                      <div className="flex items-start justify-between">
+                {/* Skeletons while loading */}
+                {feedLoading && (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((n) => (
+                      <div key={n} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 animate-pulse">
                         <div className="flex items-center gap-3">
-                          <Avatar name={post.authorName} size="md" />
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <p className="text-white font-semibold text-[15px] leading-tight">
-                                {post.authorName}
-                              </p>
-                              <span className="text-[#6E6E73] text-[12px]">@{post.authorHandle}</span>
-                            </div>
-                            <p className="text-[#8E8E93] text-[12px] leading-snug mt-0.5">
-                              {post.authorHeadline}
-                            </p>
+                          <div className="w-10 h-10 rounded-full bg-[#1C1C1E]" />
+                          <div className="space-y-1.5 flex-1">
+                            <div className="w-32 h-3.5 bg-[#1C1C1E] rounded" />
+                            <div className="w-20 h-2.5 bg-[#1C1C1E] rounded" />
                           </div>
                         </div>
-                        {post.tag && (
-                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#A24BFF]/10 text-[#A24BFF] border border-[#A24BFF]/20">
-                            {post.tag}
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="text-white text-[14px] leading-relaxed whitespace-pre-wrap">
-                        {post.body}
-                      </p>
-
-                      <div className="flex items-center justify-between pt-2 border-t border-[#1C1C1E] text-[#8E8E93] text-[13px]">
-                        <div className="flex items-center gap-5">
-                          <button
-                            onClick={() => handleLike(post.id)}
-                            className={cn(
-                              "flex items-center gap-1.5 transition-colors",
-                              post.liked ? "text-pink-500 font-semibold" : "hover:text-white"
-                            )}
-                          >
-                            <Heart size={16} fill={post.liked ? "currentColor" : "none"} />
-                            <span>{post.likeCount}</span>
-                          </button>
-                          <button className="flex items-center gap-1.5 hover:text-white transition-colors">
-                            <MessageCircle size={16} />
-                            <span>{post.commentCount}</span>
-                          </button>
-                          <button className="hover:text-white transition-colors">
-                            <Share2 size={15} />
-                          </button>
+                        <div className="space-y-2 pt-2">
+                          <div className="w-full h-3 bg-[#1C1C1E] rounded" />
+                          <div className="w-4/5 h-3 bg-[#1C1C1E] rounded" />
                         </div>
-                        <TimeAgo date={post.createdAt} fallback="1h" className="text-[11px] text-[#6E6E73]" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Empty State */}
+                {!feedLoading && posts.length === 0 && (
+                  <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3">
+                    <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#A24BFF]">
+                      <Sparkles size={20} />
+                    </div>
+                    <h3 className="text-white font-bold text-[16px]">No community posts yet</h3>
+                    <p className="text-[#8E8E93] text-[13px] max-w-sm mx-auto">
+                      Be the first to share an update, showcase what you are building, or post an ask to the Ruven network.
+                    </p>
+                    <button
+                      onClick={() => setShowPostBox(true)}
+                      className="px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
+                    >
+                      Share First Update
+                    </button>
+                  </div>
+                )}
+
+                {/* Feed Posts */}
+                {!feedLoading &&
+                  posts.map((post) => (
+                    <div key={post.id} className="space-y-4">
+                      <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 hover:border-[#2A2A2E] transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <Avatar name={post.authorName} size="md" />
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <p className="text-white font-semibold text-[15px] leading-tight">
+                                  {post.authorName}
+                                </p>
+                                <span className="text-[#6E6E73] text-[12px]">@{post.authorHandle}</span>
+                              </div>
+                              <p className="text-[#8E8E93] text-[12px] leading-snug mt-0.5">
+                                {post.authorHeadline}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <p className="text-white text-[14px] leading-relaxed whitespace-pre-wrap">
+                          {post.body}
+                        </p>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-[#1C1C1E] text-[#8E8E93] text-[13px]">
+                          <div className="flex items-center gap-5">
+                            <button
+                              onClick={() => handleLike(post.id)}
+                              className={cn(
+                                "flex items-center gap-1.5 transition-colors",
+                                post.liked ? "text-pink-500 font-semibold" : "hover:text-white"
+                              )}
+                            >
+                              <Heart size={16} fill={post.liked ? "currentColor" : "none"} />
+                              <span>{post.likeCount}</span>
+                            </button>
+                            <button className="flex items-center gap-1.5 hover:text-white transition-colors">
+                              <MessageCircle size={16} />
+                              <span>{post.commentCount}</span>
+                            </button>
+                            <button className="hover:text-white transition-colors">
+                              <Share2 size={15} />
+                            </button>
+                          </div>
+                          <TimeAgo date={post.createdAt} fallback="1h" className="text-[11px] text-[#6E6E73]" />
+                        </div>
                       </div>
                     </div>
-
-                    {/* Sponsored Card after every 2 updates (B6) */}
-                    {(idx + 1) % 2 === 0 && (
-                      <div className="bg-[#0e0e12] border border-[#2a2a36] rounded-2xl p-4 space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4FF3A] px-2 py-0.5 rounded-full bg-[#D4FF3A]/10 border border-[#D4FF3A]/20">
-                            Sponsored
-                          </span>
-                          <span className="text-[11px] text-[#6E6E73]">Promoted Startup Resource</span>
-                        </div>
-                        <div>
-                          <h4 className="text-white font-bold text-[14px]">Google for Startups Cloud Program</h4>
-                          <p className="text-[#8E8E93] text-[12px] mt-1">
-                            Receive up to ₹20,00,000 in Google Cloud & Firebase credits, 1:1 technical mentorship, and Web3 credits.
-                          </p>
-                        </div>
-                        <div className="pt-1 flex items-center justify-between">
-                          <span className="text-[#B3B3BA] text-[11px]">Google Cloud India</span>
-                          <a
-                            href="https://cloud.google.com/startup"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3 py-1 bg-white text-black text-[11px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
-                          >
-                            Apply Now
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  ))}
               </div>
 
               {/* Desktop Feed Sidebar (Col 4 on desktop) */}
@@ -1296,46 +929,63 @@ function HomePageContent() {
                       View All →
                     </Link>
                   </div>
-                  <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] space-y-2">
-                    <p className="text-white font-semibold text-[13px]">Bengaluru AI Founders Mixer</p>
-                    <p className="text-[#8E8E93] text-[11px]">Today · 6:30 PM IST · Koramangala</p>
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                        18 attending
-                      </span>
-                      <Link
-                        href="/meetups"
-                        className="px-3 py-1 bg-[#A24BFF] text-white text-[11px] font-medium rounded-lg hover:bg-[#8e3eee] transition-colors"
-                      >
-                        RSVP
+                  {todayMeetups.length === 0 ? (
+                    <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] text-center space-y-1.5">
+                      <p className="text-[#8E8E93] text-[12px]">No meetups scheduled today</p>
+                      <Link href="/meetups" className="text-[11px] text-[#A24BFF] hover:underline font-semibold block">
+                        Browse upcoming or host one →
                       </Link>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-[#141416] border border-[#222226] space-y-2">
+                      <p className="text-white font-semibold text-[13px]">{todayMeetups[0].title}</p>
+                      <p className="text-[#8E8E93] text-[11px]">{todayMeetups[0].location}</p>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                          {todayMeetups[0].attendee_count} attending
+                        </span>
+                        <Link
+                          href="/meetups"
+                          className="px-3 py-1 bg-[#A24BFF] text-white text-[11px] font-medium rounded-lg hover:bg-[#8e3eee] transition-colors"
+                        >
+                          RSVP
+                        </Link>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Sponsored Partner */}
                 <div className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#A1A1A6] px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-                      Partner
+                      {activeAd ? "Partner" : "Ruven"}
                     </span>
-                    <span className="text-[11px] text-[#6E6E73]">Ecosystem Credit</span>
+                    <span className="text-[11px] text-[#6E6E73]">
+                      {activeAd?.sponsor_name || "Ecosystem Credit"}
+                    </span>
                   </div>
                   <div>
-                    <h4 className="text-white font-bold text-[14px]">$25,000 AWS Cloud Credits</h4>
+                    <h4 className="text-white font-bold text-[14px]">
+                      {activeAd ? activeAd.title : "Verified Startup Perks & Grants"}
+                    </h4>
                     <p className="text-[#8E8E93] text-[11px] mt-1">
-                      Free infrastructure credits for early-stage Indian startups and founders.
+                      {activeAd
+                        ? activeAd.description
+                        : "Claim cloud infrastructure credits, legal advisory perks, and investor warm intros."}
                     </p>
                   </div>
                   <div className="pt-1 flex items-center justify-between">
-                    <span className="text-[#D4FF3A] text-[11px] font-medium">AWS for Startups</span>
+                    <span className="text-[#D4FF3A] text-[11px] font-medium">
+                      {activeAd?.tag || "Ruven Pro"}
+                    </span>
                     <a
-                      href="https://aws.amazon.com/startups"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href={activeAd?.cta_link || "/plans"}
+                      target={activeAd?.cta_link?.startsWith("http") ? "_blank" : undefined}
+                      rel={activeAd?.cta_link?.startsWith("http") ? "noopener noreferrer" : undefined}
                       className="px-3 py-1 bg-white text-black text-[11px] font-bold rounded-lg hover:bg-neutral-200 transition-colors"
                     >
-                      Claim
+                      {activeAd?.cta_text || "Explore"}
                     </a>
                   </div>
                 </div>
@@ -1375,8 +1025,7 @@ function HomePageContent() {
           setActiveTab("feed");
           setShowPostBox(true);
         }}
-        userName={user?.userHandle ? `@${user.userHandle}` : "Aarav Reddy"}
-        onProfileOpen={() => {}}
+        userName={user?.name || user?.userHandle || ""}
       />
     </div>
   );

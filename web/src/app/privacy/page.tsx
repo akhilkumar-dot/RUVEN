@@ -59,10 +59,10 @@ export default function PrivacyPage() {
         <section className="space-y-3 bg-[#101012] p-5 rounded-2xl border border-[#1E1E22]">
           <h2 className="text-[18px] font-semibold text-white">4. Grievance Redressal</h2>
           <p className="text-[#B3B3BA] text-[14px] leading-relaxed">
-            Grievance Officer: <strong>Aarav Reddy</strong><br />
+            Grievance Officer: <strong>Ruven Compliance Officer</strong><br />
             Ruven Technologies Private Limited<br />
             Indiranagar, Bengaluru, Karnataka 560038<br />
-            Email: <span className="text-[#D4FF3A]">grievance@founderbridge.in</span>
+            Email: <span className="text-[#D4FF3A]">grievance@ruven.in</span>
           </p>
         </section>
 

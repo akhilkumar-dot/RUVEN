@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { setAccessToken, type AuthResponse } from "@/lib/api/client";
-import { mockAuthApi } from "@/lib/api/mockAuth";
 import { supabaseAuth } from "@/lib/api/supabaseAuth";
+import { supabase } from "@/lib/supabase/client";
 
 // ── Types ─────────────────────────────────────────────────────
 export type AccountType =
@@ -15,6 +15,7 @@ export interface AuthUser {
   id: string;
   userHandle: string;
   email: string;
+  name?: string;
   type: AccountType;
 }
 
@@ -33,19 +34,19 @@ interface AuthState {
     password: string;
     type: AccountType;
   }) => Promise<AuthUser>;
-  switchAccountType: (type: AccountType) => void;
+  switchAccountType: (type: AccountType) => Promise<void>;
   logout: () => Promise<void>;
   logoutAll: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
   setUser: (user: AuthUser | null) => void;
   /** Called by OAuth callback page to hydrate session from redirect params */
-  setAuth: (opts: { accessToken: string; userHandle: string; type?: AccountType }) => void;
+  setAuth: (opts: { accessToken: string; userHandle: string; type?: AccountType; userId?: string; email?: string }) => void;
 }
 
-// ── Store with localStorage persistence ───────────────────────
+// ── Store with sessionStorage persistence ───────────────────────
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       accessToken: null,
       isAuthenticated: false,
@@ -54,31 +55,32 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user) =>
         set({ user, isAuthenticated: user !== null }),
 
-      switchAccountType: (type: AccountType) =>
-        set((state) => {
-          if (!state.user) {
-            return {
-              user: {
-                id: "usr-" + Math.random().toString(36).substring(2, 9),
-                userHandle: "aarav_reddy",
-                email: "aarav@founderbridge.in",
-                type,
-              },
-              isAuthenticated: true,
-            };
-          }
-          return { user: { ...state.user, type } };
-        }),
+      switchAccountType: async (type: AccountType) => {
+        const currentUser = get().user;
+        if (!currentUser) return;
 
-      setAuth: ({ accessToken, userHandle, type = "STARTUP_FOUNDER" }) => {
+        // Persist account type update to Supabase
+        try {
+          await supabase
+            .from("users")
+            .update({ type, updated_at: new Date().toISOString() })
+            .eq("id", currentUser.id);
+        } catch (e) {
+          console.warn("Failed to update user type in database:", e);
+        }
+
+        set({ user: { ...currentUser, type } });
+      },
+
+      setAuth: ({ accessToken, userHandle, type = "STARTUP_FOUNDER", userId, email }) => {
         setAccessToken(accessToken);
         set({
           accessToken,
           isAuthenticated: true,
           user: {
-            id: "u-" + Math.random().toString(36).substring(2, 9),
+            id: userId || "",
             userHandle,
-            email: `${userHandle}@founderbridge.in`,
+            email: email || `${userHandle}@ruven.app`,
             type,
           },
         });
@@ -87,16 +89,7 @@ export const useAuthStore = create<AuthState>()(
       login: async (payload) => {
         set({ isLoading: true });
         try {
-          let data: AuthResponse;
-          try {
-            data = await supabaseAuth.login(payload);
-          } catch (supaErr) {
-            if (mockAuthApi.isEnabled) {
-              data = await mockAuthApi.login(payload);
-            } else {
-              throw supaErr;
-            }
-          }
+          const data: AuthResponse = await supabaseAuth.login(payload);
           setAccessToken(data.accessToken);
           set({
             user: data.user as AuthUser,
@@ -113,16 +106,7 @@ export const useAuthStore = create<AuthState>()(
       register: async (payload) => {
         set({ isLoading: true });
         try {
-          let data: AuthResponse;
-          try {
-            data = await supabaseAuth.register(payload);
-          } catch (supaErr) {
-            if (mockAuthApi.isEnabled) {
-              data = await mockAuthApi.register(payload);
-            } else {
-              throw supaErr;
-            }
-          }
+          const data: AuthResponse = await supabaseAuth.register(payload);
           setAccessToken(data.accessToken);
           const user = data.user as AuthUser;
           set({ user, accessToken: data.accessToken, isAuthenticated: true, isLoading: false });
@@ -135,14 +119,12 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         await supabaseAuth.logout().catch(() => {});
-        if (mockAuthApi.isEnabled) await mockAuthApi.logout();
         setAccessToken(null);
         set({ user: null, accessToken: null, isAuthenticated: false });
       },
 
       logoutAll: async () => {
         await supabaseAuth.logout().catch(() => {});
-        if (mockAuthApi.isEnabled) await mockAuthApi.logoutAll();
         setAccessToken(null);
         set({ user: null, accessToken: null, isAuthenticated: false });
       },
@@ -153,12 +135,6 @@ export const useAuthStore = create<AuthState>()(
           if (data) {
             setAccessToken(data.accessToken);
             set({ user: data.user as AuthUser, accessToken: data.accessToken, isAuthenticated: true });
-            return true;
-          }
-          if (mockAuthApi.isEnabled) {
-            const mockData = await mockAuthApi.refresh();
-            setAccessToken(mockData.accessToken);
-            set({ user: mockData.user as AuthUser, accessToken: mockData.accessToken, isAuthenticated: true });
             return true;
           }
           setAccessToken(null);
@@ -172,12 +148,11 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "founderbridge-auth-storage",
+      name: "ruven-auth-storage",
       storage: createJSONStorage(() => (typeof window !== "undefined" ? window.sessionStorage : localStorage)),
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
-        // Tokens are in-memory only (never saved to localStorage per security spec)
       }),
     }
   )

@@ -8,25 +8,46 @@ import { BridgeLogo } from "@/ui/BridgeLogo";
 import { PillInput } from "@/ui/PillInput";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { WavyGradientHeader } from "@/ui/WavyGradientHeader";
+import { supabase } from "@/lib/supabase/client";
 
 function ForgotPasswordContent() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
+    if (!email.trim() || loading) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 600));
-    setLoading(false);
-    setSent(true);
+    setErrorMsg(null);
+    try {
+      const redirectUrl =
+        typeof window !== "undefined"
+          ? `${window.location.origin}/auth/callback?type=recovery`
+          : undefined;
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: redirectUrl,
+      });
+
+      if (error) throw error;
+      setSent(true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to send reset link.";
+      setErrorMsg(msg);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="min-h-dvh bg-black flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-[380px] flex flex-col items-center text-center">
-        <Link href="/" className="w-16 h-16 rounded-2xl bg-black border border-[#2A2A2E] flex items-center justify-center mb-6 shadow-[0_0_40px_#A24BFF30] overflow-hidden">
+        <Link
+          href="/"
+          className="w-16 h-16 rounded-2xl bg-black border border-[#2A2A2E] flex items-center justify-center mb-6 shadow-[0_0_40px_#A24BFF30] overflow-hidden"
+        >
           <BridgeLogo size={56} />
         </Link>
 
@@ -44,7 +65,8 @@ function ForgotPasswordContent() {
             <CheckCircle2 size={56} className="text-[#A24BFF] mx-auto" />
             <p className="text-white text-[17px] font-semibold">Check your email</p>
             <p className="text-[#8E8E93] text-[14px]">
-              We sent password reset instructions to <span className="text-white font-medium">{email}</span>.
+              We sent password reset instructions to{" "}
+              <span className="text-white font-medium">{email}</span>.
             </p>
             <Link
               href="/sign-in"
@@ -59,11 +81,17 @@ function ForgotPasswordContent() {
               Enter your registered email address and we&apos;ll send you a link to reset your password.
             </p>
 
+            {errorMsg && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center">
+                {errorMsg}
+              </div>
+            )}
+
             <PillInput
               label="Email"
               type="email"
               autoComplete="email"
-              placeholder="aarav@startup.in"
+              placeholder="you@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -71,7 +99,7 @@ function ForgotPasswordContent() {
             <GradientRingButton
               type="submit"
               size="lg"
-              disabled={loading || !email}
+              disabled={loading || !email.trim()}
               className="w-full mt-2"
             >
               {loading ? "Sending link…" : "Send Reset Link"}

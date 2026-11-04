@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { cn, getInitials, getPastel } from "@/lib/utils";
 
@@ -36,16 +37,20 @@ export function Avatar({
   verified = false,
   className,
 }: AvatarProps) {
+  const [imgError, setImgError] = useState(false);
   const initials = getInitials(name);
   const pastel = getPastel(name);
+  const showPhoto = Boolean(photoUrl && !imgError);
 
   return (
     <span className={cn("relative inline-flex shrink-0", sizeMap[size], className)}>
-      {photoUrl ? (
+      {showPhoto ? (
         <Image
-          src={photoUrl}
+          src={photoUrl!}
           alt={name}
           fill
+          unoptimized
+          onError={() => setImgError(true)}
           className="rounded-full object-cover"
           sizes="80px"
         />

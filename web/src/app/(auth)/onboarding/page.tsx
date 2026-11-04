@@ -345,7 +345,7 @@ function OnboardingContent() {
                       ? "e.g. Bharat Venture Partners"
                       : selectedClass === "COMPANY_OWNER"
                       ? "e.g. Apex Tech Solutions"
-                      : "e.g. FinPilot, NovaLeaf Labs..."
+                      : "e.g. Peak Robotics, SolarSphere Labs..."
                   }
                   value={organizationName}
                   onChange={(e) => setOrganizationName(e.target.value)}

@@ -38,9 +38,12 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
+      { protocol: "https", hostname: "*.googleusercontent.com" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "**.ruven.in" },
       { protocol: "https", hostname: "**.founderbridge.in" },
       { protocol: "http",  hostname: "localhost" },
-      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
 };

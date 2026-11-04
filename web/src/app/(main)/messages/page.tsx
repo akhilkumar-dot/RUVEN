@@ -6,17 +6,12 @@ import {
   Send,
   ChevronLeft,
   Search,
-  Phone,
-  Video,
-  MoreHorizontal,
-  Circle,
-  PhoneOff,
-  Mic,
-  MicOff,
-  VideoOff,
-  ShieldCheck,
-  MessageSquare
+  MessageSquare,
+  User,
+  ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Avatar } from "@/ui/Avatar";
 import { TopBar } from "@/ui/TopBar";
 import { BottomDock } from "@/ui/BottomDock";
@@ -24,56 +19,66 @@ import { TimeAgo } from "@/ui/TimeAgo";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/client";
 import { useAuthStore } from "@/lib/store/authStore";
+import {
+  dataService,
+  ChatRoomSummary,
+  ChatMessage,
+} from "@/lib/api/dataService";
 
-// ── Types ─────────────────────────────────────────────────────
-interface Conversation {
-  id: string;
-  handle: string;
-  lastMessage: string;
-  lastAt: Date;
-  unread: number;
-  online?: boolean;
+// ── Skeletons ─────────────────────────────────────────────────
+function ConvoListSkeleton() {
+  return (
+    <div className="space-y-1 p-2">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="flex items-center gap-3 p-3 rounded-xl animate-pulse">
+          <div className="w-10 h-10 rounded-full bg-[#1C1C1E] shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-[#1C1C1E] rounded w-1/3" />
+            <div className="h-3 bg-[#18181A] rounded w-2/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
-interface Message {
-  id: string;
-  senderId: "me" | string;
-  text: string;
-  sentAt: Date;
-  status?: "sent" | "delivered" | "read";
+function MessagesSkeleton() {
+  return (
+    <div className="flex-1 p-4 space-y-4 animate-pulse">
+      <div className="flex items-start gap-2">
+        <div className="w-8 h-8 rounded-full bg-[#1C1C1E] shrink-0" />
+        <div className="h-10 bg-[#1C1C1E] rounded-2xl w-48" />
+      </div>
+      <div className="flex items-end justify-end">
+        <div className="h-12 bg-[#2A2A2E] rounded-2xl w-56" />
+      </div>
+      <div className="flex items-start gap-2">
+        <div className="w-8 h-8 rounded-full bg-[#1C1C1E] shrink-0" />
+        <div className="h-14 bg-[#1C1C1E] rounded-2xl w-64" />
+      </div>
+    </div>
+  );
 }
 
-// ── Fallback/Seed Conversations ───────────────────────────────
-const SEED_CONVOS: Conversation[] = [
-  { id: "a0000000-0000-0000-0000-000000000001", handle: "priya_founder",  lastMessage: "Let us sync tomorrow at 10am?",         lastAt: new Date("2026-11-03T17:55:00.000Z"), unread: 2, online: true },
-  { id: "a0000000-0000-0000-0000-000000000002", handle: "rohan_investor",  lastMessage: "Deck looks good. Send financials too.", lastAt: new Date("2026-11-03T17:25:00.000Z"), unread: 0, online: false },
-  { id: "3", handle: "rahul_verma",   lastMessage: "The API is down, urgent!",              lastAt: new Date("2026-11-03T16:00:00.000Z"), unread: 1, online: true },
-  { id: "4", handle: "neha_design",   lastMessage: "Just dropped the new screens 🎨",       lastAt: new Date("2026-11-03T13:00:00.000Z"), unread: 0 },
-  { id: "5", handle: "deepstack_ai",  lastMessage: "Happy to collaborate on the model.",    lastAt: new Date("2026-11-02T18:00:00.000Z"), unread: 0 },
-];
-
-const SEED_THREAD: Message[] = [
-  { id: "1", senderId: "priya_founder", text: "Hey! Saw your idea on Ruven. Super interesting.",               sentAt: new Date("2026-11-03T17:30:00.000Z") },
-  { id: "2", senderId: "me",            text: "Thanks! Yes, been working on it for 3 months now.",                    sentAt: new Date("2026-11-03T17:32:00.000Z"), status: "read" },
-  { id: "3", senderId: "priya_founder", text: "The vernacular angle is 🔥 — would love to learn more.",               sentAt: new Date("2026-11-03T17:40:00.000Z") },
-  { id: "4", senderId: "me",            text: "Let's do a quick call? I can show you the demo.",                      sentAt: new Date("2026-11-03T17:42:00.000Z"), status: "read" },
-  { id: "5", senderId: "priya_founder", text: "100%. Are you free tomorrow? I'm in Bangalore this week.",             sentAt: new Date("2026-11-03T17:50:00.000Z") },
-  { id: "6", senderId: "me",            text: "Yes! 10am works perfectly.",                                           sentAt: new Date("2026-11-03T17:52:00.000Z"), status: "delivered" },
-  { id: "7", senderId: "priya_founder", text: "Let's sync tomorrow at 10am?",                                         sentAt: new Date("2026-11-03T17:55:00.000Z") },
-];
-
-// ── Conversation list ─────────────────────────────────────────
+// ── Conversation List Component ───────────────────────────────
 function ConvoList({
   convos,
+  loading,
   selected,
   onSelect,
 }: {
-  convos: Conversation[];
+  convos: ChatRoomSummary[];
+  loading: boolean;
   selected: string | null;
   onSelect: (id: string) => void;
 }) {
   const [q, setQ] = useState("");
-  const filtered = convos.filter(c => c.handle.toLowerCase().includes(q.toLowerCase()));
+  const filtered = convos.filter((c) => {
+    const handle = c.counterpart.user_handle?.toLowerCase() || "";
+    const name = c.counterpart.name?.toLowerCase() || "";
+    const query = q.toLowerCase();
+    return handle.includes(query) || name.includes(query);
+  });
 
   return (
     <div className="flex flex-col h-full">
@@ -83,219 +88,136 @@ function ConvoList({
           <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6E6E73]" />
           <input
             value={q}
-            onChange={e => setQ(e.target.value)}
-            placeholder="Search messages…"
-            className="w-full bg-[#1C1C1E] text-white rounded-full pl-9 pr-4 py-2.5 text-[14px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF]"
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search conversations…"
+            className="w-full bg-[#1C1C1E] text-white rounded-full pl-9 pr-4 py-2.5 text-[14px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF] transition-colors"
           />
         </div>
       </div>
 
-      {/* List */}
+      {/* List Container */}
       <div className="flex-1 overflow-y-auto">
-        {filtered.map(c => (
-          <motion.button
-            key={c.id}
-            onClick={() => onSelect(c.id)}
-            whileTap={{ scale: 0.98 }}
-            className={cn(
-              "w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors border-b border-[#141416]",
-              selected === c.id ? "bg-[#1C1C1E]" : "hover:bg-[#0C0C0C]"
-            )}
-          >
-            <div className="relative shrink-0">
-              <Avatar name={c.handle} size="md" />
-              {c.online && (
-                <Circle size={10} className="absolute bottom-0 right-0 text-emerald-400 fill-emerald-400 bg-black rounded-full" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className="text-white font-semibold text-[15px]">@{c.handle}</p>
-                <TimeAgo date={c.lastAt} fallback="5m" className="text-[#6E6E73] text-[11px]" />
+        {loading ? (
+          <ConvoListSkeleton />
+        ) : filtered.length === 0 ? (
+          <div className="p-6 text-center text-[#8E8E93]">
+            {q ? (
+              <p className="text-sm">No conversations match &ldquo;{q}&rdquo;</p>
+            ) : (
+              <div className="py-8 flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full bg-[#18181A] border border-[#2A2A2D] flex items-center justify-center text-[#A1A1A6] mb-3">
+                  <MessageSquare size={20} className="text-[#A24BFF]" />
+                </div>
+                <p className="text-white font-medium text-sm mb-1">No messages yet</p>
+                <p className="text-xs text-[#6E6E73] max-w-[200px] mb-4">
+                  Connect with founders or collaborate on ideas to start chatting.
+                </p>
+                <Link
+                  href="/hub"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#A24BFF]/20 text-[#A24BFF] text-xs font-semibold hover:bg-[#A24BFF]/30 transition-colors"
+                >
+                  Explore Founders Hub <ArrowRight size={12} />
+                </Link>
               </div>
-              <p className={cn("text-[13px] truncate mt-0.5", c.unread > 0 ? "text-white font-medium" : "text-[#6E6E73]")}>
-                {c.lastMessage}
-              </p>
-            </div>
-            {c.unread > 0 && (
-              <span className="min-w-[20px] h-5 rounded-full bg-[#A24BFF] text-white text-[11px] font-bold flex items-center justify-center px-1.5 shrink-0">
-                {c.unread}
-              </span>
             )}
-          </motion.button>
-        ))}
+          </div>
+        ) : (
+          filtered.map((c) => {
+            const isSelected = selected === c.id;
+            const displayName = c.counterpart.name || `@${c.counterpart.user_handle}`;
+            const lastText = c.lastMessage?.body || "Started a conversation";
+
+            return (
+              <motion.button
+                key={c.id}
+                onClick={() => onSelect(c.id)}
+                whileTap={{ scale: 0.98 }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors border-b border-[#141416]",
+                  isSelected ? "bg-[#1C1C1E]" : "hover:bg-[#0C0C0C]"
+                )}
+              >
+                <div className="relative shrink-0">
+                  <Avatar name={c.counterpart.name || c.counterpart.user_handle} size="md" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <p className="text-white font-semibold text-[14px] truncate">
+                      {displayName}
+                    </p>
+                    {c.lastMessage?.created_at && (
+                      <TimeAgo
+                        date={new Date(c.lastMessage.created_at)}
+                        fallback="now"
+                        className="text-[#6E6E73] text-[11px] shrink-0 ml-2"
+                      />
+                    )}
+                  </div>
+                  <p className="text-[13px] truncate mt-0.5 text-[#6E6E73]">
+                    {lastText}
+                  </p>
+                </div>
+              </motion.button>
+            );
+          })
+        )}
       </div>
     </div>
   );
 }
 
-// ── Active Call Modal ─────────────────────────────────────────
-function CallModal({
-  type,
-  handle,
-  onEnd,
-}: {
-  type: "audio" | "video";
-  handle: string;
-  onEnd: () => void;
-}) {
-  const [muted, setMuted] = useState(false);
-  const [videoOff, setVideoOff] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => setElapsed((prev) => prev + 1), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTime = (sec: number) => {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-8 text-white">
-      <div className="text-center mt-8 space-y-2">
-        <span className="flex items-center justify-center gap-1.5 text-[12px] text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 w-fit mx-auto">
-          <ShieldCheck size={14} /> End-to-End Encrypted {type === "video" ? "Video" : "Audio"} Call
-        </span>
-        <h2 className="text-[24px] font-bold">@{handle}</h2>
-        <p className="text-[#8E8E93] text-[14px]">Connected · {formatTime(elapsed)}</p>
-      </div>
-
-      <div className="my-auto flex flex-col items-center">
-        <div className="relative">
-          <Avatar name={handle} size="lg" className="w-28 h-28 text-3xl ring-4 ring-[#A24BFF]/30" />
-          <span className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-black" />
-        </div>
-        {type === "video" && (
-          <p className="text-[12px] text-[#6E6E73] mt-3">WebRTC peer camera feed active</p>
-        )}
-      </div>
-
-      <div className="flex items-center gap-5 mb-8">
-        <button
-          onClick={() => setMuted((v) => !v)}
-          className={cn(
-            "w-14 h-14 rounded-full flex items-center justify-center transition-colors text-white",
-            muted ? "bg-red-500/30 text-red-400 border border-red-500/40" : "bg-[#222] hover:bg-[#333]"
-          )}
-        >
-          {muted ? <MicOff size={22} /> : <Mic size={22} />}
-        </button>
-
-        {type === "video" && (
-          <button
-            onClick={() => setVideoOff((v) => !v)}
-            className={cn(
-              "w-14 h-14 rounded-full flex items-center justify-center transition-colors text-white",
-              videoOff ? "bg-red-500/30 text-red-400 border border-red-500/40" : "bg-[#222] hover:bg-[#333]"
-            )}
-          >
-            {videoOff ? <VideoOff size={22} /> : <Video size={22} />}
-          </button>
-        )}
-
-        <button
-          onClick={onEnd}
-          className="w-14 h-14 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition-colors shadow-lg shadow-red-600/30"
-          aria-label="End Call"
-        >
-          <PhoneOff size={22} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Chat thread ───────────────────────────────────────────────
+// ── Chat Thread Component ─────────────────────────────────────
 function ChatThread({
-  convoId,
   convo,
   onBack,
+  onMessageSent,
 }: {
-  convoId: string;
-  convo: Conversation;
+  convo: ChatRoomSummary;
   onBack: () => void;
+  onMessageSent?: () => void;
 }) {
   const user = useAuthStore((s) => s.user);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
-  const [callState, setCallState] = useState<"audio" | "video" | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
-  // Load messages from Supabase or Fallback
+  // Load real messages
   useEffect(() => {
     let isMounted = true;
 
-    async function loadDbMessages() {
-      if (convoId.includes("-")) {
-        try {
-          const { data, error } = await supabase
-            .from("chat_messages")
-            .select("id, room_id, sender_id, body, status, created_at")
-            .eq("room_id", convoId)
-            .order("created_at", { ascending: true });
-
-          if (!error && data && data.length > 0) {
-            if (isMounted) {
-              setMessages(
-                data.map((r) => ({
-                  id: r.id,
-                  senderId: r.sender_id === user?.id ? "me" : convo.handle,
-                  text: r.body,
-                  sentAt: new Date(r.created_at),
-                  status: (r.status as Message["status"]) || "delivered",
-                }))
-              );
-              return;
-            }
-          }
-        } catch {
-          // fallback to seed
+    async function loadThread() {
+      try {
+        const msgs = await dataService.fetchRoomMessages(convo.id);
+        if (isMounted) {
+          setMessages(msgs);
         }
-      }
-
-      if (isMounted) {
-        setMessages(SEED_THREAD);
+      } catch (err) {
+        console.error("Failed to load thread:", err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     }
 
-    loadDbMessages();
+    loadThread();
 
-    // Supabase Realtime Subscription for room
+    // Realtime Postgres subscription
     const channel = supabase
-      .channel(`room_${convoId}`)
+      .channel(`room_${convo.id}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "chat_messages",
-          filter: `room_id=eq.${convoId}`,
+          filter: `room_id=eq.${convo.id}`,
         },
         (payload) => {
-          interface RealtimeMessageRow {
-            id: string;
-            sender_id: string;
-            body: string;
-            created_at?: string;
-            status?: Message["status"];
-          }
-          const row = payload.new as unknown as RealtimeMessageRow;
+          const newRow = payload.new as ChatMessage;
           setMessages((prev) => {
-            if (prev.some((m) => m.id === row.id)) return prev;
-            return [
-              ...prev,
-              {
-                id: row.id,
-                senderId: row.sender_id === user?.id ? "me" : convo.handle,
-                text: row.body,
-                sentAt: new Date(row.created_at || Date.now()),
-                status: row.status || "delivered",
-              },
-            ];
+            if (prev.some((m) => m.id === newRow.id)) return prev;
+            return [...prev, newRow];
           });
         }
       )
@@ -305,134 +227,129 @@ function ChatThread({
       isMounted = false;
       supabase.removeChannel(channel);
     };
-  }, [convoId, user?.id, convo.handle]);
+  }, [convo.id]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, loading]);
 
-  async function send() {
+  const send = async () => {
     const t = text.trim();
-    if (!t) return;
+    if (!t || !user?.id || isSubmitting) return;
 
-    const tempId = "temp-" + Date.now();
-    const newMsg: Message = {
-      id: tempId,
-      senderId: "me",
-      text: t,
-      sentAt: new Date(),
-      status: "sent",
-    };
-
-    setMessages((m) => [...m, newMsg]);
+    setIsSubmitting(true);
     setText("");
 
-    // If UUID room, persist to Supabase
-    if (convoId.includes("-") && user?.id) {
-      try {
-        await supabase.from("chat_messages").insert({
-          room_id: convoId,
-          sender_id: user.id,
-          body: t,
-          status: "sent",
+    try {
+      const inserted = await dataService.sendMessage(convo.id, user.id, t);
+      if (inserted) {
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === inserted.id)) return prev;
+          return [...prev, inserted];
         });
-      } catch (err) {
-        console.error("Failed to insert message:", err);
+        if (onMessageSent) onMessageSent();
       }
-    } else {
-      // Seed fallback reply
-      setTimeout(() => {
-        setMessages((m) => [
-          ...m,
-          {
-            id: String(Date.now() + 1),
-            senderId: convo.handle,
-            text: "Got it! Let's connect soon 👍",
-            sentAt: new Date(),
-            status: "delivered",
-          },
-        ]);
-      }, 1200);
+    } catch (err) {
+      console.error("Failed to send message:", err);
+    } finally {
+      setIsSubmitting(false);
     }
-  }
+  };
+
+  const counterpartHandle = convo.counterpart.user_handle;
+  const counterpartName = convo.counterpart.name || `@${counterpartHandle}`;
 
   return (
-    <div className="flex flex-col h-full relative">
+    <div className="flex flex-col h-full relative bg-black">
       {/* Thread header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-[#1C1C1E]">
-        <button onClick={onBack} className="text-[#A1A1A6] hover:text-white transition-colors md:hidden" aria-label="Back">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-[#1C1C1E] bg-[#0A0A0C]">
+        <button
+          onClick={onBack}
+          className="text-[#A1A1A6] hover:text-white transition-colors md:hidden"
+          aria-label="Back to conversations"
+        >
           <ChevronLeft size={20} />
         </button>
-        <div className="relative">
-          <Avatar name={convo.handle} size="md" />
-          {convo.online && (
-            <Circle size={10} className="absolute bottom-0 right-0 text-emerald-400 fill-emerald-400 bg-black rounded-full" />
-          )}
-        </div>
+
+        <Avatar name={convo.counterpart.name || counterpartHandle} size="md" />
+
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-[15px]">@{convo.handle}</p>
-          <p className="text-[12px] text-emerald-400">{convo.online ? "Online" : "Offline"}</p>
+          <p className="text-white font-semibold text-[15px] truncate">{counterpartName}</p>
+          <p className="text-[12px] text-[#8E8E93] truncate">@{counterpartHandle}</p>
         </div>
-        <div className="flex gap-2 text-[#8E8E93]">
-          <button
-            onClick={() => setCallState("audio")}
-            aria-label="Voice call"
-            className="w-8 h-8 rounded-full bg-[#1A1A1E] hover:bg-[#2A2A2E] flex items-center justify-center text-white transition-colors"
+
+        {counterpartHandle && (
+          <Link
+            href={`/u/${counterpartHandle}`}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#1C1C1E] text-xs text-[#A1A1A6] hover:text-white hover:bg-[#2A2A2D] transition-colors"
           >
-            <Phone size={15} />
-          </button>
-          <button
-            onClick={() => setCallState("video")}
-            aria-label="Video call"
-            className="w-8 h-8 rounded-full bg-[#1A1A1E] hover:bg-[#2A2A2E] flex items-center justify-center text-white transition-colors"
-          >
-            <Video size={15} />
-          </button>
-          <button aria-label="More" className="w-8 h-8 rounded-full bg-[#1A1A1E] hover:bg-[#2A2A2E] flex items-center justify-center text-[#8E8E93] hover:text-white transition-colors">
-            <MoreHorizontal size={15} />
-          </button>
-        </div>
+            <User size={13} />
+            <span className="hidden sm:inline">Profile</span>
+          </Link>
+        )}
       </div>
 
-      {/* Messages */}
+      {/* Messages Scroll Area */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2.5">
-        <AnimatePresence initial={false}>
-          {messages.map((msg) => {
-            const isMe = msg.senderId === "me";
-            return (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
-                className={cn("flex gap-2", isMe ? "justify-end" : "justify-start")}
-              >
-                {!isMe && <Avatar name={msg.senderId} size="sm" className="shrink-0 mt-auto mb-1" />}
-                <div
-                  className={cn(
-                    "max-w-[78%] rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed shadow-sm",
-                    isMe
-                      ? "bg-[#A24BFF] text-white rounded-br-sm"
-                      : "bg-[#1C1C1E] text-white rounded-bl-sm border border-[#26262A]"
-                  )}
+        {loading ? (
+          <MessagesSkeleton />
+        ) : messages.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 text-[#6E6E73]">
+            <div className="w-12 h-12 rounded-full bg-[#18181A] border border-[#2A2A2D] flex items-center justify-center text-[#A1A1A6] mb-3">
+              <MessageSquare size={20} className="text-[#A24BFF]" />
+            </div>
+            <p className="text-white font-medium text-sm mb-1">Say hello!</p>
+            <p className="text-xs text-[#8E8E93] max-w-xs">
+              This is the beginning of your conversation with {counterpartName}.
+            </p>
+          </div>
+        ) : (
+          <AnimatePresence initial={false}>
+            {messages.map((msg) => {
+              const isMe = msg.sender_id === user?.id;
+              return (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
+                  className={cn("flex gap-2", isMe ? "justify-end" : "justify-start")}
                 >
-                  {msg.text}
-                  <div className={cn("flex items-center gap-1 mt-1", isMe ? "justify-end" : "justify-start")}>
-                    <TimeAgo date={msg.sentAt} fallback="now" className="text-[10px] opacity-60" />
-                    {isMe && msg.status === "read" && <span className="text-[10px] text-sky-300">✓✓</span>}
-                    {isMe && msg.status === "delivered" && <span className="text-[10px] opacity-60">✓✓</span>}
-                    {isMe && msg.status === "sent" && <span className="text-[10px] opacity-60">✓</span>}
+                  {!isMe && (
+                    <Avatar
+                      name={convo.counterpart.name || convo.counterpart.user_handle}
+                      size="sm"
+                      className="shrink-0 mt-auto mb-1"
+                    />
+                  )}
+                  <div
+                    className={cn(
+                      "max-w-[78%] rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed shadow-sm",
+                      isMe
+                        ? "bg-[#A24BFF] text-white rounded-br-sm"
+                        : "bg-[#1C1C1E] text-white rounded-bl-sm border border-[#26262A]"
+                    )}
+                  >
+                    {msg.body}
+                    <div
+                      className={cn(
+                        "flex items-center gap-1 mt-1 text-[10px]",
+                        isMe ? "justify-end text-white/70" : "justify-start text-[#8E8E93]"
+                      )}
+                    >
+                      <TimeAgo date={new Date(msg.created_at)} fallback="now" />
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        )}
         <div ref={endRef} />
       </div>
 
-      {/* Input */}
-      <div className="px-4 py-3 border-t border-[#1C1C1E] flex gap-2 items-end bg-black">
+      {/* Input Composer */}
+      <div className="px-4 py-3 border-t border-[#1C1C1E] flex gap-2 items-end bg-[#0A0A0C]">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -444,96 +361,89 @@ function ChatThread({
           }}
           placeholder="Type a message…"
           rows={1}
-          className="flex-1 bg-[#1C1C1E] text-white rounded-2xl px-4 py-3 text-[15px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF] resize-none transition-colors max-h-[120px] overflow-y-auto"
+          className="flex-1 bg-[#1C1C1E] text-white rounded-2xl px-4 py-3 text-[14px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF] resize-none transition-colors max-h-[120px] overflow-y-auto"
         />
         <motion.button
-          whileTap={{ scale: 0.85 }}
+          whileTap={{ scale: 0.9 }}
           onClick={send}
-          disabled={!text.trim()}
+          disabled={!text.trim() || isSubmitting}
           className={cn(
-            "w-10 h-10 rounded-full flex items-center justify-center transition-colors shrink-0",
-            text.trim()
-              ? "bg-[#A24BFF] text-white"
-              : "bg-[#1C1C1E] text-[#6E6E73]"
+            "w-11 h-11 rounded-full flex items-center justify-center transition-colors shrink-0",
+            text.trim() && !isSubmitting
+              ? "bg-[#A24BFF] text-white hover:bg-[#8D34F0]"
+              : "bg-[#1C1C1E] text-[#6E6E73] cursor-not-allowed"
           )}
           aria-label="Send message"
         >
           <Send size={16} />
         </motion.button>
       </div>
-
-      {/* Active Call Modal */}
-      {callState && (
-        <CallModal
-          type={callState}
-          handle={convo.handle}
-          onEnd={() => setCallState(null)}
-        />
-      )}
     </div>
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────
+// ── Main Page Content ─────────────────────────────────────────
 function MessagesPageContent() {
   const user = useAuthStore((s) => s.user);
-  const [convos, setConvos] = useState<Conversation[]>(SEED_CONVOS);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const roomParam = searchParams.get("room");
 
-  // Load user rooms from Supabase
+  const [convos, setConvos] = useState<ChatRoomSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(roomParam);
+
+  const fetchRooms = async () => {
+    if (!user?.id) return;
+    try {
+      const rooms = await dataService.fetchUserRooms(user.id);
+      setConvos(rooms);
+    } catch (err) {
+      console.error("Failed to refresh user rooms:", err);
+    }
+  };
+
   useEffect(() => {
-    async function loadRooms() {
-      if (!user?.id) return;
+    let isMounted = true;
+    async function loadInitial() {
+      if (!user?.id) {
+        if (isMounted) setLoading(false);
+        return;
+      }
       try {
-        const { data: memberRows, error } = await supabase
-          .from("chat_room_members")
-          .select("room_id")
-          .eq("user_id", user.id);
-
-        if (!error && memberRows && memberRows.length > 0) {
-          const roomIds = memberRows.map((r) => r.room_id);
-          const { data: rooms } = await supabase
-            .from("chat_rooms")
-            .select("id, name, created_at")
-            .in("id", roomIds);
-
-          if (rooms && rooms.length > 0) {
-            const dbConvos: Conversation[] = rooms.map((rm) => ({
-              id: rm.id,
-              handle: rm.name ? rm.name.replace(/\s*&\s*.*/, "").trim() : "chat_partner",
-              lastMessage: "Tap to open conversation",
-              lastAt: new Date(rm.created_at || Date.now()),
-              unread: 0,
-              online: true,
-            }));
-
-            // Merge with SEED_CONVOS ensuring unique IDs
-            setConvos((prev) => {
-              const ids = new Set(dbConvos.map((c) => c.id));
-              return [...dbConvos, ...prev.filter((c) => !ids.has(c.id))];
-            });
+        const rooms = await dataService.fetchUserRooms(user.id);
+        if (isMounted) {
+          setConvos(rooms);
+          if (!roomParam && rooms.length > 0 && typeof window !== "undefined" && window.innerWidth >= 768) {
+            setSelectedId(rooms[0].id);
           }
         }
-      } catch {
-        // use default seed
+      } catch (err) {
+        console.error("Failed to load user rooms:", err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     }
 
-    loadRooms();
-  }, [user?.id]);
+    loadInitial();
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id, roomParam]);
 
-  const activeConvo = convos.find((c) => c.id === selectedId) || convos[0];
+  const activeConvo = convos.find((c) => c.id === selectedId) || null;
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
-      <TopBar unreadCount={3} className={selectedId ? "hidden md:flex" : "flex"} />
+      <TopBar unreadCount={0} className={selectedId ? "hidden md:flex" : "flex"} />
 
       <main
         className="flex-1 flex overflow-hidden w-full max-w-7xl mx-auto md:px-4 md:py-3"
-        style={{ height: "calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))" }}
+        style={{
+          height: "calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
+        }}
       >
         <div className="flex-1 flex overflow-hidden md:border md:border-[#1C1C1E] md:rounded-2xl bg-[#09090B]">
-          {/* Conversation list pane: full width on mobile when no chat selected; fixed sidebar on desktop */}
+          {/* Conversation list pane */}
           <div
             className={cn(
               "flex flex-col border-r border-[#1C1C1E] w-full md:w-[320px] lg:w-[360px] shrink-0 bg-black md:bg-[#0D0D0F]",
@@ -545,29 +455,36 @@ function MessagesPageContent() {
             </div>
             <ConvoList
               convos={convos}
+              loading={loading}
               selected={selectedId}
               onSelect={setSelectedId}
             />
           </div>
 
           {/* Active Chat or Desktop Placeholder */}
-          {selectedId ? (
+          {selectedId && activeConvo ? (
             <div className="flex flex-col flex-1 min-w-0 bg-black">
               <ChatThread
-                convoId={selectedId}
                 convo={activeConvo}
                 onBack={() => setSelectedId(null)}
+                onMessageSent={fetchRooms}
               />
             </div>
           ) : (
             <div className="hidden md:flex flex-1 flex-col items-center justify-center text-center p-8 text-[#6E6E73] bg-black/40">
-              <div className="w-16 h-16 rounded-full bg-[#1A1A1E] border border-[#2A2A2E] flex items-center justify-center text-[#A1A1A6] mb-4">
+              <div className="w-16 h-16 rounded-full bg-[#1A1A1E] border border-[#2A2A2D] flex items-center justify-center text-[#A1A1A6] mb-4">
                 <MessageSquare size={28} className="text-[#A24BFF]" />
               </div>
               <h3 className="text-white font-semibold text-lg mb-1">Your Messages</h3>
-              <p className="text-sm max-w-xs text-[#8E8E93]">
+              <p className="text-sm max-w-xs text-[#8E8E93] mb-4">
                 Select a conversation from the left to start collaborating with founders, investors, and talent.
               </p>
+              <Link
+                href="/hub"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#1C1C1E] hover:bg-[#2A2A2D] text-white text-xs font-semibold border border-[#2A2A2D] transition-colors"
+              >
+                Find Collaborators in Hub <ArrowRight size={13} />
+              </Link>
             </div>
           )}
         </div>
@@ -576,7 +493,7 @@ function MessagesPageContent() {
       <BottomDock
         className={selectedId ? "hidden md:flex" : "flex"}
         activeTab="messages"
-        userName={user?.userHandle || "Aarav Reddy"}
+        userName={user?.userHandle || "user"}
       />
     </div>
   );

@@ -7,23 +7,38 @@ import { Mail, ArrowRight } from "lucide-react";
 import { BridgeLogo } from "@/ui/BridgeLogo";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { WavyGradientHeader } from "@/ui/WavyGradientHeader";
+import { supabase } from "@/lib/supabase/client";
+import { useAuthStore } from "@/lib/store/authStore";
 
 function VerifyEmailContent() {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
   const [resending, setResending] = useState(false);
   const [resent, setResent] = useState(false);
 
   async function handleResend() {
+    if (resending || !user?.email) return;
     setResending(true);
-    await new Promise((r) => setTimeout(r, 600));
-    setResending(false);
-    setResent(true);
+    try {
+      await supabase.auth.resend({
+        type: "signup",
+        email: user.email,
+      });
+      setResent(true);
+    } catch (err) {
+      console.error("Failed to resend email:", err);
+    } finally {
+      setResending(false);
+    }
   }
 
   return (
     <div className="min-h-dvh bg-black flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-[380px] flex flex-col items-center text-center">
-        <Link href="/" className="w-16 h-16 rounded-2xl bg-black border border-[#2A2A2E] flex items-center justify-center mb-6 shadow-[0_0_40px_#A24BFF30] overflow-hidden">
+        <Link
+          href="/"
+          className="w-16 h-16 rounded-2xl bg-black border border-[#2A2A2E] flex items-center justify-center mb-6 shadow-[0_0_40px_#A24BFF30] overflow-hidden"
+        >
           <BridgeLogo size={56} />
         </Link>
 
@@ -51,14 +66,20 @@ function VerifyEmailContent() {
           Continue to Onboarding <ArrowRight size={18} />
         </GradientRingButton>
 
-        <button
-          type="button"
-          disabled={resending || resent}
-          onClick={handleResend}
-          className="text-[#8E8E93] text-[13px] hover:text-white transition-colors"
-        >
-          {resent ? "Email resent! Check your inbox" : resending ? "Resending…" : "Didn't receive an email? Resend"}
-        </button>
+        {user?.email && (
+          <button
+            type="button"
+            disabled={resending || resent}
+            onClick={handleResend}
+            className="text-[#8E8E93] text-[13px] hover:text-white transition-colors"
+          >
+            {resent
+              ? "Email resent! Check your inbox"
+              : resending
+              ? "Resending…"
+              : "Didn't receive an email? Resend"}
+          </button>
+        )}
       </div>
     </div>
   );

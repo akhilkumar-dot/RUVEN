@@ -1,99 +1,125 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, Users, Building2, TrendingUp, Briefcase } from "lucide-react";
+import { Search, Users, Building2, TrendingUp, Briefcase, Check } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
 import { TopBar } from "@/ui/TopBar";
 import { BottomDock } from "@/ui/BottomDock";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/lib/store/authStore";
+import {
+  dataService,
+  type DiscoverPerson,
+  type DiscoverCompany,
+  type DiscoverInvestor,
+  type DiscoverJob
+} from "@/lib/api/dataService";
 
 // ── Discover tabs ─────────────────────────────────────────────
 const DISCOVER_TABS = [
-  { key: "people",    label: "People",    icon: <Users size={14} /> },
+  { key: "people", label: "People", icon: <Users size={14} /> },
   { key: "companies", label: "Companies", icon: <Building2 size={14} /> },
   { key: "investors", label: "Investors", icon: <TrendingUp size={14} /> },
-  { key: "jobs",      label: "Jobs",      icon: <Briefcase size={14} /> },
-];
-
-// ── Mock data ─────────────────────────────────────────────────
-const PEOPLE = [
-  { handle: "priya_sharma",    headline: "Co-founder @ Sattva Health · Ex-Apollo",        type: "STARTUP_FOUNDER", connections: 342 },
-  { handle: "rahul_verma",     headline: "CTO @ Finovo · IIT-Delhi CS '19",               type: "STARTUP_FOUNDER", connections: 218 },
-  { handle: "ananya_iyer",     headline: "ML Engineer · Open to opportunities",            type: "INDIVIDUAL",      connections: 97  },
-  { handle: "vikram_mehta",    headline: "CEO @ Konnect Logistics · B2B SaaS",            type: "COMPANY_OWNER",   connections: 785 },
-  { handle: "sneha_patel",     headline: "Product Designer · Building in public",         type: "INDIVIDUAL",      connections: 156 },
-  { handle: "rohan_das",       headline: "Founder & CEO @ AgriStack · Rural fintech",     type: "STARTUP_FOUNDER", connections: 422 },
-];
-
-const COMPANIES = [
-  { name: "DeepStack AI",    slug: "deepstack-ai",  tagline: "LLM infra for Indian SMEs",       industry: "AI/ML",    founded: 2023 },
-  { name: "Sattva Health",   slug: "sattva-health", tagline: "Preventive care at scale",         industry: "Healthtech",founded: 2022 },
-  { name: "Finovo",          slug: "finovo",         tagline: "Embedded finance for SMBs",        industry: "Fintech",  founded: 2021 },
-  { name: "AgriStack",       slug: "agristack",      tagline: "Connecting farmers to markets",    industry: "Agritech", founded: 2022 },
-  { name: "Konnect Logistics",slug:"konnect",        tagline: "B2B supply chain for Bharat",     industry: "Logistics",founded: 2020 },
-];
-
-const INVESTORS = [
-  { handle: "arjun_vc",   firm: "Blume Ventures",      thesis: "Pre-seed / Seed · Enterprise & Consumer",  ticketSize: "₹1–5 Cr" },
-  { handle: "meera_angel",firm: "Solo Angel",           thesis: "D2C, Healthtech, Edtech",                  ticketSize: "₹25–75L" },
-  { handle: "sid_kapoor",  firm: "Matrix Partners IN",  thesis: "Series A/B · Deep tech, SaaS",            ticketSize: "₹5–25 Cr" },
-];
-
-const JOBS = [
-  { title: "Senior ML Engineer",      company: "DeepStack AI",  location: "Bangalore / Remote", salaryRange: "₹40–60L", type: "Full-time" },
-  { title: "Backend Engineer (Java)",  company: "Finovo",         location: "Hyderabad",         salaryRange: "₹30–45L", type: "Full-time" },
-  { title: "Product Designer",         company: "Sattva Health",  location: "Mumbai",            salaryRange: "₹20–35L", type: "Full-time" },
-  { title: "Growth Intern",            company: "AgriStack",      location: "Remote",            salaryRange: "₹15K/mo", type: "Internship" },
+  { key: "jobs", label: "Jobs", icon: <Briefcase size={14} /> },
 ];
 
 // ── Person card ───────────────────────────────────────────────
-function PersonCard({ person }: { person: (typeof PEOPLE)[0] }) {
-  const [connected, setConnected] = useState(false);
+function PersonCard({
+  person,
+  currentUserId,
+  onStatusChange,
+}: {
+  person: DiscoverPerson;
+  currentUserId?: string;
+  onStatusChange: (id: string, status: "NONE" | "PENDING") => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleToggle() {
+    if (!currentUserId || loading) return;
+    setLoading(true);
+    try {
+      const nextStatus = person.connectionStatus === "PENDING" ? "NONE" : "PENDING";
+      await dataService.toggleConnection(currentUserId, person.id);
+      onStatusChange(person.id, nextStatus);
+    } catch (e) {
+      console.error("Connect toggle error:", e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const isConnected = person.connectionStatus === "ACCEPTED";
+  const isPending = person.connectionStatus === "PENDING";
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-3 bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex items-center gap-3 bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 hover:border-[#2A2A2D] transition-colors"
     >
-      <Avatar name={person.handle} size="md" />
+      <Avatar name={person.name} size="md" />
       <div className="flex-1 min-w-0">
-        <p className="text-white font-semibold text-[15px] leading-tight">@{person.handle}</p>
-        <p className="text-[#6E6E73] text-[12px] leading-snug mt-0.5 truncate">{person.headline}</p>
-        <p className="text-[#A24BFF] text-[11px] mt-1">{person.connections} connections</p>
+        <Link href={`/u/${person.user_handle}`} className="text-white font-semibold text-[15px] leading-tight hover:underline truncate block">
+          @{person.user_handle}
+        </Link>
+        <p className="text-[#8E8E93] text-[12px] leading-snug mt-0.5 truncate">
+          {person.headline || person.type.replace(/_/g, " ")}
+        </p>
+        {person.location && (
+          <p className="text-[#6E6E73] text-[11px] mt-1 truncate">{person.location}</p>
+        )}
       </div>
       <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setConnected(v => !v)}
+        whileTap={{ scale: 0.95 }}
+        disabled={loading || isConnected}
+        onClick={handleToggle}
         className={cn(
-          "px-3 py-1.5 rounded-full text-[12px] sm:text-[13px] font-semibold transition-colors border shrink-0",
-          connected
-            ? "border-[#2A2A2D] text-[#6E6E73] bg-transparent"
+          "px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors border shrink-0",
+          isConnected
+            ? "border-[#2A2A2D] text-[#6E6E73] bg-transparent cursor-default"
+            : isPending
+            ? "border-amber-500/30 text-amber-400 bg-amber-500/10"
             : "border-[#A24BFF] text-[#A24BFF] bg-[#A24BFF]/10 hover:bg-[#A24BFF]/20"
         )}
       >
-        {connected ? "Connected" : "Connect"}
+        {isConnected ? "Connected" : isPending ? "Pending" : "Connect"}
       </motion.button>
     </motion.div>
   );
 }
 
 // ── Company card ──────────────────────────────────────────────
-function CompanyCard({ co }: { co: (typeof COMPANIES)[0] }) {
+function CompanyCard({ co }: { co: DiscoverCompany }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="flex items-start gap-3 bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex items-start gap-3 bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 hover:border-[#2A2A2D] transition-colors"
     >
       <div className="w-12 h-12 rounded-xl bg-[#1C1C1E] flex items-center justify-center text-white font-bold text-[16px] shrink-0">
         {co.name[0]}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-white font-semibold text-[15px]">{co.name}</p>
-        <p className="text-[#6E6E73] text-[13px] truncate">{co.tagline}</p>
+        <div className="flex items-center gap-1.5">
+          <Link href={`/c/${co.slug}`} className="text-white font-semibold text-[15px] hover:underline truncate">
+            {co.name}
+          </Link>
+          {co.verified && (
+            <span className="text-emerald-400 text-[10px] bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
+              Verified
+            </span>
+          )}
+        </div>
+        <p className="text-[#8E8E93] text-[13px] truncate mt-0.5">{co.tagline || co.description || "Company on Ruven"}</p>
         <div className="flex gap-2 mt-2 flex-wrap">
-          {[co.industry, `Est. ${co.founded}`].map(t => (
-            <span key={t} className="px-2 py-0.5 rounded-full bg-[#1C1C1E] border border-[#2A2A2D] text-[11px] text-[#A1A1A6]">{t}</span>
+          {[co.industry, co.location, co.founded_year ? `Est. ${co.founded_year}` : null].filter(Boolean).map((t) => (
+            <span key={t as string} className="px-2 py-0.5 rounded-full bg-[#1C1C1E] border border-[#2A2A2D] text-[11px] text-[#A1A1A6]">
+              {t}
+            </span>
           ))}
         </div>
       </div>
@@ -102,29 +128,74 @@ function CompanyCard({ co }: { co: (typeof COMPANIES)[0] }) {
 }
 
 // ── Investor card ─────────────────────────────────────────────
-function InvestorCard({ inv }: { inv: (typeof INVESTORS)[0] }) {
+function InvestorCard({
+  inv,
+  currentUserId,
+  onStatusChange,
+}: {
+  inv: DiscoverInvestor;
+  currentUserId?: string;
+  onStatusChange: (id: string, status: "NONE" | "PENDING") => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleRequest() {
+    if (!currentUserId || loading) return;
+    setLoading(true);
+    try {
+      await dataService.requestInvestorIntro(currentUserId, inv.user_id, "Intro request from Discover");
+      onStatusChange(inv.user_id, "PENDING");
+    } catch (e) {
+      console.error("Intro request error:", e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const isConnected = inv.connectionStatus === "ACCEPTED";
+  const isPending = inv.connectionStatus === "PENDING";
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 hover:border-[#2A2A2E] transition-colors flex flex-col justify-between"
     >
-      <div className="flex items-center gap-3 mb-3">
-        <Avatar name={inv.handle} size="md" />
-        <div>
-          <p className="text-white font-semibold text-[15px]">@{inv.handle}</p>
-          <p className="text-[#A24BFF] text-[12px]">{inv.firm}</p>
+      <div>
+        <div className="flex items-center gap-3 mb-2.5">
+          <Avatar name={inv.name} size="md" />
+          <div className="min-w-0 flex-1">
+            <Link href={`/u/${inv.user_handle}`} className="text-white font-semibold text-[15px] hover:underline truncate block">
+              {inv.name}
+            </Link>
+            <p className="text-[#A24BFF] text-[12px] truncate">{inv.firm_name || `@${inv.user_handle}`}</p>
+          </div>
         </div>
+        <p className="text-[#A1A1A6] text-[13px] leading-snug line-clamp-2">
+          {inv.thesis || "Active investor in Indian technology startups & founders."}
+        </p>
       </div>
-      <p className="text-[#A1A1A6] text-[13px] leading-snug">{inv.thesis}</p>
-      <div className="flex items-center justify-between mt-3 gap-2">
-        <span className="px-2.5 sm:px-3 py-1 rounded-full bg-[#A24BFF]/10 border border-[#A24BFF]/30 text-[#A24BFF] text-[11px] sm:text-[12px] font-semibold truncate">
-          {inv.ticketSize}
+
+      <div className="flex items-center justify-between mt-3.5 pt-2 border-t border-[#1C1C1E] gap-2">
+        <span className="px-2.5 py-1 rounded-full bg-[#A24BFF]/10 border border-[#A24BFF]/30 text-[#A24BFF] text-[11px] font-semibold truncate">
+          {inv.min_ticket_lakh && inv.max_ticket_lakh
+            ? `₹${inv.min_ticket_lakh}L–₹${inv.max_ticket_lakh}L`
+            : inv.stages || "Early Stage"}
         </span>
         <motion.button
-          whileTap={{ scale: 0.9 }}
-          className="px-3 sm:px-4 py-1.5 rounded-full border border-[#A24BFF] text-[#A24BFF] text-[12px] sm:text-[13px] font-semibold hover:bg-[#A24BFF]/10 shrink-0"
+          whileTap={{ scale: 0.95 }}
+          disabled={loading || isConnected || isPending}
+          onClick={handleRequest}
+          className={cn(
+            "px-3 py-1.5 rounded-full border text-[12px] font-semibold transition-colors shrink-0",
+            isConnected
+              ? "border-[#2A2A2D] text-[#6E6E73] bg-transparent"
+              : isPending
+              ? "border-amber-500/30 text-amber-400 bg-amber-500/10"
+              : "border-[#A24BFF] text-[#A24BFF] hover:bg-[#A24BFF]/10"
+          )}
         >
-          Request Intro
+          {isConnected ? "Connected" : isPending ? "Requested" : "Request Intro"}
         </motion.button>
       </div>
     </motion.div>
@@ -132,32 +203,122 @@ function InvestorCard({ inv }: { inv: (typeof INVESTORS)[0] }) {
 }
 
 // ── Job card ──────────────────────────────────────────────────
-function JobCard({ job }: { job: (typeof JOBS)[0] }) {
+function JobCard({
+  job,
+  currentUserId,
+  onApply,
+}: {
+  job: DiscoverJob;
+  currentUserId?: string;
+  onApply: (jobId: string) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleApply() {
+    if (!currentUserId || loading || job.hasApplied) return;
+    setLoading(true);
+    try {
+      await dataService.applyToJob(job.id, currentUserId, "Applied via Ruven Discover");
+      onApply(job.id);
+    } catch (e) {
+      console.error("Job apply error:", e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 flex flex-col justify-between hover:border-[#2A2A2E] transition-colors"
     >
-      <p className="text-white font-semibold text-[16px]">{job.title}</p>
-      <p className="text-[#A24BFF] text-[13px]">{job.company}</p>
-      <div className="flex gap-2 mt-2 flex-wrap">
-        {[job.location, job.salaryRange, job.type].map(t => (
-          <span key={t} className="px-2.5 py-1 rounded-full bg-[#1C1C1E] border border-[#2A2A2D] text-[11px] text-[#A1A1A6]">{t}</span>
-        ))}
+      <div>
+        <p className="text-white font-semibold text-[16px]">{job.title}</p>
+        <p className="text-[#A24BFF] text-[13px] mt-0.5">{job.company_name}</p>
+        <div className="flex gap-2 mt-2 flex-wrap">
+          {[
+            job.location || (job.is_remote ? "Remote" : null),
+            job.salary_min_lakh && job.salary_max_lakh
+              ? `₹${job.salary_min_lakh}L–₹${job.salary_max_lakh}L`
+              : null,
+            job.employment_type,
+          ]
+            .filter(Boolean)
+            .map((t) => (
+              <span key={t as string} className="px-2.5 py-1 rounded-full bg-[#1C1C1E] border border-[#2A2A2D] text-[11px] text-[#A1A1A6]">
+                {t}
+              </span>
+            ))}
+        </div>
       </div>
-      <GradientRingButton size="sm" className="w-full mt-3">Apply Now</GradientRingButton>
+      <div className="mt-4">
+        {job.hasApplied ? (
+          <div className="w-full py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[12px] font-semibold flex items-center justify-center gap-1.5">
+            <Check size={14} /> Applied
+          </div>
+        ) : (
+          <GradientRingButton
+            size="sm"
+            onClick={handleApply}
+            disabled={loading}
+            className="w-full"
+          >
+            {loading ? "Submitting…" : "Apply Now"}
+          </GradientRingButton>
+        )}
+      </div>
     </motion.div>
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────
+// ── Main Discover Page ─────────────────────────────────────────
 export default function DiscoverPage() {
+  const user = useAuthStore((s) => s.user);
   const [activeTab, setActiveTab] = useState("people");
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // Live state from Supabase
+  const [people, setPeople] = useState<DiscoverPerson[]>([]);
+  const [companies, setCompanies] = useState<DiscoverCompany[]>([]);
+  const [investors, setInvestors] = useState<DiscoverInvestor[]>([]);
+  const [jobs, setJobs] = useState<DiscoverJob[]>([]);
+
+  useEffect(() => {
+    let isCancelled = false;
+    async function loadData() {
+      setLoading(true);
+      try {
+        if (activeTab === "people") {
+          const res = await dataService.fetchDiscoverPeople(user?.id, query);
+          if (!isCancelled) setPeople(res);
+        } else if (activeTab === "companies") {
+          const res = await dataService.fetchDiscoverCompanies(query);
+          if (!isCancelled) setCompanies(res);
+        } else if (activeTab === "investors") {
+          const res = await dataService.fetchDiscoverInvestors(user?.id, query);
+          if (!isCancelled) setInvestors(res);
+        } else if (activeTab === "jobs") {
+          const res = await dataService.fetchDiscoverJobs(user?.id, query);
+          if (!isCancelled) setJobs(res);
+        }
+      } catch (err) {
+        console.error("Discover load error:", err);
+      } finally {
+        if (!isCancelled) setLoading(false);
+      }
+    }
+
+    loadData();
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeTab, query, user?.id]);
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
-      <TopBar unreadCount={3} />
+      <TopBar unreadCount={0} />
 
       {/* Search bar */}
       <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-2 max-w-6xl mx-auto w-full">
@@ -165,19 +326,16 @@ export default function DiscoverPage() {
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6E6E73]" />
           <input
             value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="Search people, companies, investors…"
-            className="w-full bg-[#1C1C1E] text-white rounded-full pl-10 pr-12 py-3 text-[14px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF] transition-colors"
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search verified founders, companies, investors, or jobs…"
+            className="w-full bg-[#1C1C1E] text-white rounded-full pl-10 pr-4 py-3 text-[14px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF] transition-colors"
           />
-          <button className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6E6E73] hover:text-white" aria-label="Filters">
-            <SlidersHorizontal size={16} />
-          </button>
         </div>
       </div>
 
       {/* Discover sub-tabs */}
       <div className="flex overflow-x-auto scrollbar-hide gap-2 px-4 sm:px-6 lg:px-8 pb-3 max-w-6xl mx-auto w-full">
-        {DISCOVER_TABS.map(t => (
+        {DISCOVER_TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
@@ -188,7 +346,8 @@ export default function DiscoverPage() {
                 : "bg-[#1C1C1E] text-[#6E6E73] hover:text-white border border-[#2A2A2D]"
             )}
           >
-            {t.icon}{t.label}
+            {t.icon}
+            {t.label}
           </button>
         ))}
       </div>
@@ -196,18 +355,146 @@ export default function DiscoverPage() {
       {/* Content */}
       <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24">
         <div className="px-4 sm:px-6 lg:px-8 py-2 max-w-6xl mx-auto w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {activeTab === "people"    && PEOPLE.map(p    => <PersonCard   key={p.handle} person={p} />)}
-            {activeTab === "companies" && COMPANIES.map(c  => <CompanyCard  key={c.slug} co={c} />)}
-            {activeTab === "investors" && INVESTORS.map(i  => <InvestorCard key={i.handle} inv={i} />)}
-            {activeTab === "jobs"      && JOBS.map((j, i)  => <JobCard      key={i} job={j} />)}
-          </div>
+          {/* Skeletons while loading */}
+          {loading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#1C1C1E]" />
+                    <div className="space-y-1.5 flex-1">
+                      <div className="w-28 h-3.5 bg-[#1C1C1E] rounded" />
+                      <div className="w-20 h-2.5 bg-[#1C1C1E] rounded" />
+                    </div>
+                  </div>
+                  <div className="h-3 w-3/4 bg-[#1C1C1E] rounded" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* People list */}
+          {!loading && activeTab === "people" && (
+            people.length === 0 ? (
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+                <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#A24BFF]">
+                  <Users size={20} />
+                </div>
+                <h3 className="text-white font-bold text-[16px]">No people found</h3>
+                <p className="text-[#8E8E93] text-[13px]">
+                  {query ? `No verified members match "${query}". Try searching by skill or title.` : "No other verified founders or members found yet."}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {people.map((p) => (
+                  <PersonCard
+                    key={p.id}
+                    person={p}
+                    currentUserId={user?.id}
+                    onStatusChange={(id, status) => {
+                      setPeople((prev) => prev.map((item) => (item.id === id ? { ...item, connectionStatus: status } : item)));
+                    }}
+                  />
+                ))}
+              </div>
+            )
+          )}
+
+          {/* Companies list */}
+          {!loading && activeTab === "companies" && (
+            companies.length === 0 ? (
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+                <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#3B82F6]">
+                  <Building2 size={20} />
+                </div>
+                <h3 className="text-white font-bold text-[16px]">No verified companies listed</h3>
+                <p className="text-[#8E8E93] text-[13px]">
+                  {query ? `No published companies match "${query}".` : "No startup companies published yet. Register your company profile to be featured."}
+                </p>
+                <Link
+                  href="/company"
+                  className="inline-block px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
+                >
+                  Create Company Profile
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {companies.map((c) => (
+                  <CompanyCard key={c.id} co={c} />
+                ))}
+              </div>
+            )
+          )}
+
+          {/* Investors list */}
+          {!loading && activeTab === "investors" && (
+            investors.length === 0 ? (
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+                <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-amber-400">
+                  <TrendingUp size={20} />
+                </div>
+                <h3 className="text-white font-bold text-[16px]">No investors found</h3>
+                <p className="text-[#8E8E93] text-[13px]">
+                  {query ? `No investors match "${query}".` : "No registered investors in this directory yet."}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {investors.map((inv) => (
+                  <InvestorCard
+                    key={inv.user_id}
+                    inv={inv}
+                    currentUserId={user?.id}
+                    onStatusChange={(id, status) => {
+                      setInvestors((prev) => prev.map((item) => (item.user_id === id ? { ...item, connectionStatus: status } : item)));
+                    }}
+                  />
+                ))}
+              </div>
+            )
+          )}
+
+          {/* Jobs list */}
+          {!loading && activeTab === "jobs" && (
+            jobs.length === 0 ? (
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+                <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-emerald-400">
+                  <Briefcase size={20} />
+                </div>
+                <h3 className="text-white font-bold text-[16px]">No active job openings</h3>
+                <p className="text-[#8E8E93] text-[13px]">
+                  {query ? `No positions match "${query}".` : "No startups have posted open roles yet. Check back soon or post a job opening."}
+                </p>
+                <Link
+                  href="/company"
+                  className="inline-block px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
+                >
+                  Post Job Opening
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {jobs.map((j) => (
+                  <JobCard
+                    key={j.id}
+                    job={j}
+                    currentUserId={user?.id}
+                    onApply={(jobId) => {
+                      setJobs((prev) => prev.map((item) => (item.id === jobId ? { ...item, hasApplied: true } : item)));
+                    }}
+                  />
+                ))}
+              </div>
+            )
+          )}
         </div>
       </main>
 
       <BottomDock
         activeTab="discover"
-        userName="Aarav Reddy"
+        userName={user?.name || user?.userHandle || ""}
       />
     </div>
   );
