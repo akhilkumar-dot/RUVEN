@@ -2,10 +2,11 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Plus, X, Check, Edit3, ExternalLink, MapPin, Briefcase, GraduationCap } from "lucide-react";
+import { Camera, Plus, X, Check, Edit3, ExternalLink, MapPin, Briefcase, GraduationCap, ChevronLeft } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { BridgeLogo } from "@/ui/BridgeLogo";
+import { useRouter } from "next/navigation";
 import { cn, truncate } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────
@@ -93,6 +94,7 @@ interface ProfileEditorProps {
 }
 
 export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileEditorProps) {
+  const router = useRouter();
   const [data, setData] = useState<ProfileData>(initialData);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -131,10 +133,21 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
       {/* ── Header ── */}
       <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 bg-black/80 backdrop-blur-xl border-b border-[#1C1C1E]"
            style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}>
-        <div className="w-10 h-10 rounded-2xl bg-black border border-[#2A2A2E] flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
-          <BridgeLogo size={36} />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.back()}
+            className="w-10 h-10 rounded-full bg-[#1C1C1E] flex items-center justify-center text-[#8E8E93] hover:text-white transition-colors"
+            aria-label="Go back"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <div className="w-8 h-8 rounded-xl bg-black border border-[#2A2A2E] flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+            <BridgeLogo size={28} />
+          </div>
         </div>
-        <h1 className="text-white font-semibold text-[16px]">My Profile</h1>
+        
+        <h1 className="text-white font-semibold text-[16px] absolute left-1/2 -translate-x-1/2 max-w-[40%] truncate">My Profile</h1>
+        
         {isOwner && (
           editing ? (
             <div className="flex gap-2">
@@ -172,7 +185,7 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white font-bold text-[20px] leading-tight">
+              <p className="text-white font-bold text-[18px] sm:text-[20px] leading-tight break-all">
                 @{data.userHandle}
               </p>
               <p className="text-[#6E6E73] text-[12px] mt-0.5 capitalize">

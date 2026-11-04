@@ -439,7 +439,7 @@ function MessagesPageContent() {
       <main
         className="flex-1 flex overflow-hidden w-full max-w-7xl mx-auto md:px-4 md:py-3"
         style={{
-          height: "calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
+          height: "calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 64px)",
         }}
       >
         <div className="flex-1 flex overflow-hidden md:border md:border-[#1C1C1E] md:rounded-2xl bg-[#09090B]">

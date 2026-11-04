@@ -21,7 +21,7 @@ export function TopBar({ className }: TopBarProps) {
     <header
       className={cn(
         "sticky top-0 z-[var(--z-topbar)] w-full",
-        "px-4 sm:px-6 lg:px-8 pt-[calc(env(safe-area-inset-top,0px)+12px)] pb-3",
+        "px-5 sm:px-6 lg:px-8 pt-[calc(env(safe-area-inset-top,0px)+12px)] pb-3",
         "bg-black/80 backdrop-blur-xl border-b border-[#1C1C1E]/50",
         className
       )}

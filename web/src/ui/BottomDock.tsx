@@ -94,7 +94,7 @@ export function BottomDock({
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-lg sm:max-w-2xl md:max-w-3xl px-4 pb-6 md:pb-8">
+      <div className="relative mx-auto max-w-lg sm:max-w-2xl md:max-w-3xl px-4 pb-8 md:pb-8">
         <div
           className={cn(
             "flex items-center justify-between gap-2 p-2",
