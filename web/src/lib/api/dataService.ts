@@ -40,7 +40,7 @@ export interface DiscoverPerson {
   headline?: string | null;
   location?: string | null;
   skills?: string | null;
-  connectionStatus?: "NONE" | "PENDING" | "ACCEPTED";
+  connectionStatus?: "NONE" | "REQUESTED" | "RESPOND" | "CONNECTED" | "PENDING" | "ACCEPTED";
 }
 
 export interface DiscoverCompany {
@@ -71,7 +71,7 @@ export interface DiscoverInvestor {
   user_handle: string;
   location?: string | null;
   avatar_url?: string | null;
-  connectionStatus?: "NONE" | "PENDING" | "ACCEPTED";
+  connectionStatus?: "NONE" | "REQUESTED" | "RESPOND" | "CONNECTED" | "PENDING" | "ACCEPTED";
 }
 
 export interface DiscoverJob {
@@ -472,17 +472,25 @@ export const dataService = {
 
       // Check connection status
       const userIds = data.map((u) => u.id);
-      const connMap = new Map<string, "PENDING" | "ACCEPTED">();
+      const connMap = new Map<string, "NONE" | "REQUESTED" | "RESPOND" | "CONNECTED">();
       if (currentUserId && userIds.length > 0) {
         const { data: conns } = await supabase
           .from("connections")
-          .select("requester_id, addressee_id, status")
+          .select("id, requester_id, addressee_id, status")
           .or(`requester_id.eq.${currentUserId},addressee_id.eq.${currentUserId}`);
 
         if (conns) {
           for (const c of conns) {
             const otherId = c.requester_id === currentUserId ? c.addressee_id : c.requester_id;
-            connMap.set(otherId, c.status as "PENDING" | "ACCEPTED");
+            if (c.status === "ACCEPTED") {
+              connMap.set(otherId, "CONNECTED");
+            } else if (c.status === "PENDING") {
+              if (c.requester_id === currentUserId) {
+                connMap.set(otherId, "REQUESTED");
+              } else {
+                connMap.set(otherId, "RESPOND");
+              }
+            }
           }
         }
       }
@@ -545,17 +553,25 @@ export const dataService = {
       const { data, error } = await query;
       if (error || !data) return [];
 
-      const connMap = new Map<string, "PENDING" | "ACCEPTED">();
+      const connMap = new Map<string, "NONE" | "REQUESTED" | "RESPOND" | "CONNECTED">();
       if (currentUserId && data.length > 0) {
         const { data: conns } = await supabase
           .from("connections")
-          .select("requester_id, addressee_id, status")
+          .select("id, requester_id, addressee_id, status")
           .or(`requester_id.eq.${currentUserId},addressee_id.eq.${currentUserId}`);
 
         if (conns) {
           for (const c of conns) {
             const otherId = c.requester_id === currentUserId ? c.addressee_id : c.requester_id;
-            connMap.set(otherId, c.status as "PENDING" | "ACCEPTED");
+            if (c.status === "ACCEPTED") {
+              connMap.set(otherId, "CONNECTED");
+            } else if (c.status === "PENDING") {
+              if (c.requester_id === currentUserId) {
+                connMap.set(otherId, "REQUESTED");
+              } else {
+                connMap.set(otherId, "RESPOND");
+              }
+            }
           }
         }
       }
@@ -645,7 +661,101 @@ export const dataService = {
     }
   },
 
+  /**
+   * Get the connection state between current user and target user:
+   * NONE: No active request or connection
+   * REQUESTED: Current user sent request, pending acceptance by target
+   * RESPOND: Target user sent request to current user, pending our acceptance
+   * CONNECTED: Connection is ACCEPTED
+   */
+  getConnectionState: async (
+    currentUserId: string,
+    targetUserId: string
+  ): Promise<{
+    status: "NONE" | "REQUESTED" | "RESPOND" | "CONNECTED";
+    connectionId?: string;
+  }> => {
+    if (!currentUserId || !targetUserId || currentUserId === targetUserId) {
+      return { status: "NONE" };
+    }
+    const { data: row } = await supabase
+      .from("connections")
+      .select("id, requester_id, addressee_id, status")
+      .or(`and(requester_id.eq.${currentUserId},addressee_id.eq.${targetUserId}),and(requester_id.eq.${targetUserId},addressee_id.eq.${currentUserId})`)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!row) return { status: "NONE" };
+
+    if (row.status === "ACCEPTED") {
+      return { status: "CONNECTED", connectionId: row.id };
+    }
+    if (row.status === "PENDING") {
+      if (row.requester_id === currentUserId) {
+        return { status: "REQUESTED", connectionId: row.id };
+      }
+      return { status: "RESPOND", connectionId: row.id };
+    }
+    return { status: "NONE", connectionId: row.id };
+  },
+
   sendConnectionRequest: async (requesterId: string, addresseeId: string, note?: string) => {
+    if (!requesterId || !addresseeId || requesterId === addresseeId) {
+      throw new Error("Cannot connect with yourself");
+    }
+
+    // Check existing
+    const { data: existing } = await supabase
+      .from("connections")
+      .select("id, requester_id, addressee_id, status, declined_cooldown_until")
+      .or(`and(requester_id.eq.${requesterId},addressee_id.eq.${addresseeId}),and(requester_id.eq.${addresseeId},addressee_id.eq.${requesterId})`)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      if (existing.status === "ACCEPTED") {
+        return; // already connected
+      }
+      if (existing.status === "PENDING") {
+        if (existing.requester_id === requesterId) {
+          return; // already sent
+        } else {
+          // Mutual request case: if target already requested me, auto-accept!
+          const { error: acceptErr } = await supabase
+            .from("connections")
+            .update({ status: "ACCEPTED", responded_at: new Date().toISOString() })
+            .eq("id", existing.id);
+          if (acceptErr) throw acceptErr;
+          return;
+        }
+      }
+      if (existing.status === "DECLINED") {
+        if (existing.declined_cooldown_until && new Date(existing.declined_cooldown_until) > new Date()) {
+          const days = Math.ceil((new Date(existing.declined_cooldown_until).getTime() - Date.now()) / (86400000));
+          throw new Error(`Cannot send request. Cooldown active for ${days} more day(s).`);
+        }
+        // Cooldown passed: re-activate as PENDING
+        const { error } = await supabase
+          .from("connections")
+          .update({
+            requester_id: requesterId,
+            addressee_id: addresseeId,
+            status: "PENDING",
+            note: note || null,
+            created_at: new Date().toISOString(),
+            responded_at: null,
+            declined_cooldown_until: null,
+          })
+          .eq("id", existing.id);
+        if (error) throw error;
+        return;
+      }
+      // If WITHDRAWN or REMOVED, delete old record first so unique index doesn't conflict
+      await supabase.from("connections").delete().eq("id", existing.id);
+    }
+
     const { error } = await supabase.from("connections").insert({
       requester_id: requesterId,
       addressee_id: addresseeId,
@@ -655,45 +765,104 @@ export const dataService = {
     if (error) throw error;
   },
 
+  withdrawConnectionRequest: async (connectionId: string): Promise<void> => {
+    const { error } = await supabase.from("connections").delete().eq("id", connectionId);
+    if (error) throw error;
+  },
+
+  acceptConnectionRequest: async (connectionId: string): Promise<void> => {
+    const { error } = await supabase
+      .from("connections")
+      .update({ status: "ACCEPTED", responded_at: new Date().toISOString() })
+      .eq("id", connectionId)
+      .eq("status", "PENDING");
+    if (error) throw error;
+  },
+
+  declineConnectionRequest: async (connectionId: string): Promise<void> => {
+    const cooldown = new Date(Date.now() + 7 * 86400000).toISOString();
+    const { error } = await supabase
+      .from("connections")
+      .update({
+        status: "DECLINED",
+        responded_at: new Date().toISOString(),
+        declined_cooldown_until: cooldown,
+      })
+      .eq("id", connectionId)
+      .eq("status", "PENDING");
+    if (error) throw error;
+  },
+
   toggleConnection: async (currentUserId: string, targetUserId: string, currentlyConnected?: boolean) => {
-    if (typeof currentlyConnected === "boolean") {
-      if (currentlyConnected) {
-        const { error } = await supabase
-          .from("connections")
-          .delete()
-          .or(`and(requester_id.eq.${currentUserId},addressee_id.eq.${targetUserId}),and(requester_id.eq.${targetUserId},addressee_id.eq.${currentUserId})`);
-        if (error) throw error;
-        return false;
-      } else {
-        const { error } = await supabase.from("connections").insert({
-          requester_id: currentUserId,
-          addressee_id: targetUserId,
-          status: "PENDING",
-        });
-        if (error) throw error;
-        return true;
+    const state = await dataService.getConnectionState(currentUserId, targetUserId);
+
+    if (state.status === "CONNECTED" || currentlyConnected === true) {
+      if (state.connectionId) {
+        await supabase.from("connections").delete().eq("id", state.connectionId);
       }
+      return false;
     }
 
-    const { data: existing } = await supabase
-      .from("connections")
-      .select("id, status")
-      .or(`and(requester_id.eq.${currentUserId},addressee_id.eq.${targetUserId}),and(requester_id.eq.${targetUserId},addressee_id.eq.${currentUserId})`)
-      .maybeSingle();
-
-    if (existing) {
-      const { error } = await supabase.from("connections").delete().eq("id", existing.id);
-      if (error) throw error;
+    if (state.status === "REQUESTED") {
+      if (state.connectionId) {
+        await dataService.withdrawConnectionRequest(state.connectionId);
+      }
       return false;
-    } else {
-      const { error } = await supabase.from("connections").insert({
-        requester_id: currentUserId,
-        addressee_id: targetUserId,
-        status: "PENDING",
-      });
-      if (error) throw error;
+    }
+
+    if (state.status === "RESPOND") {
+      if (state.connectionId) {
+        await dataService.acceptConnectionRequest(state.connectionId);
+      }
       return true;
     }
+
+    // state is NONE
+    await dataService.sendConnectionRequest(currentUserId, targetUserId);
+    return true;
+  },
+
+  fetchConnectionRequests: async (userId: string) => {
+    const { data: incoming } = await supabase
+      .from("connections")
+      .select(`
+        id, created_at, note,
+        user:users!requester_id (id, name, user_handle, avatar_url, type)
+      `)
+      .eq("addressee_id", userId)
+      .eq("status", "PENDING")
+      .order("created_at", { ascending: false });
+
+    const { data: sent } = await supabase
+      .from("connections")
+      .select(`
+        id, created_at, note,
+        user:users!addressee_id (id, name, user_handle, avatar_url, type)
+      `)
+      .eq("requester_id", userId)
+      .eq("status", "PENDING")
+      .order("created_at", { ascending: false });
+
+    return {
+      incoming: (incoming || []).map((r) => {
+        const u = Array.isArray(r.user) ? r.user[0] : r.user;
+        return {
+          id: r.id as string,
+          created_at: r.created_at as string,
+          note: r.note as string | null,
+          user: u as { id: string; name: string; user_handle: string; avatar_url: string | null; type: string } | null,
+        };
+      }),
+      sent: (sent || []).map((r) => {
+        const u = Array.isArray(r.user) ? r.user[0] : r.user;
+        return {
+          id: r.id as string,
+          created_at: r.created_at as string,
+          note: r.note as string | null,
+          user: u as { id: string; name: string; user_handle: string; avatar_url: string | null; type: string } | null,
+        };
+      }),
+    };
   },
 
   requestInvestorIntro: async (requesterId: string, targetUserId: string, note?: string) => {

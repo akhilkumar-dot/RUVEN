@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search, Users, Building2, TrendingUp, Briefcase, Check } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
@@ -34,26 +35,44 @@ function PersonCard({
 }: {
   person: DiscoverPerson;
   currentUserId?: string;
-  onStatusChange: (id: string, status: "NONE" | "PENDING") => void;
+  onStatusChange: (id: string, status: "NONE" | "REQUESTED" | "RESPOND" | "CONNECTED") => void;
 }) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  async function handleToggle() {
+  if (currentUserId && person.id === currentUserId) {
+    return null; // Hidden for self
+  }
+
+  const status = person.connectionStatus || "NONE";
+  const isConnected = status === "CONNECTED" || status === "ACCEPTED";
+  const isRequested = status === "REQUESTED" || status === "PENDING";
+  const isRespond = status === "RESPOND";
+
+  async function handleClick() {
     if (!currentUserId || loading) return;
+    if (isConnected) {
+      router.push("/messages");
+      return;
+    }
     setLoading(true);
     try {
-      const nextStatus = person.connectionStatus === "PENDING" ? "NONE" : "PENDING";
-      await dataService.toggleConnection(currentUserId, person.id);
-      onStatusChange(person.id, nextStatus);
+      if (isRequested) {
+        await dataService.toggleConnection(currentUserId, person.id);
+        onStatusChange(person.id, "NONE");
+      } else if (isRespond) {
+        await dataService.toggleConnection(currentUserId, person.id);
+        onStatusChange(person.id, "CONNECTED");
+      } else {
+        await dataService.sendConnectionRequest(currentUserId, person.id);
+        onStatusChange(person.id, "REQUESTED");
+      }
     } catch (e) {
       console.error("Connect toggle error:", e);
     } finally {
       setLoading(false);
     }
   }
-
-  const isConnected = person.connectionStatus === "ACCEPTED";
-  const isPending = person.connectionStatus === "PENDING";
 
   return (
     <motion.div
@@ -75,18 +94,28 @@ function PersonCard({
       </div>
       <motion.button
         whileTap={{ scale: 0.95 }}
-        disabled={loading || isConnected}
-        onClick={handleToggle}
+        disabled={loading}
+        onClick={handleClick}
         className={cn(
           "px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors border shrink-0",
           isConnected
-            ? "border-[#2A2A2D] text-[#6E6E73] bg-transparent cursor-default"
-            : isPending
-            ? "border-amber-500/30 text-amber-400 bg-amber-500/10"
+            ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
+            : isRequested
+            ? "border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20"
+            : isRespond
+            ? "border-purple-400 text-purple-300 bg-purple-500/20 hover:bg-purple-500/30"
             : "border-[#A24BFF] text-[#A24BFF] bg-[#A24BFF]/10 hover:bg-[#A24BFF]/20"
         )}
       >
-        {isConnected ? "Connected" : isPending ? "Pending" : "Connect"}
+        {loading
+          ? "..."
+          : isConnected
+          ? "Connected"
+          : isRequested
+          ? "Requested"
+          : isRespond
+          ? "Respond"
+          : "Connect"}
       </motion.button>
     </motion.div>
   );
@@ -135,25 +164,40 @@ function InvestorCard({
 }: {
   inv: DiscoverInvestor;
   currentUserId?: string;
-  onStatusChange: (id: string, status: "NONE" | "PENDING") => void;
+  onStatusChange: (id: string, status: "NONE" | "REQUESTED" | "RESPOND" | "CONNECTED") => void;
 }) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+
+  const status = inv.connectionStatus || "NONE";
+  const isConnected = status === "CONNECTED" || status === "ACCEPTED";
+  const isRequested = status === "REQUESTED" || status === "PENDING";
+  const isRespond = status === "RESPOND";
 
   async function handleRequest() {
     if (!currentUserId || loading) return;
+    if (isConnected) {
+      router.push("/messages");
+      return;
+    }
     setLoading(true);
     try {
-      await dataService.requestInvestorIntro(currentUserId, inv.user_id, "Intro request from Discover");
-      onStatusChange(inv.user_id, "PENDING");
+      if (isRequested) {
+        await dataService.toggleConnection(currentUserId, inv.user_id);
+        onStatusChange(inv.user_id, "NONE");
+      } else if (isRespond) {
+        await dataService.toggleConnection(currentUserId, inv.user_id);
+        onStatusChange(inv.user_id, "CONNECTED");
+      } else {
+        await dataService.requestInvestorIntro(currentUserId, inv.user_id, "Intro request from Discover");
+        onStatusChange(inv.user_id, "REQUESTED");
+      }
     } catch (e) {
       console.error("Intro request error:", e);
     } finally {
       setLoading(false);
     }
   }
-
-  const isConnected = inv.connectionStatus === "ACCEPTED";
-  const isPending = inv.connectionStatus === "PENDING";
 
   return (
     <motion.div
@@ -184,18 +228,28 @@ function InvestorCard({
         </span>
         <motion.button
           whileTap={{ scale: 0.95 }}
-          disabled={loading || isConnected || isPending}
+          disabled={loading}
           onClick={handleRequest}
           className={cn(
             "px-3 py-1.5 rounded-full border text-[12px] font-semibold transition-colors shrink-0",
             isConnected
-              ? "border-[#2A2A2D] text-[#6E6E73] bg-transparent"
-              : isPending
-              ? "border-amber-500/30 text-amber-400 bg-amber-500/10"
+              ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
+              : isRequested
+              ? "border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20"
+              : isRespond
+              ? "border-purple-400 text-purple-300 bg-purple-500/20 hover:bg-purple-500/30"
               : "border-[#A24BFF] text-[#A24BFF] hover:bg-[#A24BFF]/10"
           )}
         >
-          {isConnected ? "Connected" : isPending ? "Requested" : "Request Intro"}
+          {loading
+            ? "..."
+            : isConnected
+            ? "Connected"
+            : isRequested
+            ? "Requested"
+            : isRespond
+            ? "Respond"
+            : "Request Intro"}
         </motion.button>
       </div>
     </motion.div>

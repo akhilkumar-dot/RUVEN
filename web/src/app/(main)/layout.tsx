@@ -1,7 +1,7 @@
-"use client";
+ï»¿"use client";
 
 /**
- * (main)/layout.tsx — Auth guard for all protected main-app routes.
+ * (main)/layout.tsx - Auth guard for all protected main-app routes.
  *
  * Strategy:
  *  - On mount, call supabase.auth.getSession() (reads from persisted storage,
@@ -11,7 +11,7 @@
  *  - If the session check comes back empty, redirect to /sign-in.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { setAccessToken } from "@/lib/api/client";
@@ -25,18 +25,27 @@ export default function MainLayout({
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const setAuth = useAuthStore((s) => s.setAuth);
-  // Start in "checking" only when Zustand does not already know the user is in.
-  // Using useRef to track if the check has completed so we do not set state
-  // synchronously inside the effect body (avoids the lint warning).
-  const checked = useRef(isAuthenticated);
   const [ready, setReady] = useState(isAuthenticated);
 
   useEffect(() => {
-    // Already confirmed by Zustand (sessionStorage persistence) — nothing to do.
-    if (checked.current) return;
+    if (isAuthenticated) {
+      setReady(true);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    // Already confirmed by Zustand - nothing to do.
+    if (useAuthStore.getState().isAuthenticated) {
+      setReady(true);
+      return;
+    }
 
     supabase.auth.getSession().then(async ({ data, error }) => {
       if (error || !data.session) {
+        if (useAuthStore.getState().isAuthenticated) {
+          setReady(true);
+          return;
+        }
         router.replace("/sign-in");
         return;
       }

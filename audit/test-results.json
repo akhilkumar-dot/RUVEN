@@ -4,7 +4,11 @@
       "C:\\Program Files\\nodejs\\node.exe",
       "C:\\Users\\Akhil M\\Downloads\\RUVEN\\node_modules\\@playwright\\test\\cli.js",
       "test",
-      "audit/e2e/design-fidelity.spec.ts"
+      "--config",
+      "playwright.config.ts",
+      "audit/e2e/phase2-connection-notifications.spec.ts",
+      "-g",
+      "P2-1"
     ],
     "configFile": "C:\\Users\\Akhil M\\Downloads\\RUVEN\\playwright.config.ts",
     "rootDir": "C:/Users/Akhil M/Downloads/RUVEN/audit/e2e",
@@ -96,21 +100,21 @@
   },
   "suites": [
     {
-      "title": "design-fidelity.spec.ts",
-      "file": "design-fidelity.spec.ts",
+      "title": "phase2-connection-notifications.spec.ts",
+      "file": "phase2-connection-notifications.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Design Fidelity Audit (V1 - V11)",
-          "file": "design-fidelity.spec.ts",
-          "line": 5,
+          "title": "Phase 2: Connection Requests & In-App Notifications",
+          "file": "phase2-connection-notifications.spec.ts",
+          "line": 4,
           "column": 6,
           "specs": [
             {
-              "title": "V1 & V3 - Home Screen (mobile-390)",
-              "ok": true,
+              "title": "P2-1: Bell in TopBar renders and notification dropdown opens with tabs",
+              "ok": false,
               "tags": [],
               "tests": [
                 {
@@ -123,333 +127,58 @@
                     {
                       "workerIndex": 0,
                       "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 6864,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-03T18:33:15.518Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7cc57c15413891db9efa-3adb901583ed84bbcf27",
-              "file": "design-fidelity.spec.ts",
-              "line": 12,
-              "column": 9
-            },
-            {
-              "title": "V2 - Sign In Screen (mobile-390)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 45000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "desktop",
-                  "projectName": "desktop",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1065,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-03T18:33:24.167Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7cc57c15413891db9efa-e3ffb341c334669c4383",
-              "file": "design-fidelity.spec.ts",
-              "line": 19,
-              "column": 9
-            },
-            {
-              "title": "V4 - Bottom Dock & Floating Action Stack (mobile-390)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 45000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "desktop",
-                  "projectName": "desktop",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1976,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-03T18:33:25.253Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7cc57c15413891db9efa-ed2586d03642a222e99e",
-              "file": "design-fidelity.spec.ts",
-              "line": 26,
-              "column": 9
-            },
-            {
-              "title": "V5 - Detail Card / Competition Screen (mobile-390)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 45000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "desktop",
-                  "projectName": "desktop",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2055,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-03T18:33:27.256Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7cc57c15413891db9efa-67871ad952e32407d223",
-              "file": "design-fidelity.spec.ts",
-              "line": 33,
-              "column": 9
-            },
-            {
-              "title": "V1 & V3 - Home Screen (desktop-1440)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 45000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "desktop",
-                  "projectName": "desktop",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2178,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-03T18:33:29.324Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7cc57c15413891db9efa-ce393abbaaa63bb61dfa",
-              "file": "design-fidelity.spec.ts",
-              "line": 12,
-              "column": 9
-            },
-            {
-              "title": "V2 - Sign In Screen (desktop-1440)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 45000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "desktop",
-                  "projectName": "desktop",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 981,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-03T18:33:31.519Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7cc57c15413891db9efa-a238fa410138597e9539",
-              "file": "design-fidelity.spec.ts",
-              "line": 19,
-              "column": 9
-            },
-            {
-              "title": "V4 - Bottom Dock & Floating Action Stack (desktop-1440)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 45000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "desktop",
-                  "projectName": "desktop",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2657,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-03T18:33:32.515Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7cc57c15413891db9efa-fcbd032dce84ca0a158e",
-              "file": "design-fidelity.spec.ts",
-              "line": 26,
-              "column": 9
-            },
-            {
-              "title": "V5 - Detail Card / Competition Screen (desktop-1440)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 45000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "desktop",
-                  "projectName": "desktop",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2548,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-03T18:33:35.190Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7cc57c15413891db9efa-7d68e9d18534aa334ad1",
-              "file": "design-fidelity.spec.ts",
-              "line": 33,
-              "column": 9
-            },
-            {
-              "title": "V9 - Responsive Overflow Check (360, 390, 768, 1024, 1440)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 45000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "desktop",
-                  "projectName": "desktop",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 5995,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-03T18:33:37.761Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7cc57c15413891db9efa-ba77fb28f28bc65e2bae",
-              "file": "design-fidelity.spec.ts",
-              "line": 41,
-              "column": 7
-            },
-            {
-              "title": "V10 - Text contrast measurement on cards",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 45000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "desktop",
-                  "projectName": "desktop",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 590,
-                      "errors": [],
-                      "stdout": [
+                      "status": "failed",
+                      "duration": 11081,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#btn-notification-bell')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#btn-notification-bell') with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('#btn-notification-bell')\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#btn-notification-bell')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#btn-notification-bell') with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('#btn-notification-bell')\u001b[22m\n\n    at C:\\Users\\Akhil M\\Downloads\\RUVEN\\audit\\e2e\\phase2-connection-notifications.spec.ts:49:27",
+                        "location": {
+                          "file": "C:\\Users\\Akhil M\\Downloads\\RUVEN\\audit\\e2e\\phase2-connection-notifications.spec.ts",
+                          "column": 27,
+                          "line": 49
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 47 |\u001b[39m     \u001b[90m// The notification bell must be present in the top bar\u001b[39m\n \u001b[90m 48 |\u001b[39m     \u001b[36mconst\u001b[39m bellBtn \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m\"#btn-notification-bell\"\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 49 |\u001b[39m     \u001b[36mawait\u001b[39m expect(bellBtn)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 50 |\u001b[39m\n \u001b[90m 51 |\u001b[39m     \u001b[90m// Click the bell to open dropdown\u001b[39m\n \u001b[90m 52 |\u001b[39m     \u001b[36mawait\u001b[39m bellBtn\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
                         {
-                          "text": "V10 Sample card text colors: [\n  { color: \u001b[32m'oklab(0 0 0 / 0.8)'\u001b[39m, bg: \u001b[32m'rgba(0, 0, 0, 0)'\u001b[39m },\n  { color: \u001b[32m'oklab(0 0 0 / 0.6)'\u001b[39m, bg: \u001b[32m'rgba(0, 0, 0, 0)'\u001b[39m },\n  { color: \u001b[32m'rgb(0, 0, 0)'\u001b[39m, bg: \u001b[32m'rgba(0, 0, 0, 0)'\u001b[39m },\n  { color: \u001b[32m'oklab(0 0 0 / 0.7)'\u001b[39m, bg: \u001b[32m'rgba(0, 0, 0, 0)'\u001b[39m },\n  {\n    color: \u001b[32m'oklab(0.999994 0.0000455677 0.0000200868 / 0.8)'\u001b[39m,\n    bg: \u001b[32m'rgba(0, 0, 0, 0)'\u001b[39m\n  },\n  { color: \u001b[32m'rgb(0, 0, 0)'\u001b[39m, bg: \u001b[32m'rgba(0, 0, 0, 0)'\u001b[39m },\n  { color: \u001b[32m'oklab(0 0 0 / 0.75)'\u001b[39m, bg: \u001b[32m'rgba(0, 0, 0, 0)'\u001b[39m },\n  { color: \u001b[32m'rgb(0, 0, 0)'\u001b[39m, bg: \u001b[32m'rgba(0, 0, 0, 0)'\u001b[39m },\n  { color: \u001b[32m'oklab(0 0 0 / 0.7)'\u001b[39m, bg: \u001b[32m'rgba(0, 0, 0, 0)'\u001b[39m },\n  { color: \u001b[32m'rgb(0, 0, 0)'\u001b[39m, bg: \u001b[32m'rgba(0, 0, 0, 0)'\u001b[39m }\n]\n"
+                          "location": {
+                            "file": "C:\\Users\\Akhil M\\Downloads\\RUVEN\\audit\\e2e\\phase2-connection-notifications.spec.ts",
+                            "column": 27,
+                            "line": 49
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('#btn-notification-bell')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" locator('#btn-notification-bell') with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('#btn-notification-bell')\u001b[22m\n\n\n  47 |     // The notification bell must be present in the top bar\n  48 |     const bellBtn = page.locator(\"#btn-notification-bell\");\n> 49 |     await expect(bellBtn).toBeVisible({ timeout: 10000 });\n     |                           ^\n  50 |\n  51 |     // Click the bell to open dropdown\n  52 |     await bellBtn.click();\n    at C:\\Users\\Akhil M\\Downloads\\RUVEN\\audit\\e2e\\phase2-connection-notifications.spec.ts:49:27"
                         }
                       ],
+                      "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-03T18:33:43.771Z",
+                      "startTime": "2026-11-04T17:09:40.026Z",
                       "annotations": [],
-                      "attachments": []
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Akhil M\\test-results\\phase2-connection-notifica-fcff8-on-dropdown-opens-with-tabs-desktop\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\Akhil M\\test-results\\phase2-connection-notifica-fcff8-on-dropdown-opens-with-tabs-desktop\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\Akhil M\\Downloads\\RUVEN\\audit\\e2e\\phase2-connection-notifications.spec.ts",
+                        "column": 27,
+                        "line": 49
+                      }
                     }
                   ],
-                  "status": "expected"
+                  "status": "unexpected"
                 }
               ],
-              "id": "7cc57c15413891db9efa-8f0bc4ddebdb2d2af256",
-              "file": "design-fidelity.spec.ts",
-              "line": 59,
+              "id": "18d324735160b3486318-928572221b0d04b37701",
+              "file": "phase2-connection-notifications.spec.ts",
+              "line": 5,
               "column": 7
             }
           ]
@@ -459,11 +188,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-03T18:33:15.071Z",
-    "duration": 29447.691,
-    "expected": 10,
+    "startTime": "2026-11-04T17:09:39.607Z",
+    "duration": 11768.619999999999,
+    "expected": 0,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 1,
     "flaky": 0
   }
 }

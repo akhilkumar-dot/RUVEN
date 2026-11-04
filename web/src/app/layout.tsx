@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { AuthBootstrap } from "@/ui/AuthBootstrap";
+import { NotificationProvider } from "@/ui/NotificationProvider";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -53,6 +54,7 @@ export default function RootLayout({
     <html lang="en-IN" className={jakarta.variable} data-scroll-behavior="smooth">
       <body className="antialiased bg-[#000] text-white">
         <AuthBootstrap />
+        <NotificationProvider />
         {children}
       </body>
     </html>

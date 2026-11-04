@@ -14,6 +14,8 @@ import {
   GraduationCap,
   Briefcase,
   ShieldCheck,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
 import { TopBar } from "@/ui/TopBar";
@@ -21,6 +23,7 @@ import { BottomDock } from "@/ui/BottomDock";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { useAuthStore } from "@/lib/store/authStore";
 import { dataService } from "@/lib/api/dataService";
+import { cn } from "@/lib/utils";
 
 interface PublicUserPageProps {
   params: Promise<{ handle: string }>;
@@ -55,7 +58,10 @@ function UserProfileContent({ params }: PublicUserPageProps) {
   const currentUser = useAuthStore((s) => s.user);
   const [data, setData] = useState<LoadedUserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isConnected, setIsConnected] = useState(false);
+  const [connState, setConnState] = useState<{
+    status: "NONE" | "REQUESTED" | "RESPOND" | "CONNECTED";
+    connectionId?: string;
+  }>({ status: "NONE" });
   const [copied, setCopied] = useState(false);
   const [connecting, setConnecting] = useState(false);
 
@@ -65,7 +71,12 @@ function UserProfileContent({ params }: PublicUserPageProps) {
       try {
         const res = await dataService.fetchUserByHandle(handle);
         if (isMounted) {
-          setData(res as LoadedUserProfile | null);
+          const profileData = res as LoadedUserProfile | null;
+          setData(profileData);
+          if (currentUser?.id && profileData?.user?.id && currentUser.id !== profileData.user.id) {
+            const cs = await dataService.getConnectionState(currentUser.id, profileData.user.id);
+            if (isMounted) setConnState(cs);
+          }
         }
       } catch (err) {
         console.error("Failed to load user by handle:", err);
@@ -78,7 +89,7 @@ function UserProfileContent({ params }: PublicUserPageProps) {
     return () => {
       isMounted = false;
     };
-  }, [handle]);
+  }, [handle, currentUser?.id]);
 
   const handleShare = () => {
     if (typeof window === "undefined") return;
@@ -95,8 +106,24 @@ function UserProfileContent({ params }: PublicUserPageProps) {
     if (!currentUser?.id || !data?.user.id || connecting) return;
     setConnecting(true);
     try {
-      await dataService.toggleConnection(currentUser.id, data.user.id, isConnected);
-      setIsConnected((v) => !v);
+      if (connState.status === "REQUESTED") {
+        if (connState.connectionId) {
+          await dataService.withdrawConnectionRequest(connState.connectionId);
+        } else {
+          await dataService.toggleConnection(currentUser.id, data.user.id);
+        }
+        setConnState({ status: "NONE" });
+      } else if (connState.status === "RESPOND") {
+        if (connState.connectionId) {
+          await dataService.acceptConnectionRequest(connState.connectionId);
+        } else {
+          await dataService.toggleConnection(currentUser.id, data.user.id);
+        }
+        setConnState({ status: "CONNECTED" });
+      } else if (connState.status === "NONE") {
+        await dataService.sendConnectionRequest(currentUser.id, data.user.id);
+        setConnState({ status: "REQUESTED" });
+      }
     } catch (err) {
       console.error("Failed to toggle connection:", err);
     } finally {
@@ -105,7 +132,7 @@ function UserProfileContent({ params }: PublicUserPageProps) {
   };
 
   const handleStartMessage = async () => {
-    if (!currentUser?.id || !data?.user.id) return;
+    if (!currentUser?.id || !data?.user.id || connState.status !== "CONNECTED") return;
     try {
       const roomId = await dataService.getOrCreateDirectRoom(currentUser.id, data.user.id);
       router.push(`/messages?room=${roomId}`);
@@ -236,11 +263,30 @@ function UserProfileContent({ params }: PublicUserPageProps) {
                       whileTap={{ scale: 0.98 }}
                       onClick={handleConnect}
                       disabled={connecting}
-                      className="flex-1 py-2.5 rounded-full bg-[#A24BFF] hover:bg-[#8D34F0] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                      className={cn(
+                        "flex-1 py-2.5 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors",
+                        connState.status === "CONNECTED"
+                          ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
+                          : connState.status === "REQUESTED"
+                          ? "bg-amber-500/15 border border-amber-500/30 text-amber-400 hover:bg-amber-500/25"
+                          : connState.status === "RESPOND"
+                          ? "bg-purple-500/20 border border-purple-500/30 text-purple-300 hover:bg-purple-500/30"
+                          : "bg-[#A24BFF] hover:bg-[#8D34F0] text-white"
+                      )}
                     >
-                      {isConnected ? (
+                      {connecting ? (
+                        "..."
+                      ) : connState.status === "CONNECTED" ? (
                         <>
                           <Check size={14} /> Connected
+                        </>
+                      ) : connState.status === "REQUESTED" ? (
+                        <>
+                          <Clock size={14} /> Requested
+                        </>
+                      ) : connState.status === "RESPOND" ? (
+                        <>
+                          <CheckCircle2 size={14} /> Respond
                         </>
                       ) : (
                         <>
@@ -251,7 +297,14 @@ function UserProfileContent({ params }: PublicUserPageProps) {
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={handleStartMessage}
-                      className="flex-1 py-2.5 rounded-full bg-[#1C1C1E] hover:bg-[#2A2A2D] text-white text-xs font-semibold border border-[#2A2A2D] flex items-center justify-center gap-1.5 transition-colors"
+                      disabled={connState.status !== "CONNECTED"}
+                      title={connState.status !== "CONNECTED" ? "Connect with this member first to message" : "Message"}
+                      className={cn(
+                        "flex-1 py-2.5 rounded-full text-xs font-semibold border flex items-center justify-center gap-1.5 transition-colors",
+                        connState.status === "CONNECTED"
+                          ? "bg-[#1C1C1E] hover:bg-[#2A2A2D] text-white border-[#2A2A2D] cursor-pointer"
+                          : "bg-[#141416] text-[#555] border-[#1C1C1E] cursor-not-allowed opacity-50"
+                      )}
                     >
                       <MessageSquare size={14} /> Message
                     </motion.button>

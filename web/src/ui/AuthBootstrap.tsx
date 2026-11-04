@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * AuthBootstrap — mounted once in the root layout.
+ * AuthBootstrap - mounted once in the root layout.
  *
  * Responsibilities:
  *  1. On first mount, call supabase.auth.getSession() to restore any
@@ -16,13 +16,42 @@
  *  3. When a SIGNED_OUT event is received, clear the Zustand store so every
  *     guarded route redirects immediately.
  *
- * This component renders nothing — it only manages side-effects.
+ * This component renders nothing - it only manages side-effects.
  */
 
 import { useEffect, useRef } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import { setAccessToken } from "@/lib/api/client";
 import { useAuthStore, type AccountType } from "@/lib/store/authStore";
+
+async function buildAuthPayload(session: Session) {
+  const authUser = session.user;
+
+  const { data: dbUser } = await supabase
+    .from("users")
+    .select("id, user_handle, email, type")
+    .eq("id", authUser.id)
+    .maybeSingle();
+
+  const resolvedType = (dbUser?.type ||
+    authUser.user_metadata?.type ||
+    "STARTUP_FOUNDER") as AccountType;
+
+  const resolvedHandle =
+    dbUser?.user_handle ||
+    authUser.user_metadata?.user_handle ||
+    authUser.email?.split("@")[0] ||
+    "founder";
+
+  return {
+    accessToken: session.access_token,
+    userHandle: resolvedHandle,
+    type: resolvedType,
+    userId: authUser.id,
+    email: dbUser?.email || authUser.email || "",
+  };
+}
 
 export function AuthBootstrap() {
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -36,35 +65,7 @@ export function AuthBootstrap() {
     // 1. Restore existing session on cold start
     supabase.auth.getSession().then(async ({ data, error }) => {
       if (error || !data.session) return;
-
-      const session = data.session;
-      const authUser = session.user;
-
-      const { data: dbUser } = await supabase
-        .from("users")
-        .select("id, user_handle, email, type")
-        .eq("id", authUser.id)
-        .maybeSingle();
-
-      const resolvedType = (
-        dbUser?.type ||
-        authUser.user_metadata?.type ||
-        "STARTUP_FOUNDER"
-      ) as AccountType;
-
-      const resolvedHandle =
-        dbUser?.user_handle ||
-        authUser.user_metadata?.user_handle ||
-        authUser.email?.split("@")[0] ||
-        "founder";
-
-      setAuth({
-        accessToken: session.access_token,
-        userHandle: resolvedHandle,
-        type: resolvedType,
-        userId: authUser.id,
-        email: dbUser?.email || authUser.email || "",
-      });
+      setAuth(await buildAuthPayload(data.session));
     });
 
     // 2. Keep in-memory token current on silent refreshes
@@ -76,34 +77,7 @@ export function AuthBootstrap() {
         setUser(null);
         return;
       }
-
-      const authUser = session.user;
-
-      const { data: dbUser } = await supabase
-        .from("users")
-        .select("id, user_handle, email, type")
-        .eq("id", authUser.id)
-        .maybeSingle();
-
-      const resolvedType = (
-        dbUser?.type ||
-        authUser.user_metadata?.type ||
-        "STARTUP_FOUNDER"
-      ) as AccountType;
-
-      const resolvedHandle =
-        dbUser?.user_handle ||
-        authUser.user_metadata?.user_handle ||
-        authUser.email?.split("@")[0] ||
-        "founder";
-
-      setAuth({
-        accessToken: session.access_token,
-        userHandle: resolvedHandle,
-        type: resolvedType,
-        userId: authUser.id,
-        email: dbUser?.email || authUser.email || "",
-      });
+      setAuth(await buildAuthPayload(session));
     });
 
     return () => {

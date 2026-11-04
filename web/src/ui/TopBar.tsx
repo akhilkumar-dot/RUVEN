@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Bell } from "lucide-react";
 import { BridgeLogo } from "./BridgeLogo";
 import { NavDrawer } from "./NavDrawer";
+import { NotificationBell } from "./NotificationBell";
 
 interface TopBarProps {
   onMenuOpen?: () => void;
@@ -24,8 +24,6 @@ interface TopBarProps {
 export function TopBar({
   onMenuOpen,
   onSearchOpen,
-  onNotificationsOpen,
-  unreadCount = 0,
   className,
 }: TopBarProps) {
   const [internalDrawerOpen, setInternalDrawerOpen] = useState(false);
@@ -79,23 +77,8 @@ export function TopBar({
               </svg>
             </motion.button>
 
-            {/* Notifications bell */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={onNotificationsOpen}
-              aria-label="Notifications"
-              className="relative w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-            >
-              <Bell size={18} />
-              {unreadCount > 0 && (
-                <span
-                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-[11px] font-bold text-white flex items-center justify-center border-2 border-black"
-                  style={{ background: "linear-gradient(135deg, #A24BFF, #FF3D81)" }}
-                >
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </motion.button>
+            {/* Notifications bell — real, with Accept/Decline dropdown */}
+            <NotificationBell />
           </div>
         </div>
       </header>
