@@ -7,6 +7,12 @@ import { useAuthStore, type AccountType } from "@/lib/store/authStore";
 import { setAccessToken } from "@/lib/api/client";
 import { BridgeLogo } from "@/ui/BridgeLogo";
 
+function generateHandle(source: string) {
+  const base =
+    source.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18) || "user";
+  return `${base}${Math.floor(Math.random() * 900 + 100)}`;
+}
+
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,20 +41,48 @@ function AuthCallbackContent() {
         const token = session.access_token;
         setAccessToken(token);
 
-        // Fetch or create user record in public.users to get their class
-        const { data: dbUser } = await supabase
+        const meta = authUser.user_metadata ?? {};
+        const fullName = (meta.full_name || meta.name || "") as string;
+        const avatarUrl = (meta.avatar_url || meta.picture || "") as string;
+        const provider = (authUser.app_metadata?.provider || "email") as string;
+
+        // Fetch or create the user record in public.users to get their class
+        let { data: dbUser } = await supabase
           .from("users")
           .select("id, user_handle, email, type, name")
           .eq("id", authUser.id)
           .maybeSingle();
 
+        if (!dbUser) {
+          const handle = generateHandle(
+            fullName || authUser.email?.split("@")[0] || "user"
+          );
+          const { data: created } = await supabase
+            .from("users")
+            .upsert({
+              id: authUser.id,
+              user_handle: handle,
+              email: authUser.email,
+              name: fullName || authUser.email?.split("@")[0],
+              avatar_url: avatarUrl || null,
+              role: "USER",
+              type: "STARTUP_FOUNDER",
+              status: "ACTIVE",
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .select("id, user_handle, email, type, name")
+            .maybeSingle();
+          dbUser = created ?? dbUser;
+        }
+
         const resolvedType = (dbUser?.type ||
-          authUser.user_metadata?.type ||
+          meta.type ||
           "STARTUP_FOUNDER") as AccountType;
 
         const resolvedHandle =
           dbUser?.user_handle ||
-          authUser.user_metadata?.user_handle ||
+          meta.user_handle ||
           authUser.email?.split("@")[0] ||
           "founder";
 
@@ -59,9 +93,26 @@ function AuthCallbackContent() {
           type: resolvedType,
         });
 
-        setStatus("Authentication successful! Redirecting to onboarding…");
+        // Google users sign in without any profile details, so prompt them to
+        // complete their profile — unless they have already filled it out.
+        let needsProfile = false;
+        if (provider === "google") {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("headline, bio")
+            .eq("user_id", authUser.id)
+            .maybeSingle();
+          needsProfile = !(profile?.headline && profile?.bio);
+        }
+
+        const target = needsProfile ? "/onboarding" : "/home";
+        setStatus(
+          needsProfile
+            ? "Almost there! Let's set up your profile…"
+            : "Authentication successful! Redirecting…"
+        );
         setTimeout(() => {
-          router.replace("/onboarding");
+          router.replace(target);
         }, 500);
       } catch (err: unknown) {
         const error = err as Error;

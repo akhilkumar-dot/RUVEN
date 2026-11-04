@@ -178,20 +178,20 @@ export default function FoundersHubPage() {
                     key={founder.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-[#0D0D10] border border-[#1E1E22] rounded-2xl p-4.5 space-y-3 hover:border-[#2C2C32] transition-colors flex flex-col justify-between"
+                    className="bg-[#0D0D10] border border-[#1E1E22] rounded-2xl p-4.5 space-y-3 hover:border-[#2C2C32] transition-colors flex flex-col justify-between min-w-0"
                   >
                     {/* Top: Avatar, Name, Handle, Headline */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <Avatar name={founder.name} size="md" />
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <Link href={`/u/${founder.user_handle}`} className="text-white font-semibold text-[15px] truncate hover:underline">
+                    <div className="flex items-start justify-between gap-3 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <Avatar name={founder.name} size="md" className="shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <Link href={`/u/${founder.user_handle}`} className="text-white font-semibold text-[15px] truncate hover:underline flex-1">
                               {founder.name}
                             </Link>
                             <ShieldCheck size={14} className="text-[#A24BFF] shrink-0" />
                           </div>
-                          <p className="text-[#8E8E93] text-[12px] truncate">
+                          <p className="text-[#8E8E93] text-[12px] truncate mt-0.5">
                             @{founder.user_handle} · <span className="text-[#D4FF3A] font-medium">{founder.type.replace(/_/g, " ")}</span>
                           </p>
                         </div>

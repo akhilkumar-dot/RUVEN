@@ -128,12 +128,12 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
   // 1. INDIVIDUAL: Freelancer, student, or professional
   INDIVIDUAL: {
     label: "Individual",
-    badgeLabel: "Individual · Talent & Freelance",
+    badgeLabel: "Individual",
     badgeColorClass: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
     borderClass: "border-emerald-500/20",
     accentColor: "#10B981",
     icon: <User size={16} />,
-    roleDescription: "Freelancer, student, or professional looking to connect & work with startups",
+    roleDescription: "Talent & Freelance",
     greetingTitle: "Welcome back, Talent & Freelance 👋",
     greetingSubtitle: "Explore startup project gigs, 1:1 mentorship & hackathon challenges.",
     stats: [],
@@ -151,12 +151,12 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
   // 2. STARTUP_FOUNDER: Building own startup, looking for co-founders/investors
   STARTUP_FOUNDER: {
     label: "Startup Founder",
-    badgeLabel: "Startup Founder · Early Stage",
+    badgeLabel: "Founder",
     badgeColorClass: "bg-[#A24BFF]/10 text-[#A24BFF] border-[#A24BFF]/30",
     borderClass: "border-[#A24BFF]/20",
     accentColor: "#A24BFF",
     icon: <TrendingUp size={16} />,
-    roleDescription: "Building your own startup and looking for co-founders or investors",
+    roleDescription: "Early Stage Startup",
     greetingTitle: "Founder Command Center 🚀",
     greetingSubtitle: "Cap table momentum, co-founder match pipeline & investor intros.",
     stats: [],
@@ -174,12 +174,12 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
   // 3. COMPANY_OWNER: Running established company, hiring or partnering
   COMPANY_OWNER: {
     label: "Company Owner",
-    badgeLabel: "Company Owner · Enterprise & SME",
+    badgeLabel: "Company Owner",
     badgeColorClass: "bg-blue-500/10 text-blue-400 border-blue-500/30",
     borderClass: "border-blue-500/20",
     accentColor: "#3B82F6",
     icon: <Building2 size={16} />,
-    roleDescription: "Running an established company, hiring or partnering",
+    roleDescription: "Enterprise & SME",
     greetingTitle: "Enterprise & Business Hub 🏢",
     greetingSubtitle: "Corporate vendor proposals, B2B deal flow & executive recruitment.",
     stats: [],
@@ -197,12 +197,12 @@ const ROLE_CONFIGS: Record<AccountType, RoleDashboardConfig> = {
   // 4. INVESTOR: Angel, VC, or family office looking for deal flow
   INVESTOR: {
     label: "Investor",
-    badgeLabel: "Investor · Angel & VC Terminal",
+    badgeLabel: "Investor",
     badgeColorClass: "bg-amber-500/10 text-amber-400 border-amber-500/30",
     borderClass: "border-amber-500/20",
     accentColor: "#F59E0B",
     icon: <Briefcase size={16} />,
-    roleDescription: "Angel, VC, or family office looking for deal flow",
+    roleDescription: "Angel & VC Terminal",
     greetingTitle: "Investor Deal Flow Terminal 💼",
     greetingSubtitle: "Curated Indian startup pipeline, due diligence rooms & syndicate deals.",
     stats: [],
@@ -378,29 +378,33 @@ export default function HomeClient() {
                 style={{ background: config.accentColor }}
               />
 
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <Avatar name={user?.userHandle ? `@${user.userHandle}` : "Founder"} size="md" />
-                  <div className="min-w-0">
-                    <p className="text-white font-semibold text-[15px] truncate">
+              <div className="flex items-center justify-between gap-3 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <Avatar 
+                    name={user?.userHandle ? `@${user.userHandle}` : "Founder"} 
+                    size="md" 
+                    className="shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-white font-bold text-[14px] truncate leading-tight">
                       {user?.userHandle ? `@${user.userHandle}` : "Welcome back"}
                     </p>
-                    <p className="text-[#8E8E93] text-[12px] truncate mt-0.5">
+                    <p className="text-[#8E8E93] text-[11px] truncate mt-0.5 leading-tight">
                       {config.roleDescription}
                     </p>
                   </div>
                 </div>
 
                 {/* Single Account Class Badge */}
-                <span
+                <div
                   className={cn(
-                    "text-[11px] font-semibold px-2.5 py-1 rounded-full border flex items-center gap-1.5 shrink-0 shadow-sm",
+                    "text-[10px] font-bold px-2 py-1 rounded-full border flex items-center gap-1 shrink-0 shadow-sm bg-black/20",
                     config.badgeColorClass
                   )}
                 >
-                  {config.icon}
-                  <span>{config.badgeLabel}</span>
-                </span>
+                  <span className="shrink-0">{config.icon}</span>
+                  <span className="truncate max-w-[70px] xs:max-w-none">{config.badgeLabel}</span>
+                </div>
               </div>
             </div>
 

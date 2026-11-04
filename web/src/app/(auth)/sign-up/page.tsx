@@ -594,13 +594,6 @@ function SignUpPageContent() {
                     >
                       Enter Platform <ChevronRight size={18} />
                     </GradientRingButton>
-
-                    <button
-                      onClick={() => router.replace("/onboarding")}
-                      className="text-[#A1A1A6] text-[14px] hover:text-white transition-colors underline"
-                    >
-                      Complete Onboarding Profile
-                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>

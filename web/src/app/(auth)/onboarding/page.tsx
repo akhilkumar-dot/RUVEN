@@ -20,7 +20,7 @@ import { PillInput } from "@/ui/PillInput";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { Avatar } from "@/ui/Avatar";
 import { useAuthStore, type AccountType } from "@/lib/store/authStore";
-import { supabase } from "@/lib/supabase/client";
+import { dataService } from "@/lib/api/dataService";
 import { cn } from "@/lib/utils";
 
 const ACCOUNT_CLASSES = [
@@ -140,19 +140,16 @@ function OnboardingContent() {
   async function handleComplete() {
     setSaving(true);
     try {
-      switchAccountType(selectedClass);
+      await switchAccountType(selectedClass);
 
-      // Persist chosen class to Supabase if session exists
+      // Persist the collected profile so it shows up on the profile page
       if (user?.id) {
-        await supabase
-          .from("users")
-          .update({
-            type: selectedClass,
-            headline: headline.trim(),
-            location: location,
-            bio: bio.trim(),
-          })
-          .eq("id", user.id);
+        await dataService.updateProfileData(user.id, {
+          headline: headline.trim(),
+          bio: bio.trim(),
+          location,
+          skills: selectedSkills.join(", "),
+        });
       }
     } catch {
       // Ignore background persistence errors

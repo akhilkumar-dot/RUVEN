@@ -78,9 +78,9 @@ function PersonCard({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-3 bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 hover:border-[#2A2A2D] transition-colors"
+      className="flex items-center gap-3 bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 hover:border-[#2A2A2D] transition-colors min-w-0"
     >
-      <Avatar name={person.name} size="md" />
+      <Avatar name={person.name} size="md" className="shrink-0" />
       <div className="flex-1 min-w-0">
         <Link href={`/u/${person.user_handle}`} className="text-white font-semibold text-[15px] leading-tight hover:underline truncate block">
           @{person.user_handle}
@@ -97,7 +97,7 @@ function PersonCard({
         disabled={loading}
         onClick={handleClick}
         className={cn(
-          "px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors border shrink-0",
+          "px-3 py-1.5 rounded-full text-[11px] font-bold transition-colors border shrink-0 max-w-[90px] truncate",
           isConnected
             ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
             : isRequested

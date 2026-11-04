@@ -61,9 +61,9 @@ function VerifyEmailContent() {
         <GradientRingButton
           size="lg"
           className="w-full mb-3"
-          onClick={() => router.push("/onboarding")}
+          onClick={() => router.push("/home")}
         >
-          Continue to Onboarding <ArrowRight size={18} />
+          Continue to Feed <ArrowRight size={18} />
         </GradientRingButton>
 
         {user?.email && (
