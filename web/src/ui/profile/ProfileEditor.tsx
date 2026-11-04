@@ -2,10 +2,11 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Plus, X, Check, Edit3, ExternalLink, MapPin, Briefcase, GraduationCap, ChevronLeft } from "lucide-react";
+import { Camera, Plus, X, Check, Edit3, ExternalLink, MapPin, Briefcase, GraduationCap, ChevronLeft, LogOut } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { BridgeLogo } from "@/ui/BridgeLogo";
+import { useAuthStore } from "@/lib/store/authStore";
 import { useRouter } from "next/navigation";
 import { cn, truncate } from "@/lib/utils";
 
@@ -99,7 +100,18 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [newSkill, setNewSkill] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
   const skillRef = useRef<HTMLInputElement>(null);
+  const logout = useAuthStore((s) => s.logout);
+
+  async function handleLogout() {
+    setLoggingOut(true);
+    try {
+      await logout();
+    } finally {
+      router.replace("/sign-in");
+    }
+  }
 
   const set = (key: keyof ProfileData, value: string) =>
     setData(d => ({ ...d, [key]: value }));
@@ -308,6 +320,18 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
           <GradientRingButton size="lg" className="w-full">
             Connect
           </GradientRingButton>
+        )}
+
+        {/* ── Logout ── */}
+        {isOwner && (
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="w-full flex items-center justify-center gap-2 h-[52px] rounded-2xl border border-[#2A2A2D] text-red-400 text-[15px] font-medium hover:bg-red-500/10 hover:border-red-500/40 transition-colors disabled:opacity-60"
+          >
+            <LogOut size={17} /> {loggingOut ? "Signing out…" : "Log Out"}
+          </motion.button>
         )}
       </div>
     </div>
