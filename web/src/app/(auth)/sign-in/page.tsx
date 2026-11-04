@@ -1,13 +1,24 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { BridgeLogo } from "@/ui/BridgeLogo";
-
 import { supabaseAuth } from "@/lib/api/supabaseAuth";
+import { supabase } from "@/lib/supabase/client";
 
 export default function SignInPage() {
   const router = useRouter();
+
+  // If the user somehow lands on /sign-in while already authenticated,
+  // send them home immediately.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        router.replace("/home");
+      }
+    });
+  }, [router]);
 
   async function handleGoogleSignIn() {
     try {
@@ -70,7 +81,7 @@ export default function SignInPage() {
           <div className="flex-1 h-px bg-[#2A2A2D]" />
         </div>
 
-        {/* Email sign-up fallback — goes to sign-up wizard */}
+        {/* Email sign-up fallback */}
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => router.push("/sign-up")}
@@ -85,7 +96,6 @@ export default function SignInPage() {
         >
           Already have an account?{" "}
           <span className="text-[#A24BFF] font-medium">Sign in with email</span>
-          {/* apostrophe escaped via JSX expression above */}
         </button>
 
         {/* Terms */}
