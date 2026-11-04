@@ -28,11 +28,18 @@ import { useAuthStore, type AccountType } from "@/lib/store/authStore";
 async function buildAuthPayload(session: Session) {
   const authUser = session.user;
 
-  const { data: dbUser } = await supabase
-    .from("users")
-    .select("id, user_handle, email, type")
-    .eq("id", authUser.id)
-    .maybeSingle();
+  const [{ data: dbUser }, { data: profile }] = await Promise.all([
+    supabase
+      .from("users")
+      .select("id, user_handle, email, type, avatar_url")
+      .eq("id", authUser.id)
+      .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("photo_url")
+      .eq("user_id", authUser.id)
+      .maybeSingle(),
+  ]);
 
   const resolvedType = (dbUser?.type ||
     authUser.user_metadata?.type ||
@@ -50,6 +57,8 @@ async function buildAuthPayload(session: Session) {
     type: resolvedType,
     userId: authUser.id,
     email: dbUser?.email || authUser.email || "",
+    avatarUrl: dbUser?.avatar_url || profile?.photo_url || undefined,
+    name: dbUser?.name || undefined,
   };
 }
 

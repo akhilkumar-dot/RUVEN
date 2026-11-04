@@ -43,7 +43,15 @@ interface AuthState {
   /** Update the signed-in user's avatar so nav/home reflect a photo change instantly */
   setAvatarUrl: (url: string) => void;
   /** Called by OAuth callback page to hydrate session from redirect params */
-  setAuth: (opts: { accessToken: string; userHandle: string; type?: AccountType; userId?: string; email?: string; avatarUrl?: string }) => void;
+  setAuth: (opts: { 
+    accessToken: string; 
+    userHandle: string; 
+    type?: AccountType; 
+    userId?: string; 
+    email?: string; 
+    avatarUrl?: string;
+    name?: string;
+  }) => void;
 }
 
 // ── Store with sessionStorage persistence ───────────────────────
@@ -80,7 +88,7 @@ export const useAuthStore = create<AuthState>()(
         set({ user: { ...currentUser, type } });
       },
 
-      setAuth: ({ accessToken, userHandle, type = "STARTUP_FOUNDER", userId, email, avatarUrl }) => {
+      setAuth: ({ accessToken, userHandle, type = "STARTUP_FOUNDER", userId, email, avatarUrl, name }) => {
         setAccessToken(accessToken);
         set({
           accessToken,
@@ -91,6 +99,7 @@ export const useAuthStore = create<AuthState>()(
             email: email || `${userHandle}@ruven.app`,
             type,
             avatarUrl,
+            name,
           },
         });
       },
