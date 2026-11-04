@@ -371,26 +371,26 @@ function IdeasPageContent() {
     <div className="min-h-dvh bg-black flex flex-col">
       <TopBar unreadCount={0} />
 
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 max-w-6xl mx-auto w-full">
+      <div className="px-4 pt-4 w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Flame size={20} className="text-[#FF8A3D]" />
-            <h1 className="text-white font-bold text-[20px]">Ideas & Co-founder Asks</h1>
+            <h1 className="text-white font-bold text-[20px]">Ideas & Asks</h1>
           </div>
           <GradientRingButton size="sm" onClick={() => setShowForm((v) => !v)}>
-            <Plus size={14} /> Share Idea
+            <Plus size={14} /> Share
           </GradientRingButton>
         </div>
 
         {/* Sort tabs */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
           {SORT_TABS.map((t) => (
             <button
               key={t}
               onClick={() => setSort(t)}
               className={cn(
-                "px-4 py-2 rounded-full text-[13px] font-medium transition-colors",
+                "px-4 py-2 rounded-full text-[13px] font-medium transition-colors whitespace-nowrap",
                 sort === t
                   ? "bg-[#A24BFF] text-white"
                   : "bg-[#1C1C1E] text-[#6E6E73] border border-[#2A2A2D] hover:text-white"
@@ -402,8 +402,8 @@ function IdeasPageContent() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24">
-        <div className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-4">
+      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))]">
+        <div className="px-4 w-full space-y-4">
           <AnimatePresence>
             {showForm && (
               <PostIdeaForm
@@ -416,7 +416,7 @@ function IdeasPageContent() {
 
           {/* Skeletons while loading */}
           {loading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <div key={n} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 animate-pulse">
                   <div className="flex items-center gap-2">
@@ -432,30 +432,30 @@ function IdeasPageContent() {
 
           {/* Empty State */}
           {!loading && filteredIdeas.length === 0 && (
-            <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+            <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 mx-auto my-8">
               <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#FF8A3D]">
                 <Lightbulb size={20} />
               </div>
               <h3 className="text-white font-bold text-[16px]">
-                {sort === "My Ideas" ? "You haven't posted any ideas yet" : "No startup ideas posted yet"}
+                {sort === "My Ideas" ? "No ideas yet" : "No startup ideas yet"}
               </h3>
               <p className="text-[#8E8E93] text-[13px]">
                 {sort === "My Ideas"
-                  ? "Share what problem you are solving to find potential co-founders or early contributors."
-                  : "Be the first to share a breakthrough concept, MVP, or co-founder requirement."}
+                  ? "Share what problem you are solving."
+                  : "Be the first to share a breakthrough concept."}
               </p>
               <button
                 onClick={() => setShowForm(true)}
                 className="px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
               >
-                Share First Idea
+                Share Idea
               </button>
             </div>
           )}
 
           {/* Ideas List */}
           {!loading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
               {filteredIdeas.map((idea) => (
                 <IdeaCard
                   key={idea.id}

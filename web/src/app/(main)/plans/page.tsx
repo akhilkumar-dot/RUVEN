@@ -84,15 +84,15 @@ export default function PlansPage() {
         </div>
       </div>
 
-      <div className="px-4 py-8 pb-16 max-w-4xl mx-auto">
+      <div className="px-4 py-8 pb-16 w-full">
         <div className="text-center mb-10">
-          <h1 className="text-white font-bold text-3xl tracking-tight">Simple Pricing</h1>
+          <h1 className="text-white font-bold text-3xl tracking-tight">Pricing</h1>
           <p className="text-[#8E8E93] text-sm mt-2">
-            Transparent pricing for the Indian startup ecosystem.
+            Simple plans for the ecosystem.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch mb-12">
+        <div className="flex flex-col gap-6 mb-12">
           {PLANS.map((plan) => {
             const isPro = plan.key === "pro";
             return (
@@ -128,7 +128,7 @@ export default function PlansPage() {
                     ) : (
                       <div className="flex items-baseline gap-1">
                         <p className="text-white font-bold text-3xl">₹199</p>
-                        <p className="text-[#8E8E93] text-sm">/mo · GST incl.</p>
+                        <p className="text-[#8E8E93] text-sm">/mo</p>
                       </div>
                     )}
                   </div>
@@ -147,7 +147,7 @@ export default function PlansPage() {
                 {/* CTA */}
                 {plan.key === "free" ? (
                   <div className="w-full py-3 rounded-full border border-[#2A2A2D] text-[#6E6E73] text-sm text-center font-medium">
-                    Current Active Plan
+                    Current Plan
                   </div>
                 ) : (
                   <a
@@ -155,7 +155,7 @@ export default function PlansPage() {
                     className="block w-full"
                   >
                     <GradientRingButton size="md" className="w-full flex items-center justify-center gap-2">
-                      <Mail size={15} /> Inquire for Pro Upgrade
+                      <Mail size={15} /> Inquire for Pro
                     </GradientRingButton>
                   </a>
                 )}
@@ -166,15 +166,15 @@ export default function PlansPage() {
 
         {/* FAQ */}
         <div className="space-y-4">
-          <h2 className="text-white font-bold text-xl text-center md:text-left">
-            Frequently Asked Questions
+          <h2 className="text-white font-bold text-xl text-center">
+            FAQ
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-4">
             {[
-              ["Can I cancel anytime?", "Yes — subscriptions can be cancelled before your next monthly cycle with no penalties."],
-              ["Is there a free trial?", "The Free plan has all core networking, ideas, meetups, and directory features permanently enabled."],
-              ["What payment methods are supported?", "UPI (Google Pay, PhonePe, Paytm), debit/credit cards, and net banking via Razorpay."],
-              ["Is GST included?", "Yes — the displayed fee is inclusive of 18% GST."],
+              ["Can I cancel anytime?", "Yes — subscriptions can be cancelled before your next monthly cycle."],
+              ["Is there a free trial?", "The Free plan has all core networking features enabled."],
+              ["What payments?", "UPI, debit/credit cards, and net banking."],
+              ["Is GST included?", "Yes — fee is inclusive of 18% GST."],
             ].map(([q, a]) => (
               <div key={q} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4">
                 <p className="text-white font-semibold text-sm mb-1">{q}</p>

@@ -84,7 +84,7 @@ export function BottomDock({
     <nav
       aria-label="Main navigation"
       className={cn(
-        "fixed bottom-0 inset-x-0 z-50 pointer-events-none pb-[env(safe-area-inset-bottom)]",
+        "fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 pointer-events-none pb-[env(safe-area-inset-bottom)]",
         className
       )}
     >
@@ -94,7 +94,7 @@ export function BottomDock({
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-lg sm:max-w-2xl md:max-w-3xl px-4 pb-8 md:pb-8">
+      <div className="relative mx-auto w-full px-4 pb-8">
         <div
           className={cn(
             "flex items-center justify-between gap-2 p-2",
@@ -104,7 +104,7 @@ export function BottomDock({
           )}
         >
           {/* Main Tabs */}
-          <div className="flex-1 flex items-center justify-around gap-1 px-1 sm:px-2">
+          <div className="flex-1 flex items-center justify-around gap-1 px-1">
             {visibleTabs.map((tab) => {
               const navTab = NAV_TABS.find(t => t.key === tab.key);
               const Icon = navTab?.icon || Home;
@@ -115,7 +115,7 @@ export function BottomDock({
                   key={tab.key}
                   onClick={() => handleTabChange(tab.key)}
                   className={cn(
-                    "relative flex items-center justify-center gap-2 w-11 sm:w-auto sm:px-3.5 lg:px-4 h-11 rounded-2xl transition-all duration-300",
+                    "relative flex items-center justify-center gap-2 px-3 lg:px-4 h-11 rounded-2xl transition-all duration-300",
                     isActive ? "text-white" : "text-[#8E8E93] hover:text-[#A1A1A6] hover:bg-white/5"
                   )}
                 >
@@ -139,11 +139,6 @@ export function BottomDock({
                       className="absolute -bottom-1 w-1 h-1 bg-gradient-to-r from-[#A24BFF] to-[#FF3D81] rounded-full"
                     />
                   )}
-
-                  {/* Label — hidden on small screens, shown once there is room */}
-                  <span className="hidden sm:inline text-[13px] font-medium whitespace-nowrap">
-                    {tab.label}
-                  </span>
                 </button>
               );
             })}

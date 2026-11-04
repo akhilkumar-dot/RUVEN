@@ -76,6 +76,16 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100dvh;
+    /* Prevent text selection to feel more like a native app, 
+       but allow it in inputs and textareas */
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  input, textarea, [contenteditable="true"] {
+    user-select: text;
+    -webkit-user-select: text;
   }
 
   /* Focus rings — visible on keyboard only */
@@ -139,6 +149,19 @@
   /* Safe area padding */
   .safe-top    { padding-top: env(safe-area-inset-top, 0px); }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+  /* Mobile POV Container */
+  .mobile-pov-container {
+    @apply w-full max-w-[430px] mx-auto min-h-dvh bg-black relative;
+    box-shadow: 0 0 100px rgba(0, 0, 0, 0.5);
+  }
+
+  .desktop-bg {
+    @apply hidden lg:block fixed inset-0 bg-[#0A0A0B] -z-20;
+    background-image: 
+      radial-gradient(circle at 2px 2px, rgba(255,255,255,0.02) 1px, transparent 0);
+    background-size: 32px 32px;
+  }
 
   /* Typography helpers */
   .text-display { font-size: clamp(40px, 10vw, 48px); font-weight: 500; line-height: 1.05; letter-spacing: -0.02em; }

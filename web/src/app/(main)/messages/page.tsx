@@ -265,7 +265,7 @@ function ChatThread({
       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#1C1C1E] bg-[#0A0A0C]">
         <button
           onClick={onBack}
-          className="text-[#A1A1A6] hover:text-white transition-colors md:hidden"
+          className="text-[#A1A1A6] hover:text-white transition-colors"
           aria-label="Back to conversations"
         >
           <ChevronLeft size={20} />
@@ -284,7 +284,7 @@ function ChatThread({
             className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#1C1C1E] text-xs text-[#A1A1A6] hover:text-white hover:bg-[#2A2A2D] transition-colors"
           >
             <User size={13} />
-            <span className="hidden sm:inline">Profile</span>
+            <span>Profile</span>
           </Link>
         )}
       </div>
@@ -300,7 +300,7 @@ function ChatThread({
             </div>
             <p className="text-white font-medium text-sm mb-1">Say hello!</p>
             <p className="text-xs text-[#8E8E93] max-w-xs">
-              This is the beginning of your conversation with {counterpartName}.
+              Beginning of your conversation.
             </p>
           </div>
         ) : (
@@ -324,7 +324,7 @@ function ChatThread({
                   )}
                   <div
                     className={cn(
-                      "max-w-[78%] rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed shadow-sm",
+                      "max-w-[85%] rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed shadow-sm",
                       isMe
                         ? "bg-[#A24BFF] text-white rounded-br-sm"
                         : "bg-[#1C1C1E] text-white rounded-bl-sm border border-[#26262A]"
@@ -413,9 +413,6 @@ function MessagesPageContent() {
         const rooms = await dataService.fetchUserRooms(user.id);
         if (isMounted) {
           setConvos(rooms);
-          if (!roomParam && rooms.length > 0 && typeof window !== "undefined" && window.innerWidth >= 768) {
-            setSelectedId(rooms[0].id);
-          }
         }
       } catch (err) {
         console.error("Failed to load user rooms:", err);
@@ -434,20 +431,20 @@ function MessagesPageContent() {
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
-      <TopBar unreadCount={0} className={selectedId ? "hidden md:flex" : "flex"} />
+      {!selectedId && <TopBar unreadCount={0} />}
 
       <main
-        className="flex-1 flex overflow-hidden w-full max-w-7xl mx-auto md:px-4 md:py-3"
+        className="flex-1 flex overflow-hidden w-full"
         style={{
           height: "calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 64px)",
         }}
       >
-        <div className="flex-1 flex overflow-hidden md:border md:border-[#1C1C1E] md:rounded-2xl bg-[#09090B]">
+        <div className="flex-1 flex overflow-hidden bg-[#09090B]">
           {/* Conversation list pane */}
           <div
             className={cn(
-              "flex flex-col border-r border-[#1C1C1E] w-full md:w-[320px] lg:w-[360px] shrink-0 bg-black md:bg-[#0D0D0F]",
-              selectedId ? "hidden md:flex" : "flex"
+              "flex flex-col w-full shrink-0 bg-black",
+              selectedId ? "hidden" : "flex"
             )}
           >
             <div className="px-4 pt-4 pb-2">
@@ -461,8 +458,8 @@ function MessagesPageContent() {
             />
           </div>
 
-          {/* Active Chat or Desktop Placeholder */}
-          {selectedId && activeConvo ? (
+          {/* Active Chat */}
+          {selectedId && activeConvo && (
             <div className="flex flex-col flex-1 min-w-0 bg-black">
               <ChatThread
                 convo={activeConvo}
@@ -470,31 +467,16 @@ function MessagesPageContent() {
                 onMessageSent={fetchRooms}
               />
             </div>
-          ) : (
-            <div className="hidden md:flex flex-1 flex-col items-center justify-center text-center p-8 text-[#6E6E73] bg-black/40">
-              <div className="w-16 h-16 rounded-full bg-[#1A1A1E] border border-[#2A2A2D] flex items-center justify-center text-[#A1A1A6] mb-4">
-                <MessageSquare size={28} className="text-[#A24BFF]" />
-              </div>
-              <h3 className="text-white font-semibold text-lg mb-1">Your Messages</h3>
-              <p className="text-sm max-w-xs text-[#8E8E93] mb-4">
-                Select a conversation from the left to start collaborating with founders, investors, and talent.
-              </p>
-              <Link
-                href="/hub"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#1C1C1E] hover:bg-[#2A2A2D] text-white text-xs font-semibold border border-[#2A2A2D] transition-colors"
-              >
-                Find Collaborators in Hub <ArrowRight size={13} />
-              </Link>
-            </div>
           )}
         </div>
       </main>
 
-      <BottomDock
-        className={selectedId ? "hidden md:flex" : "flex"}
-        activeTab="messages"
-        userName={user?.userHandle || "user"}
-      />
+      {!selectedId && (
+        <BottomDock
+          activeTab="messages"
+          userName={user?.userHandle || "user"}
+        />
+      )}
     </div>
   );
 }

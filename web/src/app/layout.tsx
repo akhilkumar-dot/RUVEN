@@ -53,9 +53,12 @@ export default function RootLayout({
   return (
     <html lang="en-IN" className={jakarta.variable} data-scroll-behavior="smooth">
       <body className="antialiased bg-[#000] text-white">
-        <AuthBootstrap />
-        <NotificationProvider />
-        {children}
+        <div className="desktop-bg" aria-hidden="true" />
+        <div className="mobile-pov-container">
+          <AuthBootstrap />
+          <NotificationProvider />
+          {children}
+        </div>
       </body>
     </html>
   );

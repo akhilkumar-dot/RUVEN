@@ -153,33 +153,52 @@ function UserProfileContent({ params }: PublicUserPageProps) {
       : [];
 
   return (
-    <div className="min-h-dvh bg-black text-white flex flex-col">
-      <TopBar unreadCount={0} />
-
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 pb-24">
-        {/* Navigation Bar */}
-        <div className="flex items-center justify-between mb-6">
-          <Link
-            href="/discover"
-            className="flex items-center gap-2 text-[#8E8E93] hover:text-white transition-colors text-sm"
+    <div className="min-h-dvh bg-black text-white flex flex-col pb-24">
+      {/* ── Sticky Header ── */}
+      <div
+        className="sticky top-0 z-[var(--z-topbar)] flex items-center justify-between px-4 py-3 bg-black/80 backdrop-blur-xl border-b border-[#1C1C1E]"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
+      >
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.back()}
+            className="w-10 h-10 rounded-full bg-[#1C1C1E] flex items-center justify-center text-[#8E8E93] hover:text-white transition-colors"
+            aria-label="Go back"
           >
-            <ArrowLeft size={16} /> Back
-          </Link>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleShare}
-              className="w-9 h-9 rounded-full bg-[#1C1C1E] hover:bg-[#2A2A2D] flex items-center justify-center text-[#A1A1A6] hover:text-white transition-colors relative"
-              aria-label="Share profile"
-            >
-              {copied ? <Check size={15} className="text-emerald-400" /> : <Share2 size={15} />}
-            </button>
-            {copied && (
-              <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                Copied!
-              </span>
-            )}
+            <ArrowLeft size={20} />
+          </button>
+          <div className="w-8 h-8 rounded-xl bg-black border border-[#2A2A2E] flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+            <BridgeLogo size={28} />
           </div>
         </div>
+
+        <h1 className="text-white font-semibold text-[16px] absolute left-1/2 -translate-x-1/2 max-w-[40%] truncate">
+          Member Profile
+        </h1>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleShare}
+            className="w-10 h-10 rounded-full bg-[#1C1C1E] hover:bg-[#2A2A2D] flex items-center justify-center text-[#A1A1A6] hover:text-white transition-colors relative"
+            aria-label="Share profile"
+          >
+            {copied ? <Check size={16} className="text-emerald-400" /> : <Share2 size={16} />}
+          </button>
+        </div>
+      </div>
+
+      <main className="flex-1 w-full mx-auto px-4 py-4">
+        {copied && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 text-center"
+          >
+            <span className="text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
+              Link copied to clipboard
+            </span>
+          </motion.div>
+        )}
 
         {loading ? (
           <div className="space-y-4 animate-pulse">
@@ -229,15 +248,19 @@ function UserProfileContent({ params }: PublicUserPageProps) {
               </div>
 
               <div className="mt-4">
-                <h1 className="text-2xl font-bold text-white">{data.user.name}</h1>
-                <p className="text-[#A24BFF] font-semibold text-sm">@{data.user.user_handle}</p>
+                <h1 className="text-[22px] font-bold text-white leading-tight">
+                  {data.user.name}
+                </h1>
+                <p className="text-[#A24BFF] font-semibold text-[15px] break-all mt-0.5">
+                  @{data.user.user_handle}
+                </p>
                 {data.profile?.headline && (
-                  <p className="text-[#D4FF3A] text-sm font-medium mt-1">
+                  <p className="text-[#D4FF3A] text-[14px] font-medium mt-2 leading-snug">
                     {data.profile.headline}
                   </p>
                 )}
                 {data.profile?.bio && (
-                  <p className="text-[#B3B3BA] text-sm leading-relaxed mt-3">
+                  <p className="text-[#B3B3BA] text-[14px] leading-relaxed mt-3">
                     {data.profile.bio}
                   </p>
                 )}
@@ -250,63 +273,70 @@ function UserProfileContent({ params }: PublicUserPageProps) {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-2.5 mt-6">
+              <div className="flex gap-3 mt-6">
                 {isSelf ? (
                   <Link href="/profile" className="w-full">
-                    <GradientRingButton size="md" className="w-full flex items-center justify-center">
+                    <GradientRingButton
+                      size="lg"
+                      className="w-full flex items-center justify-center font-bold text-[15px]"
+                    >
                       Edit My Profile
                     </GradientRingButton>
                   </Link>
                 ) : (
                   <>
                     <motion.button
-                      whileTap={{ scale: 0.98 }}
+                      whileTap={{ scale: 0.96 }}
                       onClick={handleConnect}
                       disabled={connecting}
                       className={cn(
-                        "flex-1 py-2.5 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors",
+                        "flex-1 h-12 rounded-2xl text-[14px] font-bold flex items-center justify-center gap-2 transition-all",
                         connState.status === "CONNECTED"
-                          ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
+                          ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
                           : connState.status === "REQUESTED"
-                          ? "bg-amber-500/15 border border-amber-500/30 text-amber-400 hover:bg-amber-500/25"
+                          ? "bg-amber-500/10 border border-amber-500/20 text-amber-400"
                           : connState.status === "RESPOND"
-                          ? "bg-purple-500/20 border border-purple-500/30 text-purple-300 hover:bg-purple-500/30"
-                          : "bg-[#A24BFF] hover:bg-[#8D34F0] text-white"
+                          ? "bg-[#A24BFF]/20 border border-[#A24BFF]/40 text-[#A24BFF]"
+                          : "bg-[#A24BFF] text-white shadow-lg shadow-[#A24BFF]/20"
                       )}
                     >
                       {connecting ? (
-                        "..."
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       ) : connState.status === "CONNECTED" ? (
                         <>
-                          <Check size={14} /> Connected
+                          <Check size={18} /> Connected
                         </>
                       ) : connState.status === "REQUESTED" ? (
                         <>
-                          <Clock size={14} /> Requested
+                          <Clock size={18} /> Requested
                         </>
                       ) : connState.status === "RESPOND" ? (
                         <>
-                          <CheckCircle2 size={14} /> Respond
+                          <CheckCircle2 size={18} /> Respond
                         </>
                       ) : (
                         <>
-                          <UserPlus size={14} /> Connect
+                          <UserPlus size={18} /> Connect
                         </>
                       )}
                     </motion.button>
                     <motion.button
-                      whileTap={{ scale: 0.98 }}
+                      whileTap={{ scale: 0.96 }}
                       onClick={handleStartMessage}
                       disabled={connState.status !== "CONNECTED"}
-                      title={connState.status !== "CONNECTED" ? "Connect with this member first to message" : "Message"}
+                      title={
+                        connState.status !== "CONNECTED"
+                          ? "Connect with this member first to message"
+                          : "Message"
+                      }
                       className={cn(
-                        "flex-1 py-2.5 rounded-full text-xs font-semibold border flex items-center justify-center gap-1.5 transition-colors",
+                        "flex-1 h-12 rounded-2xl text-[14px] font-bold border flex items-center justify-center gap-2 transition-all",
                         connState.status === "CONNECTED"
-                          ? "bg-[#1C1C1E] hover:bg-[#2A2A2D] text-white border-[#2A2A2D] cursor-pointer"
-                          : "bg-[#141416] text-[#555] border-[#1C1C1E] cursor-not-allowed opacity-50"
+                          ? "bg-[#1C1C1E] text-white border-[#2A2A2D] hover:bg-[#2A2A2D]"
+                          : "bg-[#141416] text-[#444] border-[#1C1C1E] opacity-50 cursor-not-allowed"
                       )}
                     >
-                      <MessageSquare size={14} /> Message
+                      <MessageSquare size={18} /> Message
                     </motion.button>
                   </>
                 )}

@@ -82,8 +82,8 @@ export default function FoundersHubPage() {
     <div className="min-h-dvh bg-black flex flex-col">
       <TopBar unreadCount={0} />
 
-      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24">
-        <div className="px-4 sm:px-6 lg:px-8 pt-4 max-w-6xl mx-auto w-full">
+      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))]">
+        <div className="px-4 pt-4 w-full">
           {/* Header Title & Hub Status */}
           <div className="mb-4">
             <div className="flex items-center justify-between">
@@ -97,12 +97,12 @@ export default function FoundersHubPage() {
               </div>
 
               <span className="text-[11px] px-2.5 py-1 rounded-full bg-[#1A1A1E] text-[#8E8E93] border border-[#222]">
-                Verified Directory
+                Verified
               </span>
             </div>
 
             <p className="text-[#8E8E93] text-[13px] mt-1 leading-relaxed">
-              Connect with fellow Indian startup founders and company operators building across India.
+              Connect with fellow founders and operators.
             </p>
           </div>
 
@@ -112,7 +112,7 @@ export default function FoundersHubPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by founder, company, sector, city…"
+              placeholder="Search founders, company, city…"
               className="w-full bg-[#121214] text-white rounded-2xl pl-10 pr-4 py-2.5 text-[14px] border border-[#222226] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF] transition-colors"
             />
           </div>
@@ -137,7 +137,7 @@ export default function FoundersHubPage() {
 
           {/* Skeletons while loading */}
           {loading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <div key={n} className="bg-[#0D0D10] border border-[#1E1E22] rounded-2xl p-4.5 space-y-3 animate-pulse">
                   <div className="flex items-center gap-3">
@@ -155,20 +155,20 @@ export default function FoundersHubPage() {
 
           {/* Empty State */}
           {!loading && filteredFounders.length === 0 && (
-            <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+            <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 mx-auto my-8">
               <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#A24BFF]">
                 <Sparkles size={20} />
               </div>
               <h3 className="text-white font-bold text-[16px]">No founders found</h3>
               <p className="text-[#8E8E93] text-[13px]">
-                {search ? `No founders match "${search}". Try adjusting your keywords.` : "No other founders registered yet. Invite fellow founders to connect."}
+                {search ? `No founders match "${search}".` : "No other founders registered yet."}
               </p>
             </div>
           )}
 
           {/* Founders Card List */}
           {!loading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
               {filteredFounders.map((founder) => {
                 const isConnected = founder.connectionStatus === "ACCEPTED";
                 const isPending = founder.connectionStatus === "PENDING";
@@ -178,7 +178,7 @@ export default function FoundersHubPage() {
                     key={founder.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-[#0D0D10] border border-[#1E1E22] rounded-2xl p-4.5 space-y-3 hover:border-[#2C2C32] transition-colors h-full flex flex-col justify-between"
+                    className="bg-[#0D0D10] border border-[#1E1E22] rounded-2xl p-4.5 space-y-3 hover:border-[#2C2C32] transition-colors flex flex-col justify-between"
                   >
                     {/* Top: Avatar, Name, Handle, Headline */}
                     <div className="flex items-start justify-between gap-3">

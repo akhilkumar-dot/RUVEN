@@ -322,7 +322,7 @@ export default function WorkspacePage() {
       <div className="min-h-dvh bg-black flex flex-col">
         <TopBar unreadCount={0} />
 
-        <div className="px-4 sm:px-6 lg:px-8 pt-4 max-w-6xl mx-auto w-full">
+        <div className="px-4 pt-4 w-full">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-white font-bold text-[20px] flex items-center gap-2">
               <FileText size={20} className="text-[#A24BFF]" />
@@ -362,20 +362,30 @@ export default function WorkspacePage() {
           </div>
         </div>
 
-        <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24">
-          <div className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
+        <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))]">
+          <div className="px-4 w-full">
             {loading ? (
-              <DocGridSkeleton />
+              <div className="flex flex-col gap-3">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 animate-pulse flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#1C1C1E] shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-5 bg-[#1C1C1E] rounded w-3/4" />
+                      <div className="h-3 bg-[#18181A] rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : docs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center bg-[#0C0C0C]/50 border border-[#1C1C1E] rounded-3xl p-8">
+              <div className="flex flex-col items-center justify-center py-12 text-center bg-[#0C0C0C]/50 border border-[#1C1C1E] rounded-3xl p-6">
                 <div className="w-14 h-14 rounded-2xl bg-[#18181A] border border-[#2A2A2D] flex items-center justify-center text-[#A1A1A6] mb-4">
                   <FileText size={26} className="text-[#A24BFF]" />
                 </div>
-                <h3 className="text-white font-semibold text-lg mb-1">Your Workspace is empty</h3>
-                <p className="text-sm text-[#8E8E93] max-w-md mb-6 leading-relaxed">
-                  Write meeting memos, architecture designs, or company wikis. Your docs stay private to you.
+                <h3 className="text-white font-semibold text-lg mb-1">Workspace empty</h3>
+                <p className="text-sm text-[#8E8E93] mb-6 leading-relaxed">
+                  Write meeting memos or product specs.
                 </p>
-                <div className="flex flex-wrap gap-2 justify-center">
+                <div className="flex flex-col gap-2 w-full">
                   <button
                     onClick={() =>
                       setOpenDoc({
@@ -385,9 +395,9 @@ export default function WorkspacePage() {
                         visibility: "private",
                       })
                     }
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1C1C1E] hover:bg-[#2A2A2D] text-white text-xs font-semibold border border-[#2A2A2D] transition-colors"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#1C1C1E] hover:bg-[#2A2A2D] text-white text-xs font-semibold border border-[#2A2A2D] transition-colors w-full"
                   >
-                    <Sparkles size={13} className="text-[#A24BFF]" /> Use Roadmap Template
+                    <Sparkles size={13} className="text-[#A24BFF]" /> Roadmap Template
                   </button>
                   <button
                     onClick={() =>
@@ -398,7 +408,7 @@ export default function WorkspacePage() {
                         visibility: "private",
                       })
                     }
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#A24BFF] hover:bg-[#8D34F0] text-white text-xs font-semibold transition-colors"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#A24BFF] hover:bg-[#8D34F0] text-white text-xs font-semibold transition-colors w-full"
                   >
                     <Plus size={13} /> Blank Document
                   </button>
@@ -407,10 +417,10 @@ export default function WorkspacePage() {
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center gap-3 py-16 text-center">
                 <FileText size={32} className="text-[#2A2A2D]" />
-                <p className="text-[#6E6E73] text-[15px]">No documents match &ldquo;{filter}&rdquo;</p>
+                <p className="text-[#6E6E73] text-[15px]">No match for &ldquo;{filter}&rdquo;</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="flex flex-col gap-3">
                 {filtered.map((doc) => (
                   <DocCard key={doc.id} doc={doc} onClick={() => setOpenDoc(doc)} />
                 ))}

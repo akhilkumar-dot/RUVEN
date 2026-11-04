@@ -375,20 +375,20 @@ export default function DiscoverPage() {
       <TopBar unreadCount={0} />
 
       {/* Search bar */}
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-2 max-w-6xl mx-auto w-full">
+      <div className="px-4 pt-4 pb-2 w-full">
         <div className="relative">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6E6E73]" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search verified founders, companies, investors, or jobs…"
+            placeholder="Search founders, companies, investors…"
             className="w-full bg-[#1C1C1E] text-white rounded-full pl-10 pr-4 py-3 text-[14px] border border-[#2A2A2D] placeholder:text-[#6E6E73] outline-none focus:border-[#A24BFF] transition-colors"
           />
         </div>
       </div>
 
       {/* Discover sub-tabs */}
-      <div className="flex overflow-x-auto scrollbar-hide gap-2 px-4 sm:px-6 lg:px-8 pb-3 max-w-6xl mx-auto w-full">
+      <div className="flex overflow-x-auto scrollbar-hide gap-2 px-4 pb-3 w-full">
         <div className="flex gap-2 pr-10">
           {DISCOVER_TABS.map((t) => (
             <button
@@ -409,11 +409,11 @@ export default function DiscoverPage() {
       </div>
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto pb-32 md:pb-24">
-        <div className="px-4 sm:px-6 lg:px-8 py-2 max-w-6xl mx-auto w-full">
+      <main className="flex-1 overflow-y-auto pb-32">
+        <div className="px-4 py-2 w-full">
           {/* Skeletons while loading */}
           {loading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <div key={n} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 animate-pulse">
                   <div className="flex items-center gap-3">
@@ -432,17 +432,17 @@ export default function DiscoverPage() {
           {/* People list */}
           {!loading && activeTab === "people" && (
             people.length === 0 ? (
-              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 mx-auto my-8">
                 <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#A24BFF]">
                   <Users size={20} />
                 </div>
                 <h3 className="text-white font-bold text-[16px]">No people found</h3>
                 <p className="text-[#8E8E93] text-[13px]">
-                  {query ? `No verified members match "${query}". Try searching by skill or title.` : "No other verified founders or members found yet."}
+                  {query ? `No verified members match "${query}".` : "No other verified founders found yet."}
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-4">
                 {people.map((p) => (
                   <PersonCard
                     key={p.id}
@@ -460,23 +460,17 @@ export default function DiscoverPage() {
           {/* Companies list */}
           {!loading && activeTab === "companies" && (
             companies.length === 0 ? (
-              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 mx-auto my-8">
                 <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#3B82F6]">
                   <Building2 size={20} />
                 </div>
-                <h3 className="text-white font-bold text-[16px]">No verified companies listed</h3>
+                <h3 className="text-white font-bold text-[16px]">No companies listed</h3>
                 <p className="text-[#8E8E93] text-[13px]">
-                  {query ? `No published companies match "${query}".` : "No startup companies published yet. Register your company profile to be featured."}
+                  {query ? `No companies match "${query}".` : "No startup companies published yet."}
                 </p>
-                <Link
-                  href="/company"
-                  className="inline-block px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
-                >
-                  Create Company Profile
-                </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-4">
                 {companies.map((c) => (
                   <CompanyCard key={c.id} co={c} />
                 ))}
@@ -487,17 +481,17 @@ export default function DiscoverPage() {
           {/* Investors list */}
           {!loading && activeTab === "investors" && (
             investors.length === 0 ? (
-              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 mx-auto my-8">
                 <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-amber-400">
                   <TrendingUp size={20} />
                 </div>
                 <h3 className="text-white font-bold text-[16px]">No investors found</h3>
                 <p className="text-[#8E8E93] text-[13px]">
-                  {query ? `No investors match "${query}".` : "No registered investors in this directory yet."}
+                  {query ? `No investors match "${query}".` : "No registered investors yet."}
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-4">
                 {investors.map((inv) => (
                   <InvestorCard
                     key={inv.user_id}
@@ -515,23 +509,17 @@ export default function DiscoverPage() {
           {/* Jobs list */}
           {!loading && activeTab === "jobs" && (
             jobs.length === 0 ? (
-              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 mx-auto my-8">
                 <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-emerald-400">
                   <Briefcase size={20} />
                 </div>
                 <h3 className="text-white font-bold text-[16px]">No active job openings</h3>
                 <p className="text-[#8E8E93] text-[13px]">
-                  {query ? `No positions match "${query}".` : "No startups have posted open roles yet. Check back soon or post a job opening."}
+                  {query ? `No positions match "${query}".` : "No startups have posted open roles yet."}
                 </p>
-                <Link
-                  href="/company"
-                  className="inline-block px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
-                >
-                  Post Job Opening
-                </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-4">
                 {jobs.map((j) => (
                   <JobCard
                     key={j.id}

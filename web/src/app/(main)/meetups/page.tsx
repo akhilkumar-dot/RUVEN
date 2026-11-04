@@ -446,27 +446,27 @@ function MeetupsPageContent() {
     <div className="min-h-dvh bg-black flex flex-col">
       <TopBar unreadCount={0} />
 
-      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-24">
-        <div className="px-4 sm:px-6 lg:px-8 pt-4 max-w-6xl mx-auto w-full">
+      <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))]">
+        <div className="px-4 pt-4 w-full">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div>
               <span className="text-[12px] font-bold uppercase tracking-wider text-[#A24BFF] flex items-center gap-1.5">
-                <Coffee size={13} /> Community Gatherings
+                <Coffee size={13} /> Gatherings
               </span>
-              <h1 className="text-white font-bold text-[24px] tracking-tight mt-0.5">
-                City Meetups & Mixers
+              <h1 className="text-white font-bold text-[22px] tracking-tight mt-0.5">
+                Meetups
               </h1>
             </div>
             <GradientRingButton size="sm" onClick={() => setShowHostModal(true)}>
-              <Plus size={14} /> Host Meetup
+              <Plus size={14} /> Host
             </GradientRingButton>
           </div>
 
           {/* Sub-Tabs: Upcoming, My RSVPs, Organising */}
-          <div className="flex gap-2 mb-4 border-b border-[#1C1C1E] pb-3">
+          <div className="flex gap-2 mb-4 border-b border-[#1C1C1E] pb-3 overflow-x-auto scrollbar-hide">
             {[
-              { key: "upcoming", label: "Upcoming Events" },
+              { key: "upcoming", label: "Upcoming" },
               { key: "my_rsvps", label: "My RSVPs" },
               { key: "organising", label: "Hosting" },
             ].map((t) => (
@@ -474,7 +474,7 @@ function MeetupsPageContent() {
                 key={t.key}
                 onClick={() => setView(t.key as typeof view)}
                 className={cn(
-                  "px-4 py-2 rounded-full text-[13px] font-medium transition-colors",
+                  "px-4 py-2 rounded-full text-[13px] font-medium transition-colors whitespace-nowrap",
                   view === t.key
                     ? "bg-[#A24BFF] text-white"
                     : "bg-[#141416] text-[#8E8E93] hover:text-white border border-[#222]"
@@ -487,7 +487,7 @@ function MeetupsPageContent() {
 
           {/* Skeletons while loading */}
           {loading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-4">
               {[1, 2, 3].map((n) => (
                 <div key={n} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 animate-pulse">
                   <div className="h-4 w-28 bg-[#1C1C1E] rounded" />
@@ -501,23 +501,23 @@ function MeetupsPageContent() {
           {/* Upcoming Events View */}
           {!loading && view === "upcoming" && (
             meetups.length === 0 ? (
-              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 mx-auto my-8">
                 <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#A24BFF]">
                   <Coffee size={20} />
                 </div>
-                <h3 className="text-white font-bold text-[16px]">No upcoming meetups scheduled</h3>
+                <h3 className="text-white font-bold text-[16px]">No meetups yet</h3>
                 <p className="text-[#8E8E93] text-[13px]">
-                  Host an informal breakfast mixer, demo evening, or virtual pitch session in your city.
+                  Host an informal breakfast or virtual pitch session.
                 </p>
                 <button
                   onClick={() => setShowHostModal(true)}
                   className="px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
                 >
-                  Host First Meetup
+                  Host Meetup
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-4">
                 {meetups.map((m) => (
                   <MeetupCard
                     key={m.id}
@@ -534,23 +534,23 @@ function MeetupsPageContent() {
           {/* My RSVPs View */}
           {!loading && view === "my_rsvps" && (
             myRsvps.length === 0 ? (
-              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 mx-auto my-8">
                 <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-[#38bdf8]">
                   <Calendar size={20} />
                 </div>
                 <h3 className="text-white font-bold text-[16px]">No RSVPs yet</h3>
                 <p className="text-[#8E8E93] text-[13px]">
-                  You have not registered for any upcoming mixers. Explore the events schedule to connect with peers.
+                  You have not registered for any upcoming mixers.
                 </p>
                 <button
                   onClick={() => setView("upcoming")}
                   className="px-4 py-2 bg-[#A24BFF] text-white text-[13px] font-semibold rounded-xl hover:bg-[#8e3eee] transition-colors"
                 >
-                  Explore Upcoming Events
+                  Explore Events
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-4">
                 {myRsvps.map((m) => (
                   <MeetupCard
                     key={m.id}
@@ -567,13 +567,13 @@ function MeetupsPageContent() {
           {/* Hosting View */}
           {!loading && view === "organising" && (
             myOrganising.length === 0 ? (
-              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 max-w-md mx-auto my-8">
+              <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3 mx-auto my-8">
                 <div className="w-12 h-12 rounded-full bg-[#1C1C1E] flex items-center justify-center mx-auto text-amber-400">
                   <Users size={20} />
                 </div>
-                <h3 className="text-white font-bold text-[16px]">You are not hosting any meetups</h3>
+                <h3 className="text-white font-bold text-[16px]">Not hosting</h3>
                 <p className="text-[#8E8E93] text-[13px]">
-                  Host an informal breakfast meetup, co-working session, or virtual pitch session for your city.
+                  Host a session for your city.
                 </p>
                 <button
                   onClick={() => setShowHostModal(true)}
@@ -583,7 +583,7 @@ function MeetupsPageContent() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-4">
                 {myOrganising.map((m) => (
                   <MeetupCard
                     key={m.id}
