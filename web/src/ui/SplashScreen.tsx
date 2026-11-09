@@ -43,20 +43,8 @@ export function SplashScreen({ onFinish, persistent = false }: SplashScreenProps
           exit={{ opacity: 0, scale: 0.98 }}
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* Subtle line-art background texture */}
-          <div className="absolute inset-0 texture-overlay opacity-30 pointer-events-none" />
-
-          {/* Atmospheric ambient glow */}
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(circle at 50% 42%, rgba(162, 75, 255, 0.16) 0%, rgba(255, 61, 129, 0.06) 35%, transparent 70%)",
-            }}
-          />
-
           <div className="relative z-10 flex flex-col items-center">
-            {/* Signature Badge with glowing gradient ring */}
+            {/* Logo badge — clean on pure black */}
             <motion.div
               initial={{ scale: 0.65, opacity: 0, y: 12 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -67,27 +55,8 @@ export function SplashScreen({ onFinish, persistent = false }: SplashScreenProps
               }}
               className="relative mb-7"
             >
-              {/* Outer pulsing glow */}
-              <div
-                className="absolute -inset-3 rounded-full blur-2xl opacity-40 animate-pulse pointer-events-none"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #A24BFF 0%, #FF3D81 50%, #FF8A3D 100%)",
-                }}
-              />
-
-              {/* Gradient border ring */}
-              <div
-                className="relative p-[2.5px] rounded-full shadow-[0_0_40px_rgba(162,75,255,0.35)]"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #A24BFF 0%, #FF3D81 50%, #FF8A3D 100%)",
-                }}
-              >
-                {/* Ruven logo badge */}
-                <div className="w-24 h-24 rounded-3xl bg-black border border-[#2A2A2E] flex items-center justify-center shadow-2xl overflow-hidden">
-                  <BridgeLogo size={88} />
-                </div>
+              <div className="w-24 h-24 rounded-3xl bg-black flex items-center justify-center overflow-hidden">
+                <BridgeLogo size={88} />
               </div>
             </motion.div>
 
