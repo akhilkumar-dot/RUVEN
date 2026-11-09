@@ -13,18 +13,18 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Ruven — Connect · Collaborate · Launch",
-    template: "%s | Ruven",
+    default: "COLLAB — Connect · Collaborate · Launch",
+    template: "%s | COLLAB",
   },
   description:
-    "Ruven is the networking and collaboration platform for the Indian startup ecosystem. Connect with founders, investors, and talent.",
-  keywords: ["startup", "founder", "india", "investor", "networking", "collaboration", "ruven"],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://ruven.in"),
+    "COLLAB is the networking and collaboration platform for the Indian startup ecosystem. Connect with founders, investors, and talent.",
+  keywords: ["startup", "founder", "india", "investor", "networking", "collaboration", "collab"],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://collabapp.in"),
   openGraph: {
     type: "website",
     locale: "en_IN",
-    siteName: "Ruven",
-    title: "Ruven — Connect · Collaborate · Launch",
+    siteName: "COLLAB",
+    title: "COLLAB — Connect · Collaborate · Launch",
     description: "The networking & collaboration platform for the Indian startup ecosystem.",
   },
   twitter: {
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Ruven",
+    title: "COLLAB",
   },
 };
 
@@ -52,6 +52,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-IN" className={jakarta.variable} data-scroll-behavior="smooth">
+      <head>
+        {/* Apply saved theme before first paint to avoid flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('collab_theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="antialiased bg-[#000] text-white">
         <div className="desktop-bg" aria-hidden="true" />
         <div className="mobile-pov-container">

@@ -10,17 +10,16 @@ interface BridgeLogoProps {
 }
 
 /**
- * Ruven App Logo
+ * COLLAB App Logo — chain-links icon
  */
 export function BridgeLogo({
   size = 32,
   className,
 }: BridgeLogoProps) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
-      src="/ruven-logo.png"
-      alt="Ruven"
+      src="/collab-logo.svg"
+      alt="COLLAB"
       width={size}
       height={size}
       className={cn("rounded-xl object-contain shrink-0 select-none", className)}

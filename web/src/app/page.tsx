@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,7 +19,7 @@ function RootPageContent() {
     // getSession() reads from the persisted cookie/localStorage — no network call needed.
     const { data } = await supabase.auth.getSession();
     if (data.session) {
-      router.replace("/home");
+      router.replace("/onboarding");
     } else {
       router.replace("/sign-in");
     }

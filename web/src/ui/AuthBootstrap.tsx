@@ -25,7 +25,14 @@ import { supabase } from "@/lib/supabase/client";
 import { setAccessToken } from "@/lib/api/client";
 import { useAuthStore, type AccountType } from "@/lib/store/authStore";
 
-async function buildAuthPayload(session: Session) {
+/**
+ * Shared session -> store payload builder.
+ *
+ * Exported so every session-hydration path (this bootstrap and the (main)
+ * auth guard) writes the exact same fields. Diverging here previously caused
+ * the avatar/name to be wiped by whichever path ran last.
+ */
+export async function buildAuthPayload(session: Session) {
   const authUser = session.user;
 
   const [{ data: dbUser }, { data: profile }] = await Promise.all([

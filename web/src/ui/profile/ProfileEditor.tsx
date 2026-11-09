@@ -2,7 +2,8 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Plus, X, Check, Edit3, ExternalLink, MapPin, Briefcase, GraduationCap, ChevronLeft, LogOut } from "lucide-react";
+import { Camera, Plus, X, Check, Edit3, ExternalLink, MapPin, Briefcase, GraduationCap, ChevronLeft, LogOut, Eye, Building2, Palette } from "lucide-react";
+import Link from "next/link";
 import { Avatar } from "@/ui/Avatar";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { BridgeLogo } from "@/ui/BridgeLogo";
@@ -105,6 +106,29 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
   const skillRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
   const logout = useAuthStore((s) => s.logout);
+
+  const THEMES = [
+    { id: "oled-midnight", label: "OLED Midnight", color: "#A24BFF" },
+    { id: "cyber-blue",    label: "Cyber Blue",    color: "#00B4FF" },
+    { id: "sunset-aurora", label: "Sunset Aurora", color: "#FF3D81" },
+    { id: "emerald-tech",  label: "Emerald Tech",  color: "#00C47A" },
+    { id: "clean-light",   label: "Clean Light",   color: "#F5F5F7" },
+  ];
+
+  const [activeTheme, setActiveTheme] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("collab_theme") || "oled-midnight";
+    }
+    return "oled-midnight";
+  });
+  const [showThemePicker, setShowThemePicker] = useState(false);
+
+  function applyTheme(themeId: string) {
+    setActiveTheme(themeId);
+    document.documentElement.setAttribute("data-theme", themeId);
+    localStorage.setItem("collab_theme", themeId);
+    setShowThemePicker(false);
+  }
 
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -238,6 +262,24 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
                   {uploadingPhoto ? "Uploading…" : data.photoUrl ? "Change photo" : "Add photo"}
                 </button>
               )}
+              {/* View Public Profile link */}
+              {!editing && (
+                <Link
+                  href={`/u/${data.userHandle}`}
+                  className="inline-flex items-center gap-1.5 text-[#A24BFF] text-[12px] font-semibold mt-2 hover:underline"
+                >
+                  <Eye size={12} /> View Public Profile ↗
+                </Link>
+              )}
+              {/* Company Website link for COMPANY_OWNER */}
+              {!editing && data.type === "COMPANY_OWNER" && (
+                <Link
+                  href="/company"
+                  className="inline-flex items-center gap-1.5 text-emerald-400 text-[12px] font-semibold mt-1 hover:underline"
+                >
+                  <Building2 size={12} /> 🏢 View Company Website
+                </Link>
+              )}
               {editing ? (
                 <EditableText
                   value={data.headline}
@@ -355,6 +397,42 @@ export function ProfileEditor({ initialData, isOwner = false, onSave }: ProfileE
           <GradientRingButton size="lg" className="w-full">
             Connect
           </GradientRingButton>
+        )}
+
+        {/* ── Theme Switcher ── */}
+        {isOwner && (
+          <div className="bg-[#121212] rounded-2xl p-5 border border-[#1C1C1E]">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-[#A1A1A6] text-[13px] font-semibold">
+                <Palette size={13} /> Theme
+              </div>
+              <span className="text-[#A24BFF] text-[12px] font-medium">
+                {THEMES.find(t => t.id === activeTheme)?.label || "OLED Midnight"}
+              </span>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {THEMES.map((theme) => (
+                <button
+                  key={theme.id}
+                  onClick={() => applyTheme(theme.id)}
+                  title={theme.label}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all border",
+                    activeTheme === theme.id
+                      ? "border-white/40 text-white scale-105 shadow-lg"
+                      : "border-[#2A2A2D] text-[#8E8E93] hover:text-white hover:border-white/20"
+                  )}
+                  style={activeTheme === theme.id ? { backgroundColor: theme.color + "30", borderColor: theme.color + "80" } : {}}
+                >
+                  <span
+                    className="w-3 h-3 rounded-full border border-white/20 shrink-0"
+                    style={{ backgroundColor: theme.color }}
+                  />
+                  {theme.label}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* ── Logout ── */}

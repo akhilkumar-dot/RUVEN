@@ -28,6 +28,9 @@ export default function FoundersHubPage() {
   const [selectedIndustry, setSelectedIndustry] = useState("All");
   const [founders, setFounders] = useState<DiscoverPerson[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState<"founders" | "updates">("founders");
+  const [founderPosts, setFounderPosts] = useState<{id: string; authorName: string; authorHandle: string; body: string; likeCount: number; createdAt: string}[]>([]);
+  const [feedLoading, setFeedLoading] = useState(false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -49,7 +52,39 @@ export default function FoundersHubPage() {
     };
   }, [user?.id, search]);
 
+  useEffect(() => {
+    if (activeSection !== "updates") return;
+    let isCancelled = false;
+    async function loadFounderFeed() {
+      setFeedLoading(true);
+      try {
+        const { dataService } = await import("@/lib/api/dataService");
+        const posts = await dataService.fetchFeedPosts(user?.id);
+        if (!isCancelled) {
+          // Only show posts from STARTUP_FOUNDERs
+          const founderOnly = posts.filter(p => p.author.type === "STARTUP_FOUNDER");
+          setFounderPosts(founderOnly.map(p => ({
+            id: p.id,
+            authorName: p.author.name || p.author.user_handle || "Founder",
+            authorHandle: p.author.user_handle,
+            body: p.body,
+            likeCount: p.like_count,
+            createdAt: p.created_at,
+          })));
+        }
+      } catch (err) {
+        console.error("Failed to load founder feed:", err);
+      } finally {
+        if (!isCancelled) setFeedLoading(false);
+      }
+    }
+    loadFounderFeed();
+    return () => { isCancelled = true; };
+  }, [activeSection, user?.id]);
+
   const filteredFounders = founders.filter((f) => {
+    // Founders Hub only allows Startup Founders
+    if (f.type !== "STARTUP_FOUNDER") return false;
     if (selectedIndustry === "All") return true;
     const text = `${f.headline || ""} ${f.skills || ""}`.toLowerCase();
     return text.includes(selectedIndustry.toLowerCase());
@@ -80,32 +115,56 @@ export default function FoundersHubPage() {
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
-      <TopBar unreadCount={0} />
+      <TopBar />
 
       <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))]">
-        <div className="px-4 pt-4 w-full">
-          {/* Header Title & Hub Status */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[12px] font-bold uppercase tracking-wider text-[#A24BFF] flex items-center gap-1.5">
-                  <Sparkles size={13} /> Founders Directory
-                </span>
-                <h1 className="text-white font-bold text-[24px] tracking-tight mt-0.5">
-                  Founders Hub
-                </h1>
-              </div>
-
-              <span className="text-[11px] px-2.5 py-1 rounded-full bg-[#1A1A1E] text-[#8E8E93] border border-[#222]">
-                Verified
+        {/* Sticky Page Header */}
+        <div 
+          className="sticky top-0 z-20 px-4 py-3 bg-black/80 backdrop-blur-xl border-b border-[#1C1C1E]/50"
+          style={{ paddingTop: "12px" }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[12px] font-bold uppercase tracking-wider text-[#A24BFF] flex items-center gap-1.5">
+                <Sparkles size={13} /> Founders Directory
               </span>
+              <h1 className="text-white font-bold text-[20px] tracking-tight mt-0.5">
+                Founders Hub
+              </h1>
             </div>
+            <span className="text-[11px] px-2.5 py-1 rounded-full bg-[#1A1A1E] text-[#8E8E93] border border-[#222]">
+              Verified
+            </span>
+          </div>
+        </div>
 
-            <p className="text-[#8E8E93] text-[13px] mt-1 leading-relaxed">
-              Connect with fellow founders and operators.
-            </p>
+        <div className="px-4 pt-2 w-full">
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setActiveSection("founders")}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-[13px] font-medium transition-colors",
+                activeSection === "founders"
+                  ? "bg-[#A24BFF] text-white"
+                  : "bg-[#141416] text-[#8E8E93] border border-[#222226] hover:text-white"
+              )}
+            >
+              Founders
+            </button>
+            <button
+              onClick={() => setActiveSection("updates")}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-[13px] font-medium transition-colors",
+                activeSection === "updates"
+                  ? "bg-[#A24BFF] text-white"
+                  : "bg-[#141416] text-[#8E8E93] border border-[#222226] hover:text-white"
+              )}
+            >
+              Founder Convos
+            </button>
           </div>
 
+          {activeSection === "founders" && (<>
           {/* Search Bar */}
           <div className="relative mb-3">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6E6E73]" />
@@ -201,7 +260,7 @@ export default function FoundersHubPage() {
                     {/* Headline / Skills / Location */}
                     <div className="space-y-1.5">
                       <p className="text-[#B3B3BA] text-[13px] leading-relaxed line-clamp-2">
-                        {founder.headline || "Verified founder on the Ruven ecosystem."}
+                        {founder.headline || "Verified founder on the COLLAB ecosystem."}
                       </p>
                       {founder.location && (
                         <p className="text-[#8E8E93] text-[11px] flex items-center gap-1">
@@ -228,16 +287,63 @@ export default function FoundersHubPage() {
                         {isConnected ? "Connected" : isPending ? "Pending" : "Connect"}
                       </button>
                       <Link
-                        href={`/messages`}
+                        href={`/messages?user=${founder.id}`}
                         className="px-4 py-2 rounded-xl bg-[#16161A] border border-[#26262C] text-[#A1A1A6] hover:text-white hover:border-[#3A3A42] text-[13px] font-medium transition-colors flex items-center gap-1.5"
+                        onClick={async (e) => {
+                          if (!user?.id) return;
+                          e.preventDefault();
+                          try {
+                            const { dataService } = await import("@/lib/api/dataService");
+                            const roomId = await dataService.getOrCreateDirectRoom(user.id, founder.id);
+                            window.location.href = `/messages?room=${roomId}`;
+                          } catch {
+                            window.location.href = `/messages`;
+                          }
+                        }}
                       >
                         <MessageSquare size={14} />
-                        Message
+                        Chat
                       </Link>
                     </div>
                   </motion.div>
                 );
               })}
+            </div>
+          )}
+          </>)}
+
+          {/* Founder Convos & Updates */}
+          {activeSection === "updates" && (
+            <div className="space-y-3">
+              {feedLoading && [1,2,3].map(n => (
+                <div key={n} className="bg-[#0D0D10] border border-[#1E1E22] rounded-2xl p-4 space-y-3 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#1C1C1E]" />
+                    <div className="space-y-1.5 flex-1">
+                      <div className="w-28 h-3.5 bg-[#1C1C1E] rounded" />
+                      <div className="w-20 h-2.5 bg-[#1C1C1E] rounded" />
+                    </div>
+                  </div>
+                  <div className="h-10 w-full bg-[#1C1C1E] rounded" />
+                </div>
+              ))}
+              {!feedLoading && founderPosts.length === 0 && (
+                <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-8 text-center space-y-3">
+                  <p className="text-[#8E8E93] text-[14px]">No founder updates yet.</p>
+                </div>
+              )}
+              {!feedLoading && founderPosts.map(post => (
+                <div key={post.id} className="bg-[#0D0D10] border border-[#1E1E22] rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Avatar name={post.authorName} size="sm" className="shrink-0" />
+                    <div>
+                      <p className="text-white font-semibold text-[14px]">{post.authorName}</p>
+                      <p className="text-[#8E8E93] text-[11px]">@{post.authorHandle}</p>
+                    </div>
+                  </div>
+                  <p className="text-[#D1D1D6] text-[13px] leading-relaxed whitespace-pre-wrap">{post.body}</p>
+                </div>
+              ))}
             </div>
           )}
         </div>

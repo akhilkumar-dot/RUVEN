@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -20,6 +20,7 @@ import { BridgeLogo } from "@/ui/BridgeLogo";
 import { PillInput } from "@/ui/PillInput";
 import { GradientRingButton } from "@/ui/GradientRingButton";
 import { Avatar } from "@/ui/Avatar";
+import { supabase } from "@/lib/supabase/client";
 import { useAuthStore, type AccountType } from "@/lib/store/authStore";
 import { dataService } from "@/lib/api/dataService";
 import { cn, fileToDataUrl } from "@/lib/utils";
@@ -92,6 +93,21 @@ const POPULAR_SKILLS = [
   "Legal & GST",
 ];
 
+const INVESTOR_STAGES = ["Pre-seed", "Seed", "Series A", "Series B+", "Late Stage"];
+
+const INDUSTRIES = [
+  "B2B SaaS",
+  "Fintech",
+  "Consumer Tech",
+  "Healthtech",
+  "Deeptech",
+  "Edtech",
+  "E-commerce",
+  "Web3 & Crypto",
+  "Enterprise Software",
+  "D2C Brands",
+];
+
 function OnboardingContent() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
@@ -99,6 +115,7 @@ function OnboardingContent() {
   const setAvatarUrl = useAuthStore((s) => s.setAvatarUrl);
 
   const [step, setStep] = useState(0); // 0=Class selection, 1=Profile details, 2=Welcome preview
+  const [checking, setChecking] = useState(true);
   const [selectedClass, setSelectedClass] = useState<AccountType>(user?.type || "STARTUP_FOUNDER");
   const [headline, setHeadline] = useState(
     user?.type === "INVESTOR"
@@ -116,9 +133,104 @@ function OnboardingContent() {
   const [photoUrl, setPhotoUrl] = useState<string | undefined>(undefined);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Specialized fields
+  const [ticketSize, setTicketSize] = useState("");
+  const [thesis, setThesis] = useState("");
+  const [website, setWebsite] = useState("");
+  const [selectedStages, setSelectedStages] = useState<string[]>([]);
+  const [portfolio, setPortfolio] = useState("");
+  const [industry, setIndustry] = useState("B2B SaaS");
+  const [foundedYear, setFoundedYear] = useState<string>(new Date().getFullYear().toString());
+
   const photoRef = useRef<HTMLInputElement>(null);
 
   const activeClassConfig = ACCOUNT_CLASSES.find((c) => c.key === selectedClass) || ACCOUNT_CLASSES[0];
+  
+  useEffect(() => {
+    async function checkExistingProfile() {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+          router.replace("/sign-in");
+          return;
+        }
+
+        const userId = sessionData.session.user.id;
+        
+        // Fetch both user type and profile details
+        const [userRes, profileRes] = await Promise.all([
+          supabase.from("users").select("type").eq("id", userId).maybeSingle(),
+          supabase.from("profiles").select("headline, bio, location, skills, photo_url").eq("user_id", userId).maybeSingle()
+        ]);
+
+        if (userRes.data?.type) {
+          setSelectedClass(userRes.data.type as AccountType);
+        }
+
+        const profile = profileRes.data;
+        if (profile?.headline && profile?.bio) {
+          router.replace("/home");
+          return;
+        }
+        
+        // Pre-fill if some data exists
+        if (profile) {
+          if (profile.headline) setHeadline(profile.headline);
+          if (profile.bio) setBio(profile.bio);
+          if (profile.location) setLocation(profile.location);
+          if (profile.skills) setSelectedSkills(profile.skills.split(", "));
+          if (profile.photo_url) setPhotoUrl(profile.photo_url);
+        }
+
+        // Fetch specialized details if they exist
+        const userType = userRes.data?.type;
+        if (userType === "INVESTOR") {
+          const { data: inv } = await supabase
+            .from("investor_profiles")
+            .select(`
+              firm, ticket_size, thesis, site,
+              stages:investor_stages(stage),
+              portfolio:investor_portfolio(company_name)
+            `)
+            .eq("user_id", userId)
+            .maybeSingle();
+
+          if (inv) {
+            if (inv.firm) setOrganizationName(inv.firm);
+            if (inv.ticket_size) setTicketSize(inv.ticket_size);
+            if (inv.thesis) setThesis(inv.thesis);
+            if (inv.site) setWebsite(inv.site);
+            if (inv.stages)
+              setSelectedStages((inv.stages as any[]).map((s) => s.stage));
+            if (inv.portfolio)
+              setPortfolio(
+                (inv.portfolio as any[]).map((p) => p.company_name).join(", ")
+              );
+          }
+        } else if (userType === "COMPANY_OWNER") {
+          const { data: comp } = await supabase
+            .from("companies")
+            .select("name, industry, founded_year, website")
+            .eq("owner_id", userId)
+            .maybeSingle();
+
+          if (comp) {
+            if (comp.name) setOrganizationName(comp.name);
+            if (comp.industry) setIndustry(comp.industry);
+            if (comp.founded_year) setFoundedYear(comp.founded_year.toString());
+            if (comp.website) setWebsite(comp.website);
+          }
+        }
+      } catch (err) {
+        console.error("Error checking profile:", err);
+      } finally {
+        setChecking(false);
+      }
+    }
+    
+    checkExistingProfile();
+  }, [router]);
 
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -161,6 +273,7 @@ function OnboardingContent() {
 
       // Persist the collected profile so it shows up on the profile page
       if (user?.id) {
+        // 1. Basic profile updates
         await dataService.updateProfileData(user.id, {
           headline: headline.trim(),
           bio: bio.trim(),
@@ -169,9 +282,35 @@ function OnboardingContent() {
           photo_url: photoUrl,
         });
         if (photoUrl) setAvatarUrl(photoUrl);
+
+        // 2. Specialized role-based updates
+        if (selectedClass === "INVESTOR") {
+          await dataService.updateInvestorProfile(user.id, {
+            firm: organizationName.trim(),
+            ticketSize: ticketSize.trim(),
+            thesis: thesis.trim(),
+            site: website.trim(),
+            sectors: selectedSkills,
+            stages: selectedStages,
+            portfolio: portfolio.split(",").map((p) => p.trim()).filter(Boolean),
+          });
+        } else if (selectedClass === "COMPANY_OWNER") {
+          await dataService.saveCompany(user.id, {
+            name: organizationName.trim() || "My Company",
+            industry,
+            founded_year: parseInt(foundedYear) || undefined,
+            website: website.trim(),
+            tagline: headline.trim(),
+            about: bio.trim(),
+            description: bio.trim(),
+            location,
+            status: "PUBLISHED",
+            verified: true,
+          });
+        }
       }
-    } catch {
-      // Ignore background persistence errors
+    } catch (err) {
+      console.error("Onboarding persistence error:", err);
     } finally {
       setSaving(false);
       router.replace("/home");
@@ -179,6 +318,14 @@ function OnboardingContent() {
   }
 
   const displayName = user?.userHandle ? `@${user.userHandle}` : "Founder";
+  
+  if (checking) {
+    return (
+      <div className="min-h-dvh bg-black flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-[#A24BFF] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-black text-white flex flex-col justify-between">
@@ -188,14 +335,8 @@ function OnboardingContent() {
           <div className="w-8 h-8 rounded-xl bg-black border border-[#2A2A2E] flex items-center justify-center overflow-hidden shrink-0">
             <BridgeLogo size={32} />
           </div>
-          <span className="text-white font-bold text-[17px] tracking-tight">Ruven</span>
+          <span className="text-white font-bold text-[17px] tracking-tight">COLLAB</span>
         </div>
-        <button
-          onClick={() => router.replace("/home")}
-          className="text-[#8E8E93] text-[13px] hover:text-white transition-colors px-2 py-1"
-        >
-          Skip to Feed
-        </button>
       </header>
 
       {/* Main Container */}
@@ -208,10 +349,10 @@ function OnboardingContent() {
           <h1 className="text-white font-bold text-[22px] sm:text-[26px] tracking-tight leading-snug">
             {step === 0 && "Select Your Account Class"}
             {step === 1 && "Tailor Your Profile"}
-            {step === 2 && "Welcome to Ruven!"}
+            {step === 2 && "Welcome to COLLAB!"}
           </h1>
           <p className="text-[#8E8E93] text-[13px] sm:text-[14px] mt-1 max-w-[340px] mx-auto leading-normal">
-            {step === 0 && "Ruven tailors your dashboard, deals, and ecosystem according to your role."}
+            {step === 0 && "COLLAB tailors your dashboard, deals, and ecosystem according to your role."}
             {step === 1 && "Help other founders, investors, and talent discover and collaborate with you."}
             {step === 2 && "Your personalized card is ready. Tap launch to enter the ecosystem."}
           </p>
@@ -436,6 +577,105 @@ function OnboardingContent() {
                   />
                 </div>
 
+                {/* --- Specialized Investor Fields --- */}
+                {selectedClass === "INVESTOR" && (
+                  <>
+                    <PillInput
+                      label="Ticket Size (Lakhs/Crores)"
+                      placeholder="e.g. ₹10L - ₹50L or $1M"
+                      value={ticketSize}
+                      onChange={(e) => setTicketSize(e.target.value)}
+                    />
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-medium text-[#8E8E93] px-3">
+                        Investment Thesis
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={thesis}
+                        onChange={(e) => setThesis(e.target.value)}
+                        placeholder="What do you look for in a startup?"
+                        className="w-full bg-[#121214] border border-[#222226] text-white text-[13px] rounded-2xl px-4 py-2.5 outline-none focus:border-[#A24BFF] transition-colors resize-none"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-medium text-[#8E8E93] px-3">
+                        Investment Stages
+                      </label>
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {INVESTOR_STAGES.map((stage) => {
+                          const isSel = selectedStages.includes(stage);
+                          return (
+                            <button
+                              key={stage}
+                              type="button"
+                              onClick={() =>
+                                setSelectedStages((prev) =>
+                                  prev.includes(stage)
+                                    ? prev.filter((s) => s !== stage)
+                                    : [...prev, stage]
+                                )
+                              }
+                              className={cn(
+                                "px-2.5 py-1 rounded-full text-[11px] font-medium transition-all border",
+                                isSel
+                                  ? "bg-[#FF8A3D] text-white border-[#FF8A3D]"
+                                  : "bg-[#18181C] border-[#26262A] text-[#8E8E93] hover:text-white"
+                              )}
+                            >
+                              {stage}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <PillInput
+                      label="Portfolio Companies"
+                      placeholder="e.g. Zomato, Razorpay (comma separated)"
+                      value={portfolio}
+                      onChange={(e) => setPortfolio(e.target.value)}
+                    />
+                  </>
+                )}
+
+                {/* --- Specialized Company Fields --- */}
+                {selectedClass === "COMPANY_OWNER" && (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-medium text-[#8E8E93] px-3">
+                        Industry
+                      </label>
+                      <select
+                        value={industry}
+                        onChange={(e) => setIndustry(e.target.value)}
+                        className="w-full bg-[#121214] border border-[#222226] text-white text-[14px] rounded-2xl px-4 py-3 outline-none focus:border-[#5E9C8A] transition-colors"
+                      >
+                        {INDUSTRIES.map((ind) => (
+                          <option key={ind} value={ind} className="bg-[#121214] text-white">
+                            {ind}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <PillInput
+                      label="Founded Year"
+                      placeholder="e.g. 2018"
+                      value={foundedYear}
+                      onChange={(e) => setFoundedYear(e.target.value)}
+                    />
+                  </>
+                )}
+
+                {/* Website for both Company and Investor */}
+                {(selectedClass === "COMPANY_OWNER" || selectedClass === "INVESTOR") && (
+                  <PillInput
+                    label="Official Website"
+                    placeholder="e.g. https://apextech.io"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                  />
+                )}
+
                 {/* Key Sectors & Focus Areas */}
                 <div className="space-y-1.5">
                   <label className="text-[12px] font-medium text-[#8E8E93] px-3">
@@ -493,7 +733,7 @@ function OnboardingContent() {
                 transition={{ duration: 0.2 }}
                 className="space-y-5 text-center"
               >
-                {/* Ruven Member Card Preview */}
+                {/* COLLAB Member Card Preview */}
                 <div
                   className="rounded-3xl p-5 text-left relative overflow-hidden border border-[#26262C] shadow-2xl space-y-3"
                   style={{
@@ -574,7 +814,7 @@ function OnboardingContent() {
                     disabled={saving}
                     onClick={handleComplete}
                   >
-                    {saving ? "Launching…" : "Enter Ruven Dashboard"} <ArrowRight size={18} />
+                    {saving ? "Launching…" : "Enter COLLAB Dashboard"} <ArrowRight size={18} />
                   </GradientRingButton>
                 </div>
               </motion.div>
@@ -585,7 +825,7 @@ function OnboardingContent() {
 
       {/* Footer */}
       <footer className="py-4 text-center text-[#6E6E73] text-[11px] border-t border-[#1C1C1E]">
-        © 2026 Ruven Technologies Private Limited
+        © 2026 COLLAB Technologies Private Limited
       </footer>
     </div>
   );

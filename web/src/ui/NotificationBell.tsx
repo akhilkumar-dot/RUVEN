@@ -116,6 +116,8 @@ export function NotificationBell() {
   function iconForType(type: string) {
     if (type === "CONNECTION_REQUEST") return <UserPlus size={15} className="text-[#A24BFF]" />;
     if (type === "CONNECTION_ACCEPTED") return <CheckCircle2 size={15} className="text-emerald-400" />;
+    if (type === "COLLABORATE_REQUEST") return <Users size={15} className="text-[#D4FF3A]" />;
+    if (type === "COLLABORATE_ACCEPTED") return <CheckCircle2 size={15} className="text-emerald-400" />;
     return <Bell size={15} className="text-[#8E8E93]" />;
   }
 
@@ -127,6 +129,15 @@ export function NotificationBell() {
     if (n.type === "CONNECTION_ACCEPTED") {
       const name = (n.payload.accepter_name as string) || (n.payload.accepter_handle as string) || "Someone";
       return `${name} accepted your connection request`;
+    }
+    if (n.type === "COLLABORATE_REQUEST") {
+      const name = (n.payload.requester_name as string) || (n.payload.requester_handle as string) || "Founder";
+      const idea = (n.payload.idea_title as string) || "your idea";
+      return `${name} applied to collaborate on "${idea}"`;
+    }
+    if (n.type === "COLLABORATE_ACCEPTED") {
+      const idea = (n.payload.idea_title as string) || "an idea";
+      return `Your collaboration request for "${idea}" was accepted! 🎉`;
     }
     return "New notification";
   }
@@ -301,6 +312,64 @@ export function NotificationBell() {
                                   <X size={12} />
                                   Decline
                                 </button>
+                              </div>
+                            )}
+
+                            {/* Collaborate Request actions */}
+                            {n.type === "COLLABORATE_REQUEST" && (
+                              <div className="space-y-2 mt-1">
+                                {Boolean(n.payload.message) && (
+                                  <p className="text-[#A1A1A6] text-[12px] bg-black/40 border border-[#2A2A2E] rounded-lg p-2 leading-relaxed">
+                                    "{n.payload.message as string}"
+                                  </p>
+                                )}
+                                {!n.read_at && (n.payload.status as string) !== "ACCEPTED" ? (
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={async () => {
+                                        await dataService.respondToCollaborationRequest(
+                                          n.id,
+                                          user?.id || "",
+                                          n.payload.requester_id as string,
+                                          (n.payload.idea_title as string) || "idea",
+                                          "ACCEPTED"
+                                        );
+                                        markRead(n.id);
+                                      }}
+                                      className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-600 text-white text-[12px] font-semibold hover:bg-emerald-500 transition-colors"
+                                    >
+                                      <Check size={12} />
+                                      Accept & Collaborate
+                                    </button>
+                                    <button
+                                      onClick={async () => {
+                                        await dataService.respondToCollaborationRequest(
+                                          n.id,
+                                          user?.id || "",
+                                          n.payload.requester_id as string,
+                                          (n.payload.idea_title as string) || "idea",
+                                          "DECLINED"
+                                        );
+                                        markRead(n.id);
+                                      }}
+                                      className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#2A2A2D] text-[#8E8E93] text-[12px] font-medium hover:bg-[#3A3A3D] transition-colors"
+                                    >
+                                      <X size={12} />
+                                      Decline
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2 text-[12px] text-emerald-400 font-medium">
+                                    <Check size={12} /> Accepted ·
+                                    <Link
+                                      href="/messages"
+                                      onClick={() => setPanelOpen(false)}
+                                      className="text-[#A24BFF] hover:underline flex items-center gap-1 font-semibold"
+                                    >
+                                      <MessageSquare size={12} /> Chat with Partner
+                                    </Link>
+                                  </div>
+                                )}
                               </div>
                             )}
 

@@ -15,7 +15,7 @@ export default function SignInPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
-        router.replace("/home");
+        router.replace("/onboarding");
       }
     });
   }, [router]);

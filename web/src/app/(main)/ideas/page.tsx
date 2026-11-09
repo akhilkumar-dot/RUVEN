@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lightbulb, ThumbsUp, Tag, Plus, X, ChevronRight, Flame, Send, CheckCircle2 } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
@@ -31,7 +31,9 @@ function CollaborateModal({
     if (!pitch.trim() || !currentUserId || submitting) return;
     setSubmitting(true);
     try {
-      await dataService.createDirectChat(currentUserId, idea.author_id, `[Collaboration Ask for "${idea.title}"]\n${pitch.trim()}`);
+      await dataService.createIdeaCollaborationRequest(idea.id, currentUserId, pitch.trim());
+      // Also start a chat as a secondary action
+      await dataService.createDirectChat(currentUserId, idea.author_id, `[Collaboration Request for "${idea.title}"]\n${pitch.trim()}`);
       setSent(true);
       setTimeout(() => {
         onClose();
@@ -305,6 +307,23 @@ function IdeasPageContent() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [collaboratingIdea, setCollaboratingIdea] = useState<StartupIdea | null>(null);
+  const [collabRequests, setCollabRequests] = useState<{
+    id: string;
+    idea_id: string;
+    user_id: string;
+    message: string;
+    status: string;
+    created_at: string;
+    idea: { title: string };
+    user: {
+      id: string;
+      name: string;
+      user_handle: string;
+      avatar_url: string | null;
+      type: string;
+    };
+  }[]>([]);
+  const [requestsLoading, setRequestsLoading] = useState(false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -324,6 +343,24 @@ function IdeasPageContent() {
       isCancelled = true;
     };
   }, [user?.id]);
+
+  useEffect(() => {
+    if (sort !== "My Ideas" || !user?.id) return;
+    let isCancelled = false;
+    async function loadRequests() {
+      setRequestsLoading(true);
+      try {
+        const reqs = await dataService.fetchIdeaRequestsForAuthor(user!.id);
+        if (!isCancelled) setCollabRequests(reqs);
+      } catch (err) {
+        console.error("Failed to load collab requests:", err);
+      } finally {
+        if (!isCancelled) setRequestsLoading(false);
+      }
+    }
+    loadRequests();
+    return () => { isCancelled = true; };
+  }, [sort, user?.id]);
 
   async function handleToggleUpvote(ideaId: string) {
     if (!user?.id) return;
@@ -369,7 +406,7 @@ function IdeasPageContent() {
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
-      <TopBar unreadCount={0} />
+      <TopBar />
 
       <div className="px-4 pt-4 w-full">
         {/* Header */}
@@ -467,8 +504,83 @@ function IdeasPageContent() {
               ))}
             </div>
           )}
-        </div>
-      </main>
+
+          {/* Incoming Collaboration Requests (My Ideas tab only) */}
+          {sort === "My Ideas" && (
+            <div className="mt-6 space-y-3">
+              <h2 className="text-white font-bold text-[16px] flex items-center gap-2 px-0">
+                <span className="text-[#A24BFF]">📬</span> Collaboration Requests
+              </h2>
+              {requestsLoading && (
+                <div className="space-y-3">
+                  {[1,2].map(n => (
+                    <div key={n} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 animate-pulse space-y-2">
+                      <div className="h-4 w-1/2 bg-[#1C1C1E] rounded" />
+                      <div className="h-3 w-3/4 bg-[#1C1C1E] rounded" />
+                    </div>
+                  ))}
+                </div>
+              )}
+              {!requestsLoading && collabRequests.length === 0 && (
+                <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-5 text-center">
+                  <p className="text-[#6E6E73] text-[13px]">No collaboration requests yet.</p>
+                </div>
+              )}
+              {!requestsLoading && collabRequests.map(req => (
+                <div key={req.id} className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#A24BFF]/20 flex items-center justify-center text-[#A24BFF] font-bold text-[14px] shrink-0">
+                      {(req.user.name || req.user.user_handle || "?")[0].toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-[14px]">@{req.user.user_handle}</p>
+                      <p className="text-[#A24BFF] text-[11px]">wants to collaborate on: <span className="font-semibold">{req.idea.title}</span></p>
+                    </div>
+                  </div>
+                  {req.message && (
+                    <p className="text-[#D1D1D6] text-[13px] leading-relaxed bg-[#121214] rounded-xl px-3 py-2 border border-[#1C1C1E]">
+                      "{req.message}"
+                    </p>
+                  )}
+                  {(!req.status || req.status === "PENDING") ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={async () => {
+                          if (!user?.id) return;
+                          try {
+                            await dataService.respondToCollaborationRequest(req.id, user.id, req.user_id, req.idea.title, "ACCEPTED");
+                            setCollabRequests(prev => prev.map(r => r.id === req.id ? {...r, status: "ACCEPTED"} : r));
+                          } catch (err) { console.error(err); }
+                        }}
+                        className="flex-1 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[13px] font-semibold hover:bg-emerald-500/25 transition-colors"
+                      >
+                        ✓ Accept
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!user?.id) return;
+                          try {
+                            await dataService.respondToCollaborationRequest(req.id, user.id, req.user_id, req.idea.title, "DECLINED");
+                            setCollabRequests(prev => prev.map(r => r.id === req.id ? {...r, status: "DECLINED"} : r));
+                          } catch (err) { console.error(err); }
+                        }}
+                        className="flex-1 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-[13px] font-semibold hover:bg-red-500/20 transition-colors"
+                      >
+                        ✗ Decline
+                      </button>
+                    </div>
+                  ) : (
+                    <p className={`text-[12px] font-semibold text-center ${req.status === "ACCEPTED" ? "text-emerald-400" : "text-red-400"}`}>
+                      {req.status === "ACCEPTED" ? "✓ Accepted — Chat started!" : "✗ Declined"}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          </div>
+        </main>
 
       {collaboratingIdea && (
         <CollaborateModal

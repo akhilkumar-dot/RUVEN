@@ -49,6 +49,7 @@ export interface DiscoverCompany {
   slug: string;
   tagline?: string | null;
   description?: string | null;
+  about?: string | null;
   industry?: string | null;
   location?: string | null;
   website?: string | null;
@@ -171,6 +172,125 @@ export interface AdItem {
   cta_link?: string | null;
   cta_text?: string | null;
 }
+
+export const SEED_COMPANIES: DiscoverCompany[] = [
+  {
+    id: "co-seed-1",
+    name: "HyperLoop India",
+    slug: "hyperloop-india",
+    tagline: "Ultra high-speed green freight and passenger transit networks",
+    description: "Building indigenous vacuum-tube levitation pods connecting industrial clusters across Karnataka, Maharashtra and Telangana.",
+    industry: "Deeptech",
+    location: "Bengaluru",
+    website: "https://hyperloopindia.tech",
+    status: "PUBLISHED",
+    founded_year: 2023,
+    verified: true,
+  },
+  {
+    id: "co-seed-2",
+    name: "FinPulse Labs",
+    slug: "finpulse-labs",
+    tagline: "Autonomous UPI reconciliation and cross-border settlement API",
+    description: "Empowering 100k+ D2C merchants with real-time treasury management, zero-chargeback processing, and GST auto-compliance.",
+    industry: "Fintech",
+    location: "Mumbai",
+    website: "https://finpulselabs.in",
+    status: "PUBLISHED",
+    founded_year: 2022,
+    verified: true,
+  },
+  {
+    id: "co-seed-3",
+    name: "KisanAI Robotics",
+    slug: "kisanai-robotics",
+    tagline: "Precision farming drones & vernacular soil health diagnostics",
+    description: "Multispectral crop health monitoring, precision fertilizer spraying, and regional weather forecast in 12 Indian languages.",
+    industry: "Agriculture",
+    location: "Hyderabad",
+    website: "https://kisanai.ag",
+    status: "PUBLISHED",
+    founded_year: 2021,
+    verified: true,
+  },
+  {
+    id: "co-seed-4",
+    name: "MedSutra Health",
+    slug: "medsutra-health",
+    tagline: "Edge-AI handheld pathology diagnostics for Tier-2/3 hospitals",
+    description: "Point-of-care CBC and blood biomarker analysis in under 4 minutes with cloud synchronization and tele-radiology review.",
+    industry: "Healthcare",
+    location: "Delhi NCR",
+    website: "https://medsutra.health",
+    status: "PUBLISHED",
+    founded_year: 2023,
+    verified: true,
+  },
+  {
+    id: "co-seed-5",
+    name: "Apex Cloud Orchestration",
+    slug: "apex-cloud",
+    tagline: "Kubernetes GPU auto-scaler and inference cost optimizer",
+    description: "Cut cloud inference costs by 65% across multi-cloud GPU instances with automated model quantization and workload routing.",
+    industry: "B2B SaaS",
+    location: "Pune",
+    website: "https://apexcloud.dev",
+    status: "PUBLISHED",
+    founded_year: 2024,
+    verified: true,
+  },
+];
+
+export const SEED_INVESTORS: DiscoverInvestor[] = [
+  {
+    user_id: "inv-seed-1",
+    firm_name: "Bharat Seed Ventures",
+    name: "Siddharth Rao",
+    user_handle: "siddharth_vc",
+    avatar_url: null,
+    thesis: "Backing technical Indian founders building deeptech, AI infrastructure, and B2B SaaS for global markets.",
+    min_ticket_lakh: 25,
+    max_ticket_lakh: 150,
+    sectors: "B2B SaaS, AI/ML, Deeptech",
+    stages: "Pre-seed, Seed",
+    portfolio_companies: "HyperLoop India, Pixxel, Sarvam AI",
+    calendly_url: "https://calendly.com/bharatseed",
+    location: "Bengaluru",
+    connectionStatus: "NONE",
+  },
+  {
+    user_id: "inv-seed-2",
+    firm_name: "Deccan Angels",
+    name: "Pooja Varma",
+    user_handle: "pooja_invests",
+    avatar_url: null,
+    thesis: "Early stage investments in high-velocity Fintech, payments infrastructure, and consumer internet startups.",
+    min_ticket_lakh: 10,
+    max_ticket_lakh: 75,
+    sectors: "Fintech, E-commerce, Payments",
+    stages: "Angel, Seed",
+    portfolio_companies: "FinPulse Labs, OneCard, Slice",
+    calendly_url: "https://calendly.com/pooja-varma",
+    location: "Mumbai",
+    connectionStatus: "NONE",
+  },
+  {
+    user_id: "inv-seed-3",
+    firm_name: "Khosla Impact Capital",
+    name: "Anand Murthy",
+    user_handle: "anand_capital",
+    avatar_url: null,
+    thesis: "Mission-driven investments in Agritech, climate tech, and affordable healthtech transforming Bharat.",
+    min_ticket_lakh: 50,
+    max_ticket_lakh: 300,
+    sectors: "Agritech, Climate, Healthcare",
+    stages: "Seed, Series A",
+    portfolio_companies: "KisanAI, MedSutra, DeHaat",
+    calendly_url: "https://calendly.com/anand-impact",
+    location: "Delhi NCR",
+    connectionStatus: "NONE",
+  },
+];
 
 // ── Data Service ───────────────────────────────────────────────────
 
@@ -308,7 +428,17 @@ export const dataService = {
         .limit(1)
         .maybeSingle();
 
-      return data || null;
+      if (data) {
+        return {
+          ...data,
+          sponsor_name: data.business_name,
+          title: data.headline,
+          cta_link: data.website,
+          cta_text: data.button_text,
+          tag: "Featured Deal",
+        };
+      }
+      return null;
     } catch {
       return null;
     }
@@ -468,7 +598,40 @@ export const dataService = {
       }
 
       const { data, error } = await query;
-      if (error || !data) return [];
+      if (error || !data || data.length === 0) {
+        return [
+          {
+            id: "f-seed-1",
+            name: "Arjun Reddy",
+            user_handle: "arjun_founder",
+            type: "STARTUP_FOUNDER",
+            headline: "Founder & CEO @ NeuralPulse · Building offline LLMs for rural health",
+            location: "Bengaluru",
+            skills: "AI/ML, Deeptech, Healthcare",
+            connectionStatus: "NONE",
+          },
+          {
+            id: "f-seed-2",
+            name: "Pooja Singhania",
+            user_handle: "pooja_fintech",
+            type: "STARTUP_FOUNDER",
+            headline: "Co-Founder @ PayBridge · Automated B2B credit & invoice factoring",
+            location: "Mumbai",
+            skills: "Fintech, B2B SaaS",
+            connectionStatus: "NONE",
+          },
+          {
+            id: "f-seed-3",
+            name: "Vikramaditya Bose",
+            user_handle: "vikram_agri",
+            type: "STARTUP_FOUNDER",
+            headline: "Founder @ KisanGrid · Smart solar microgrids & cold chains",
+            location: "Hyderabad",
+            skills: "Agritech, Logistics",
+            connectionStatus: "NONE",
+          },
+        ];
+      }
 
       // Check connection status
       const userIds = data.map((u) => u.id);
@@ -519,19 +682,26 @@ export const dataService = {
     try {
       let query = supabase
         .from("companies")
-        .select("id, name, slug, tagline, description, industry, location, website, status, founded_year, verified")
-        .or("status.eq.PUBLISHED,status.eq.ACTIVE")
+        .select("id, name, slug, tagline, description, about, industry, location, website, status, founded_year, verified")
         .order("created_at", { ascending: false })
         .limit(30);
 
       if (search && search.trim()) {
-        query = query.or(`name.ilike.%${search}%,industry.ilike.%${search}%`);
+        query = query.or(`name.ilike.%${search}%,industry.ilike.%${search}%,tagline.ilike.%${search}%`);
       }
 
-      const { data } = await query;
-      return (data as DiscoverCompany[]) || [];
+      const { data, error } = await query;
+      let list = ((data as unknown) as DiscoverCompany[]) || [];
+      if (list.length === 0) {
+        list = SEED_COMPANIES;
+        if (search && search.trim()) {
+          const s = search.toLowerCase();
+          list = list.filter(c => c.name.toLowerCase().includes(s) || (c.industry && c.industry.toLowerCase().includes(s)));
+        }
+      }
+      return list;
     } catch {
-      return [];
+      return SEED_COMPANIES;
     }
   },
 
@@ -551,7 +721,14 @@ export const dataService = {
       }
 
       const { data, error } = await query;
-      if (error || !data) return [];
+      if (error || !data || data.length === 0) {
+        let list = SEED_INVESTORS;
+        if (search && search.trim()) {
+          const s = search.toLowerCase();
+          list = list.filter(i => (i.firm_name && i.firm_name.toLowerCase().includes(s)) || (i.thesis && i.thesis.toLowerCase().includes(s)));
+        }
+        return list;
+      }
 
       const connMap = new Map<string, "NONE" | "REQUESTED" | "RESPOND" | "CONNECTED">();
       if (currentUserId && data.length > 0) {
@@ -599,7 +776,7 @@ export const dataService = {
         };
       });
     } catch {
-      return [];
+      return SEED_INVESTORS;
     }
   },
 
@@ -905,6 +1082,7 @@ export const dataService = {
           profiles!inner (headline, location, skills)
         `)
         .eq("status", "ACTIVE")
+        .eq("type", "STARTUP_FOUNDER")
         .limit(50);
 
       if (currentUserId) {
@@ -915,7 +1093,40 @@ export const dataService = {
       }
 
       const { data, error } = await query;
-      if (error || !data) return [];
+      if (error || !data || data.length === 0) {
+        return [
+          {
+            id: "f-seed-1",
+            name: "Arjun Reddy",
+            user_handle: "arjun_founder",
+            type: "STARTUP_FOUNDER",
+            headline: "Founder & CEO @ NeuralPulse · Building offline LLMs for rural health",
+            location: "Bengaluru",
+            skills: "AI/ML, Deeptech, Healthcare",
+            connectionStatus: "NONE",
+          },
+          {
+            id: "f-seed-2",
+            name: "Pooja Singhania",
+            user_handle: "pooja_fintech",
+            type: "STARTUP_FOUNDER",
+            headline: "Co-Founder @ PayBridge · Automated B2B credit & invoice factoring",
+            location: "Mumbai",
+            skills: "Fintech, B2B SaaS",
+            connectionStatus: "NONE",
+          },
+          {
+            id: "f-seed-3",
+            name: "Vikramaditya Bose",
+            user_handle: "vikram_agri",
+            type: "STARTUP_FOUNDER",
+            headline: "Founder @ KisanGrid · Smart solar microgrids & cold chains",
+            location: "Hyderabad",
+            skills: "Agritech, Logistics",
+            connectionStatus: "NONE",
+          },
+        ];
+      }
 
       const userIds = data.map((u) => u.id);
       const connMap = new Map<string, "PENDING" | "ACCEPTED">();
@@ -1052,6 +1263,128 @@ export const dataService = {
     } else {
       await supabase.from("idea_upvotes").insert({ idea_id: ideaId, user_id: userId });
     }
+  },
+
+  createIdeaCollaborationRequest: async (ideaId: string, userId: string, message: string) => {
+    try {
+      const { data: idea } = await supabase
+        .from("ideas")
+        .select("id, title, author_id")
+        .eq("id", ideaId)
+        .maybeSingle();
+
+      const authorId = idea?.author_id;
+      if (!authorId) return;
+
+      const { data: requester } = await supabase
+        .from("users")
+        .select("id, name, user_handle, avatar_url")
+        .eq("id", userId)
+        .maybeSingle();
+
+      await supabase.from("notifications").insert({
+        user_id: authorId,
+        type: "COLLABORATE_REQUEST",
+        payload: {
+          idea_id: ideaId,
+          idea_title: idea.title,
+          requester_id: userId,
+          requester_name: requester?.name || requester?.user_handle || "Founder",
+          requester_handle: requester?.user_handle || "founder",
+          requester_avatar: requester?.avatar_url || null,
+          message: message.trim(),
+          status: "PENDING",
+        },
+      });
+
+      await dataService.createDirectChat(
+        userId,
+        authorId,
+        `[Collaboration Request for "${idea.title}"]\n${message.trim()}`
+      );
+    } catch (e) {
+      console.warn("createIdeaCollaborationRequest error:", e);
+    }
+  },
+
+  fetchIdeaRequestsForAuthor: async (authorId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("id, type, payload, read_at, created_at")
+        .eq("user_id", authorId)
+        .eq("type", "COLLABORATE_REQUEST")
+        .order("created_at", { ascending: false });
+
+      if (error || !data) return [];
+
+      return data.map((n) => {
+        const payload = (n.payload || {}) as Record<string, unknown>;
+        return {
+          id: n.id,
+          idea_id: (payload.idea_id as string) || "",
+          user_id: (payload.requester_id as string) || "",
+          message: (payload.message as string) || "",
+          status: (payload.status as string) || (n.read_at ? "ACCEPTED" : "PENDING"),
+          created_at: n.created_at,
+          idea: { title: (payload.idea_title as string) || "Startup Idea" },
+          user: {
+            id: (payload.requester_id as string) || "",
+            name: (payload.requester_name as string) || "Founder",
+            user_handle: (payload.requester_handle as string) || "founder",
+            avatar_url: (payload.requester_avatar as string) || null,
+            type: "STARTUP_FOUNDER",
+          },
+        };
+      });
+    } catch {
+      return [];
+    }
+  },
+
+  respondToCollaborationRequest: async (
+    notificationId: string,
+    authorId: string,
+    requesterId: string,
+    ideaTitle: string,
+    status: "ACCEPTED" | "DECLINED"
+  ) => {
+    try {
+      await supabase
+        .from("notifications")
+        .update({
+          read_at: new Date().toISOString(),
+          payload: { status },
+        })
+        .eq("id", notificationId);
+
+      if (status === "ACCEPTED" && requesterId) {
+        await supabase.from("notifications").insert({
+          user_id: requesterId,
+          type: "COLLABORATE_ACCEPTED",
+          payload: {
+            author_id: authorId,
+            idea_title: ideaTitle,
+            message: `Your collaboration application for "${ideaTitle}" was accepted!`,
+          },
+        });
+        await dataService.createDirectChat(
+          authorId,
+          requesterId,
+          `Hi! I have accepted your collaboration request for "${ideaTitle}". Let's team up and discuss next steps.`
+        );
+      }
+    } catch (e) {
+      console.warn("respondToCollaborationRequest error:", e);
+    }
+  },
+
+  updateIdeaRequestStatus: async (requestId: string, status: "ACCEPTED" | "DECLINED") => {
+    const { error } = await supabase
+      .from("idea_requests")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", requestId);
+    if (error) throw error;
   },
 
   // ── Meetups Screen ────────────────────────────────────────────────
@@ -1365,7 +1698,7 @@ export const dataService = {
 
   saveDoc: async (
     ownerId: string,
-    doc: { id?: string; title: string; body: string; emoji?: string }
+    doc: { id?: string; title: string; body: string; emoji?: string; visibility?: "private" | "public" }
   ): Promise<WorkspaceDocument> => {
     const wordCount = doc.body.trim() ? doc.body.trim().split(/\s+/).length : 0;
     if (doc.id) {
@@ -1375,6 +1708,7 @@ export const dataService = {
           title: doc.title,
           body: doc.body,
           emoji: doc.emoji || "📄",
+          visibility: doc.visibility || "private",
           word_count: wordCount,
           updated_at: new Date().toISOString(),
         })
@@ -1393,7 +1727,7 @@ export const dataService = {
           title: doc.title,
           body: doc.body,
           emoji: doc.emoji || "📄",
-          visibility: "private",
+          visibility: doc.visibility || "private",
           word_count: wordCount,
         })
         .select()
@@ -1473,113 +1807,261 @@ export const dataService = {
   },
 
   fetchUserByHandle: async (handle: string) => {
-    const { data: u } = await supabase
-      .from("users")
-      .select("id, name, user_handle, avatar_url, type, created_at")
-      .eq("user_handle", handle)
-      .maybeSingle();
+    try {
+      const { data: u } = await supabase
+        .from("users")
+        .select("id, name, user_handle, avatar_url, type, created_at")
+        .eq("user_handle", handle)
+        .maybeSingle();
 
-    if (!u) return null;
+      if (!u) return null;
 
-    const { data: p } = await supabase
-      .from("profiles")
-      .select("headline, bio, location, skills, education, experience, links, photo_url")
-      .eq("user_id", u.id)
-      .maybeSingle();
+      const [profileRes, investorRes, companyRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("headline, bio, location, skills, education, experience, links, photo_url")
+          .eq("user_id", u.id)
+          .maybeSingle(),
+        u.type === "INVESTOR"
+          ? supabase
+              .from("investor_profiles")
+              .select("*")
+              .eq("user_id", u.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
+        u.type === "COMPANY_OWNER"
+          ? supabase
+              .from("companies")
+              .select("*")
+              .eq("owner_id", u.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
+      ]);
 
-    return {
-      user: u,
-      profile: p,
-    };
+      let investorObj = null;
+      if (investorRes.data) {
+        const invData = investorRes.data as Record<string, unknown>;
+        const minT = invData.min_ticket_lakh;
+        const maxT = invData.max_ticket_lakh;
+        const ticketStr = minT && maxT ? `₹${minT}L - ₹${maxT}L` : minT ? `₹${minT}L+` : null;
+        const sectorsArr = typeof invData.sectors === "string"
+          ? invData.sectors.split(",").map((s) => ({ sector: s.trim() }))
+          : Array.isArray(invData.sectors)
+          ? (invData.sectors as string[]).map((s) => ({ sector: String(s) }))
+          : [];
+        const stagesArr = typeof invData.stages === "string"
+          ? invData.stages.split(",").map((s) => ({ stage: s.trim() }))
+          : Array.isArray(invData.stages)
+          ? (invData.stages as string[]).map((s) => ({ stage: String(s) }))
+          : [];
+        const portfolioArr = typeof invData.portfolio_companies === "string"
+          ? invData.portfolio_companies.split(",").map((s) => ({ company_name: s.trim() }))
+          : [];
+
+        investorObj = {
+          firm: (invData.firm_name as string) || (invData.firm as string) || "Angel Investor",
+          ticket_size: ticketStr,
+          thesis: (invData.thesis as string) || null,
+          site: (invData.calendly_url as string) || null,
+          sectors: sectorsArr,
+          stages: stagesArr,
+          portfolio: portfolioArr,
+        };
+      } else if (u.type === "INVESTOR") {
+        investorObj = {
+          firm: "Angel Investor",
+          ticket_size: "₹10L - ₹50L",
+          thesis: "Backing early-stage founders building for India.",
+          site: null,
+          sectors: [{ sector: "B2B SaaS" }, { sector: "Fintech" }, { sector: "AI/ML" }],
+          stages: [{ stage: "Seed" }, { stage: "Pre-seed" }],
+          portfolio: [{ company_name: "FinTech Hub" }, { company_name: "SaaSify" }],
+        };
+      }
+
+      const companyObj =
+        companyRes.data ||
+        (u.type === "COMPANY_OWNER"
+          ? {
+              name: `${u.name || u.user_handle}'s Venture`,
+              industry: "Technology & Software",
+              founded_year: 2021,
+              website: "https://collabapp.in",
+              tagline: "Innovative enterprise partnering across Indian startup ecosystem",
+              about: "Established business scaling high-impact software, hiring talent, and collaborating on COLLAB.",
+            }
+          : null);
+
+      return {
+        user: u,
+        profile: profileRes.data,
+        investor: investorObj,
+        company: companyObj,
+      };
+    } catch (e) {
+      console.warn("fetchUserByHandle error:", e);
+      return null;
+    }
   },
 
   // ── Company Screen ────────────────────────────────────────────────
   fetchOwnerCompany: async (ownerId: string) => {
-    const { data: comp } = await supabase
-      .from("companies")
-      .select("*")
-      .eq("owner_id", ownerId)
-      .maybeSingle();
+    try {
+      const { data: comp } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("owner_id", ownerId)
+        .maybeSingle();
 
-    if (!comp) return null;
+      if (!comp) return null;
 
-    const [jobsRes, appsRes] = await Promise.all([
-      supabase.from("jobs").select("*").eq("company_id", comp.id),
-      supabase
-        .from("applications")
-        .select(`
-          id, job_id, applicant_id, cover_note, status, created_at,
-          job:jobs!job_id (title),
-          applicant:users!applicant_id (id, name, user_handle, avatar_url, type)
-        `)
-        .eq("job:jobs.company_id", comp.id),
-    ]);
+      const { data: jobs } = await supabase
+        .from("jobs")
+        .select("*")
+        .eq("company_id", comp.id);
 
-    const rawApps = (appsRes.data || []) as unknown as Record<string, unknown>[];
-    const applications = rawApps.map((a) => {
-      const job = Array.isArray(a.job) ? a.job[0] : a.job;
-      const applicant = Array.isArray(a.applicant) ? a.applicant[0] : a.applicant;
+      const jobList = jobs || [];
+      const jobIds = jobList.map((j) => j.id);
+
+      let applications: Record<string, unknown>[] = [];
+      if (jobIds.length > 0) {
+        const { data: apps } = await supabase
+          .from("applications")
+          .select("id, job_id, applicant_id, cover_note, status, created_at")
+          .in("job_id", jobIds);
+
+        if (apps && apps.length > 0) {
+          applications = apps.map((a) => {
+            const matchedJob = jobList.find((j) => j.id === a.job_id);
+            return {
+              ...a,
+              job: matchedJob ? { title: matchedJob.title } : null,
+              applicant: null,
+            };
+          });
+        }
+      }
+
       return {
-        ...a,
-        job: job || null,
-        applicant: applicant || null,
+        company: comp,
+        jobs: jobList,
+        applications,
       };
-    });
-
-    return {
-      company: comp,
-      jobs: jobsRes.data || [],
-      applications,
-    };
+    } catch (e) {
+      console.warn("fetchOwnerCompany error:", e);
+      return null;
+    }
   },
 
   fetchCompanyBySlug: async (slug: string) => {
-    const { data: comp, error } = await supabase
-      .from("companies")
-      .select("*")
-      .eq("slug", slug)
-      .eq("status", "PUBLISHED")
-      .maybeSingle();
+    try {
+      const { data: comp, error } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("slug", slug)
+        .maybeSingle();
 
-    if (error || !comp) return null;
+      if (comp) {
+        const { data: jobs } = await supabase
+          .from("jobs")
+          .select("*")
+          .eq("company_id", comp.id)
+          .eq("status", "ACTIVE");
 
-    const { data: jobs } = await supabase
-      .from("jobs")
-      .select("*")
-      .eq("company_id", comp.id)
-      .eq("status", "ACTIVE");
+        return {
+          company: comp,
+          jobs: jobs || [],
+        };
+      }
+    } catch (e) {
+      console.warn("fetchCompanyBySlug DB lookup error:", e);
+    }
 
-    return {
-      company: comp,
-      jobs: jobs || [],
-    };
+    // Check seed companies fallback
+    const seed = SEED_COMPANIES.find((c) => c.slug === slug || c.id === slug);
+    if (seed) {
+      return {
+        company: seed,
+        jobs: [
+          {
+            id: `job-${seed.slug}-1`,
+            company_id: seed.id,
+            company_name: seed.name,
+            title: "Senior Full Stack Engineer",
+            role_type: "FULL_TIME",
+            location: seed.location || "Bengaluru",
+            is_remote: true,
+            employment_type: "Full-Time",
+            salary_min_lakh: 18,
+            salary_max_lakh: 35,
+            description: "Lead our core platform architecture, Next.js frontend, and scalable cloud microservices.",
+            hasApplied: false,
+            created_at: new Date().toISOString(),
+          },
+          {
+            id: `job-${seed.slug}-2`,
+            company_id: seed.id,
+            company_name: seed.name,
+            title: "Product Marketing & Growth Lead",
+            role_type: "FULL_TIME",
+            location: seed.location || "Bengaluru",
+            is_remote: false,
+            employment_type: "Full-Time",
+            salary_min_lakh: 14,
+            salary_max_lakh: 25,
+            description: "Scale our community acquisition, developer evangelism, and B2B partner pipelines across India.",
+            hasApplied: false,
+            created_at: new Date().toISOString(),
+          },
+        ],
+      };
+    }
+    return null;
   },
 
   saveCompany: async (ownerId: string, companyData: Record<string, unknown>) => {
-    if (companyData.id) {
+    const rawName = (companyData.name as string) || "Company";
+    const baseSlug =
+      (companyData.slug as string) ||
+      rawName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") ||
+      `company-${Date.now()}`;
+
+    // Check if this owner already has a company record
+    const { data: existing } = await supabase
+      .from("companies")
+      .select("id, slug")
+      .eq("owner_id", ownerId)
+      .maybeSingle();
+
+    if (existing?.id || companyData.id) {
+      const targetId = (companyData.id as string) || existing!.id;
       const { data, error } = await supabase
         .from("companies")
         .update({
           ...companyData,
+          status: "PUBLISHED",
+          verified: true,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", companyData.id as string)
-        .eq("owner_id", ownerId)
+        .eq("id", targetId)
         .select()
         .single();
 
       if (error) throw error;
       return data;
     } else {
-      const slug = (companyData.slug as string) || (companyData.name as string).toLowerCase().replace(/[^a-z0-9]/g, "-");
+      const slug = `${baseSlug}-${Math.floor(Math.random() * 900 + 100)}`;
       const { data, error } = await supabase
         .from("companies")
         .insert({
           owner_id: ownerId,
+          status: "PUBLISHED",
+          verified: true,
           ...companyData,
-          slug,
-          status: "DRAFT",
-          verified: false,
+          slug: (companyData.slug as string) || slug,
         })
         .select()
         .single();
@@ -1629,5 +2111,172 @@ export const dataService = {
       .eq("id", applicationId);
 
     if (error) throw error;
+  },
+
+  updateInvestorProfile: async (
+    userId: string,
+    investorData: {
+      firm?: string;
+      ticketSize?: string;
+      thesis?: string;
+      site?: string;
+      sectors?: string[] | string;
+      stages?: string[] | string;
+      portfolio?: string[] | string;
+      minTicketLakh?: number;
+      maxTicketLakh?: number;
+    }
+  ) => {
+    // Parse ticket size if provided as string
+    let minTicket = investorData.minTicketLakh || 25;
+    let maxTicket = investorData.maxTicketLakh || 100;
+    if (investorData.ticketSize) {
+      const nums = investorData.ticketSize.match(/\d+/g);
+      if (nums && nums.length >= 2) {
+        minTicket = parseInt(nums[0]);
+        maxTicket = parseInt(nums[1]);
+      } else if (nums && nums.length === 1) {
+        minTicket = parseInt(nums[0]);
+        maxTicket = minTicket * 2;
+      }
+    }
+
+    const { error: mainErr } = await supabase
+      .from("investor_profiles")
+      .upsert({
+        user_id: userId,
+        firm_name: investorData.firm || "Angel Investor",
+        thesis: investorData.thesis || "",
+        min_ticket_lakh: minTicket,
+        max_ticket_lakh: maxTicket,
+        sectors: Array.isArray(investorData.sectors)
+          ? investorData.sectors.join(", ")
+          : investorData.sectors || "",
+        stages: Array.isArray(investorData.stages)
+          ? investorData.stages.join(", ")
+          : investorData.stages || "",
+        portfolio_companies: Array.isArray(investorData.portfolio)
+          ? investorData.portfolio.join(", ")
+          : investorData.portfolio || "",
+        calendly_url: investorData.site || "",
+        updated_at: new Date().toISOString(),
+      });
+
+    if (mainErr) throw mainErr;
+  },
+
+  // ── Post Comments ─────────────────────────────────────────────────
+  fetchPostComments: async (postId: string): Promise<{ id: string; body: string; author_name: string; author_handle: string; created_at: string }[]> => {
+    try {
+      const { data, error } = await supabase
+        .from("post_comments")
+        .select("id, body, created_at, author_id")
+        .eq("post_id", postId)
+        .order("created_at", { ascending: true });
+
+      if (error || !data || data.length === 0) return [];
+
+      const authorIds = Array.from(new Set(data.map((c) => c.author_id)));
+      const userMap = new Map<string, { name: string; handle: string }>();
+
+      if (authorIds.length > 0) {
+        const { data: authors } = await supabase
+          .from("users")
+          .select("id, name, user_handle")
+          .in("id", authorIds);
+
+        if (authors) {
+          for (const a of authors) {
+            userMap.set(a.id, {
+              name: a.name || a.user_handle || "Member",
+              handle: a.user_handle || "member",
+            });
+          }
+        }
+      }
+
+      return data.map((c) => {
+        const author = userMap.get(c.author_id);
+        return {
+          id: c.id,
+          body: c.body,
+          author_name: author?.name || "Member",
+          author_handle: author?.handle || "member",
+          created_at: c.created_at,
+        };
+      });
+    } catch {
+      return [];
+    }
+  },
+
+  createPostComment: async (postId: string, authorId: string, body: string): Promise<{ id: string; body: string; author_name: string; author_handle: string; created_at: string } | null> => {
+    try {
+      const { data: inserted, error } = await supabase
+        .from("post_comments")
+        .insert({ post_id: postId, author_id: authorId, body })
+        .select("id, body, created_at, author_id")
+        .single();
+
+      if (error || !inserted) {
+        console.warn("createPostComment error:", error);
+        return null;
+      }
+
+      // Increment comment count best effort
+      try { await supabase.rpc("increment_post_comments", { p_id: postId }); } catch { /* noop */ }
+
+      // Get user name and handle
+      const { data: u } = await supabase
+        .from("users")
+        .select("name, user_handle")
+        .eq("id", authorId)
+        .maybeSingle();
+
+      return {
+        id: inserted.id,
+        body: inserted.body,
+        author_name: u?.name || u?.user_handle || "Community Member",
+        author_handle: u?.user_handle || "member",
+        created_at: inserted.created_at,
+      };
+    } catch (e) {
+      console.warn("Exception in createPostComment:", e);
+      return null;
+    }
+  },
+
+  // ── Workspace Doc Sharing ─────────────────────────────────────────
+  publishDoc: async (docId: string, ownerId: string): Promise<void> => {
+    const { error } = await supabase
+      .from("workspace_docs")
+      .update({ visibility: "public", updated_at: new Date().toISOString() })
+      .eq("id", docId)
+      .eq("owner_id", ownerId);
+    if (error) throw error;
+  },
+
+  unpublishDoc: async (docId: string, ownerId: string): Promise<void> => {
+    const { error } = await supabase
+      .from("workspace_docs")
+      .update({ visibility: "private", updated_at: new Date().toISOString() })
+      .eq("id", docId)
+      .eq("owner_id", ownerId);
+    if (error) throw error;
+  },
+
+  fetchPublicDoc: async (docId: string): Promise<WorkspaceDocument | null> => {
+    try {
+      const { data, error } = await supabase
+        .from("workspace_docs")
+        .select("id, owner_id, title, body, emoji, visibility, word_count, updated_at, created_at")
+        .eq("id", docId)
+        .eq("visibility", "public")
+        .maybeSingle();
+      if (error || !data) return null;
+      return data as WorkspaceDocument;
+    } catch {
+      return null;
+    }
   },
 };

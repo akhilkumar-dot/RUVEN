@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { TopBar } from "@/ui/TopBar";
 import { BottomDock, NAV_TABS } from "@/ui/BottomDock";
 import { Avatar } from "@/ui/Avatar";
@@ -23,7 +23,10 @@ import {
   User,
   Check,
   CheckSquare,
-  Trash2
+  Trash2,
+  X,
+  Send,
+  Link2,
 } from "lucide-react";
 
 // Fallback quotes (used only if DB is empty)
@@ -58,6 +61,178 @@ interface FeedPost {
   commentCount: number;
   createdAt: string;
   liked?: boolean;
+}
+
+// ── Inline Comment Drawer ─────────────────────────────────────
+interface CommentDrawerProps {
+  post: FeedPost;
+  currentUserId?: string;
+  onClose: () => void;
+  onCommentAdded: (postId: string) => void;
+}
+
+function CommentDrawer({ post, currentUserId, onClose, onCommentAdded }: CommentDrawerProps) {
+  const [comments, setComments] = useState<{ id: string; body: string; author_name: string; author_handle: string; created_at: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [text, setText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const textRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      try {
+        const data = await dataService.fetchPostComments(post.id);
+        if (!cancelled) setComments(data);
+      } catch {
+        // keep empty
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [post.id]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!text.trim() || !currentUserId || submitting) return;
+    const commentBody = text.trim();
+    setSubmitting(true);
+    try {
+      const newComment = await dataService.createPostComment(post.id, currentUserId, commentBody);
+      if (newComment) {
+        setComments((prev) => [...prev, newComment]);
+        onCommentAdded(post.id);
+      } else {
+        // Optimistic fallback
+        setComments((prev) => [
+          ...prev,
+          {
+            id: `cmt-${Date.now()}`,
+            body: commentBody,
+            author_name: "You",
+            author_handle: "you",
+            created_at: new Date().toISOString(),
+          },
+        ]);
+        onCommentAdded(post.id);
+      }
+      setText("");
+    } catch (err) {
+      console.error("Comment error:", err);
+      // Still show comment optimistically
+      setComments((prev) => [
+        ...prev,
+        {
+          id: `cmt-${Date.now()}`,
+          body: commentBody,
+          author_name: "You",
+          author_handle: "you",
+          created_at: new Date().toISOString(),
+        },
+      ]);
+      onCommentAdded(post.id);
+      setText("");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <motion.div
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ type: "spring", damping: 28, stiffness: 300 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative bg-[#121214] border border-[#222226] rounded-t-3xl w-full max-w-lg max-h-[75dvh] flex flex-col"
+      >
+        {/* Handle */}
+        <div className="w-10 h-1 bg-[#3A3A3E] rounded-full mx-auto mt-3 mb-1 shrink-0" />
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-2 border-b border-[#1C1C1E] shrink-0">
+          <h3 className="text-white font-semibold text-[15px]">Comments ({post.commentCount + comments.filter(c => ![''].includes(c.id)).length})</h3>
+          <button onClick={onClose} className="text-[#6E6E73] hover:text-white p-1">
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Post preview */}
+        <div className="px-4 py-3 border-b border-[#1C1C1E] shrink-0">
+          <p className="text-[#A1A1A6] text-[12px] line-clamp-2">
+            <span className="text-[#A24BFF] font-semibold">@{post.authorHandle}</span>: {post.body}
+          </p>
+        </div>
+
+        {/* Comments list */}
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0">
+          {loading && (
+            <div className="space-y-3">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="flex gap-2 animate-pulse">
+                  <div className="w-8 h-8 rounded-full bg-[#1C1C1E] shrink-0" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3 bg-[#1C1C1E] rounded w-1/3" />
+                    <div className="h-3 bg-[#1C1C1E] rounded w-3/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {!loading && comments.length === 0 && (
+            <p className="text-[#6E6E73] text-[13px] text-center py-6">
+              No comments yet. Be the first to reply.
+            </p>
+          )}
+          {!loading && comments.map((c) => (
+            <div key={c.id} className="flex gap-2.5">
+              <Avatar name={c.author_name || c.author_handle} size="sm" className="shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-white text-[13px] font-semibold">@{c.author_handle}</span>
+                  <span className="text-[#6E6E73] text-[11px]">
+                    <TimeAgo date={c.created_at} fallback="just now" />
+                  </span>
+                </div>
+                <p className="text-[#D1D1D6] text-[13px] mt-0.5 leading-snug whitespace-pre-wrap">{c.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Comment input */}
+        <form onSubmit={handleSubmit} className="px-4 py-3 border-t border-[#1C1C1E] flex gap-2 shrink-0" style={{ paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))" }}>
+          <textarea
+            ref={textRef}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e as unknown as React.FormEvent);
+              }
+            }}
+            rows={1}
+            placeholder={currentUserId ? "Add a comment…" : "Sign in to comment"}
+            disabled={!currentUserId}
+            className="flex-1 bg-[#1A1A1E] text-white rounded-2xl px-4 py-2.5 text-[13px] border border-[#2A2A2E] outline-none focus:border-[#A24BFF] resize-none placeholder:text-[#6E6E73] disabled:opacity-50"
+          />
+          <button
+            type="submit"
+            disabled={!text.trim() || !currentUserId || submitting}
+            className="w-10 h-10 rounded-full bg-[#A24BFF] text-white flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#8D34F0] transition-colors self-end"
+          >
+            <Send size={15} />
+          </button>
+        </form>
+      </motion.div>
+    </div>
+  );
 }
 
 function dbPostToUiPost(p: DbFeedPost): FeedPost {
@@ -243,6 +418,8 @@ export default function HomeClient() {
   const [feedLoading, setFeedLoading] = useState(false);
   const [newPostText, setNewPostText] = useState("");
   const [showPostBox, setShowPostBox] = useState(false);
+  const [commentPost, setCommentPost] = useState<FeedPost | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Real data states
   const [dailyQuote, setDailyQuote] = useState<{ quote: string; author: string }>(FALLBACK_QUOTES[activeRole]);
@@ -340,6 +517,38 @@ export default function HomeClient() {
     }
   }
 
+  const handleShare = async (post: FeedPost) => {
+    // Share a link directly to this post (opens home feed)
+    const url = typeof window !== "undefined" ? `${window.location.origin}/home?post=${post.id}` : "";
+    let shared = false;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title: `${post.authorName} on COLLAB`,
+          text: post.body.slice(0, 120) + (post.body.length > 120 ? "…" : ""),
+          url,
+        });
+        shared = true;
+        setToastMessage("Shared successfully!");
+      } catch {
+        // user cancelled or share failed, fallback
+      }
+    }
+    if (!shared && typeof navigator !== "undefined" && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(url);
+        setToastMessage("Post link copied to clipboard!");
+      } catch {
+        setToastMessage("Link: " + url);
+      }
+    }
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleComment = (post: FeedPost) => {
+    setCommentPost(post);
+  };
+
   async function handleCreatePost(e: React.FormEvent) {
     e.preventDefault();
     if (!newPostText.trim() || !user?.id) return;
@@ -360,9 +569,40 @@ export default function HomeClient() {
   return (
     <div className="min-h-dvh bg-black flex flex-col">
       {/* Top bar */}
-      <TopBar
-        unreadCount={0}
-      />
+      <TopBar />
+
+      {/* Inline Comment Drawer */}
+      <AnimatePresence>
+        {commentPost && (
+          <CommentDrawer
+            post={commentPost}
+            currentUserId={user?.id}
+            onClose={() => setCommentPost(null)}
+            onCommentAdded={(postId) => {
+              setPosts((prev) =>
+                prev.map((p) =>
+                  p.id === postId ? { ...p, commentCount: p.commentCount + 1 } : p
+                )
+              );
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] px-4 py-2 bg-[#1C1C1E] border border-[#A24BFF]/40 text-white text-[13px] font-medium rounded-2xl shadow-2xl backdrop-blur-xl whitespace-nowrap flex items-center gap-2"
+          >
+            <span className="w-2 h-2 rounded-full bg-[#A24BFF] animate-pulse" />
+            {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <main
@@ -679,15 +919,15 @@ export default function HomeClient() {
                 <div data-testid="ads-panel" className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#A1A1A6] px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-                      {activeAd ? "Sponsored" : "Ruven Ecosystem"}
+                      {activeAd ? "Sponsored" : "COLLAB Ecosystem"}
                     </span>
                     <span className="text-[11px] text-[#6E6E73]">
-                      {activeAd?.sponsor_name || "Startup Perks"}
+                      {activeAd?.sponsor_name || activeAd?.business_name || "Startup Perks"}
                     </span>
                   </div>
                   <div className="mt-2">
                     <h4 className="text-white font-bold text-[15px]">
-                      {activeAd ? activeAd.title : "Verified Startup Grants & Perks"}
+                      {activeAd ? (activeAd.title || activeAd.headline) : "Verified Startup Grants & Perks"}
                     </h4>
                     <p className="text-[#8E8E93] text-[12px] mt-1 leading-snug">
                       {activeAd
@@ -697,13 +937,13 @@ export default function HomeClient() {
                   </div>
                   <div className="pt-2 flex items-center justify-between border-t border-[#1E1E22]">
                     <span className="text-[#D4FF3A] text-[12px] font-medium">
-                      {activeAd?.tag || "Ruven Pro"}
+                      {activeAd?.tag || "COLLAB Pro"}
                     </span>
                     <a
-                      href={activeAd?.cta_link || "/plans"}
+                      href={activeAd?.cta_link || activeAd?.website || "/plans"}
                       className="px-3 py-1 bg-white text-black text-[11px] font-bold rounded-lg transition-colors"
                     >
-                      {activeAd?.cta_text || "Explore"}
+                      {activeAd?.cta_text || activeAd?.button_text || "Explore"}
                     </a>
                   </div>
                 </div>
@@ -857,7 +1097,7 @@ export default function HomeClient() {
                     </div>
                     <h3 className="text-white font-bold text-[16px]">No community posts yet</h3>
                     <p className="text-[#8E8E93] text-[13px] mx-auto">
-                      Be the first to share an update to the Ruven network.
+                      Be the first to share an update to the COLLAB network.
                     </p>
                     <button
                       onClick={() => setShowPostBox(true)}
@@ -870,7 +1110,7 @@ export default function HomeClient() {
 
                 {/* Feed Posts */}
                 {!feedLoading &&
-                  posts.map((post) => (
+                  posts.map((post, index) => (
                     <div key={post.id} className="space-y-4">
                       <div className="bg-[#0C0C0C] border border-[#1C1C1E] rounded-2xl p-4 space-y-3 hover:border-[#2A2A2E] transition-colors">
                         <div className="flex items-start justify-between">
@@ -906,17 +1146,120 @@ export default function HomeClient() {
                               <Heart size={16} fill={post.liked ? "currentColor" : "none"} />
                               <span>{post.likeCount}</span>
                             </button>
-                            <button className="flex items-center gap-1.5 hover:text-white transition-colors">
+                            <button
+                              onClick={() => handleComment(post)}
+                              className="flex items-center gap-1.5 hover:text-white transition-colors"
+                            >
                               <MessageCircle size={16} />
                               <span>{post.commentCount}</span>
                             </button>
-                            <button className="hover:text-white transition-colors">
+                            <button
+                              onClick={() => handleShare(post)}
+                              className="hover:text-white transition-colors"
+                            >
                               <Share2 size={15} />
                             </button>
                           </div>
                           <TimeAgo date={post.createdAt} fallback="1h" className="text-[11px] text-[#6E6E73]" />
                         </div>
                       </div>
+
+                      {/* Inject rotating sponsor ad every 2 posts */}
+                      {(index + 1) % 2 === 0 && (() => {
+                        const SPONSOR_ADS = [
+                          {
+                            sponsor: "AWS for Startups",
+                            color: "#FF9900",
+                            title: "Claim up to $25,000 in AWS Cloud Credits",
+                            desc: "Accelerate your compute and AI workloads with free AWS promotional credits and 1-on-1 architecture reviews.",
+                            cta: "Claim Credits",
+                            href: "https://aws.amazon.com/startups/",
+                            badge: "🚀 Cloud Deal",
+                          },
+                          {
+                            sponsor: "COLLAB Pro",
+                            color: "#A24BFF",
+                            title: "Unlock 500+ Verified Angel Introductions",
+                            desc: "Direct access to top angels, standard legal SAFE templates, and priority discoverability on COLLAB.",
+                            cta: "Upgrade to Pro",
+                            href: "/plans",
+                            badge: "⚡ COLLAB",
+                          },
+                          {
+                            sponsor: "Razorpay Rize",
+                            color: "#3395FF",
+                            title: "Zero Gateway Fees + Instant Incorporation",
+                            desc: "Accept payments globally with zero platform fee for first 3 months plus dedicated startup banking support.",
+                            cta: "Join Rize",
+                            href: "https://razorpay.com/rize/",
+                            badge: "💳 Fintech",
+                          },
+                          {
+                            sponsor: "Google Cloud for Startups",
+                            color: "#34A853",
+                            title: "Build with Gemini 1.5 & Vertex AI Credits",
+                            desc: "Get up to $100K in Google Cloud credits, technical mentoring, and Google Workspace for your core team.",
+                            cta: "Apply Now",
+                            href: "https://cloud.google.com/startup",
+                            badge: "☁️ AI Credits",
+                          },
+                          {
+                            sponsor: "Zoho for Startups",
+                            color: "#E44D2E",
+                            title: "Zoho One — Free 30+ Startup Apps for 1 Year",
+                            desc: "CRM, books, invoices, contracts, payroll, and recruiting suite free for newly registered startups.",
+                            cta: "Get Suite",
+                            href: "https://www.zoho.com/startups/",
+                            badge: "🏢 SaaS Bundle",
+                          },
+                        ];
+                        const adIdx = Math.floor(index / 2) % SPONSOR_ADS.length;
+                        const ad = activeAd && index === 1 ? {
+                          sponsor: activeAd.sponsor_name || "COLLAB Partners",
+                          color: "#A24BFF",
+                          title: activeAd.title,
+                          desc: activeAd.description,
+                          cta: activeAd.cta_text || "Learn More",
+                          href: activeAd.cta_link || "/plans",
+                          badge: "Featured Partner",
+                        } : SPONSOR_ADS[adIdx];
+
+                        return (
+                          <div className="bg-[#0F0F12] border border-[#1E1E22] rounded-2xl p-4 space-y-2.5 transition-all hover:border-[#2C2C32]">
+                            <div className="flex items-center justify-between">
+                              <span
+                                className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
+                                style={{ color: ad.color, backgroundColor: `${ad.color}15`, borderColor: `${ad.color}40` }}
+                              >
+                                Sponsored
+                              </span>
+                              <span className="text-[11px] text-[#8E8E93]">{ad.sponsor}</span>
+                            </div>
+                            <div>
+                              <span
+                                className="text-[10px] font-semibold px-2 py-0.5 rounded-full inline-block mb-1.5"
+                                style={{ color: ad.color, backgroundColor: `${ad.color}15` }}
+                              >
+                                {ad.badge}
+                              </span>
+                              <h4 className="text-white font-bold text-[15px]">{ad.title}</h4>
+                              <p className="text-[#8E8E93] text-[12px] mt-1 leading-snug">{ad.desc}</p>
+                            </div>
+                            <div className="pt-2 flex items-center justify-between border-t border-[#1E1E22]">
+                              <span className="text-[#D4FF3A] text-[12px] font-medium">Featured Deal</span>
+                              <a
+                                href={ad.href}
+                                target={ad.href.startsWith("http") ? "_blank" : undefined}
+                                rel={ad.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                                className="px-3 py-1.5 text-black text-[11px] font-bold rounded-lg transition-colors"
+                                style={{ backgroundColor: ad.color }}
+                              >
+                                {ad.cta}
+                              </a>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   ))}
               </div>

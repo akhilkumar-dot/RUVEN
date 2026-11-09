@@ -18,6 +18,7 @@ import { WavyGradientHeader } from "@/ui/WavyGradientHeader";
 import { useAuthStore, type AccountType } from "@/lib/store/authStore";
 import { type ApiError } from "@/lib/api/client";
 import { supabaseAuth } from "@/lib/api/supabaseAuth";
+import { dataService } from "@/lib/api/dataService";
 import { cn } from "@/lib/utils";
 
 // ── Validation schemas ────────────────────────────────────────
@@ -152,6 +153,17 @@ function SignUpPageContent() {
   const [serverError, setServerError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Dedicated Company fields
+  const [companyName, setCompanyName] = useState("");
+  const [companyWebsite, setCompanyWebsite] = useState("");
+  const [companyIndustry, setCompanyIndustry] = useState("B2B SaaS");
+  const [companyLocation, setCompanyLocation] = useState("Bengaluru");
+  const [companyTagline, setCompanyTagline] = useState("");
+
+  // Dedicated Investor fields
+  const [investorFirm, setInvestorFirm] = useState("");
+  const [investorThesis, setInvestorThesis] = useState("");
+
   // Sign in state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -165,16 +177,53 @@ function SignUpPageContent() {
   } = useForm<Step1>({ resolver: zodResolver(step1Schema) });
 
   async function onSubmit(values: Step1) {
+    if (accountType === "COMPANY_OWNER" && !companyName.trim()) {
+      setServerError("Please enter your Company Name");
+      return;
+    }
     setServerError("");
     setSubmitting(true);
     try {
-      await register({
+      const authRes = await register({
         name: values.name,
         email: values.email,
         phone: values.phone,
         password: values.password,
         type: accountType,
       });
+
+      const newUserId = authRes?.id;
+      if (newUserId) {
+        if (accountType === "COMPANY_OWNER") {
+          try {
+            await dataService.saveCompany(newUserId, {
+              name: companyName.trim(),
+              website: companyWebsite.trim() || undefined,
+              industry: companyIndustry,
+              location: companyLocation,
+              tagline: companyTagline.trim() || undefined,
+              description: companyTagline.trim() || "Established company partnering and hiring on COLLAB.",
+              about: companyTagline.trim() || "Established company partnering and hiring on COLLAB.",
+              status: "PUBLISHED",
+              verified: true,
+            });
+          } catch (compErr) {
+            console.warn("Company creation error during signup:", compErr);
+          }
+        } else if (accountType === "INVESTOR") {
+          try {
+            await dataService.updateInvestorProfile(newUserId, {
+              firm: investorFirm.trim() || "Angel Investor",
+              thesis: investorThesis.trim() || "Active investor in Indian technology startups.",
+              sectors: ["B2B SaaS", "Fintech", "AI/ML"],
+              stages: ["Seed", "Pre-seed"],
+            });
+          } catch (invErr) {
+            console.warn("Investor profile error during signup:", invErr);
+          }
+        }
+      }
+
       setStep(2);
     } catch (err) {
       const e = err as ApiError;
@@ -199,7 +248,7 @@ function SignUpPageContent() {
         emailOrHandle: loginEmail,
         password: loginPassword,
       });
-      router.replace("/home");
+      router.replace("/onboarding");
     } catch (err: unknown) {
       const e = err as ApiError;
       setLoginError(e?.detail ?? "Invalid credentials. Please try again.");
@@ -365,7 +414,7 @@ function SignUpPageContent() {
                 <button
                   type="button"
                   onClick={() => {
-                    setLoginEmail("freelancer@founderbridge.in");
+                    setLoginEmail("freelancer@collabapp.in");
                     setLoginPassword("password123");
                   }}
                   className="py-1.5 px-2 rounded-lg bg-[#141416] border border-[#222] text-[#A1A1A6] hover:text-white hover:border-[#333] transition-colors truncate text-left"
@@ -375,7 +424,7 @@ function SignUpPageContent() {
                 <button
                   type="button"
                   onClick={() => {
-                    setLoginEmail("founder@founderbridge.in");
+                    setLoginEmail("founder@collabapp.in");
                     setLoginPassword("password123");
                   }}
                   className="py-1.5 px-2 rounded-lg bg-[#141416] border border-[#222] text-[#A1A1A6] hover:text-white hover:border-[#333] transition-colors truncate text-left"
@@ -385,7 +434,7 @@ function SignUpPageContent() {
                 <button
                   type="button"
                   onClick={() => {
-                    setLoginEmail("company@founderbridge.in");
+                    setLoginEmail("company@collabapp.in");
                     setLoginPassword("password123");
                   }}
                   className="py-1.5 px-2 rounded-lg bg-[#141416] border border-[#222] text-[#A1A1A6] hover:text-white hover:border-[#333] transition-colors truncate text-left"
@@ -395,7 +444,7 @@ function SignUpPageContent() {
                 <button
                   type="button"
                   onClick={() => {
-                    setLoginEmail("investor@founderbridge.in");
+                    setLoginEmail("investor@collabapp.in");
                     setLoginPassword("password123");
                   }}
                   className="py-1.5 px-2 rounded-lg bg-[#141416] border border-[#222] text-[#A1A1A6] hover:text-white hover:border-[#333] transition-colors truncate text-left"
@@ -457,15 +506,100 @@ function SignUpPageContent() {
                     transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
                   >
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                      {/* Company Specific Details */}
+                      {accountType === "COMPANY_OWNER" && (
+                        <div className="p-3.5 rounded-2xl bg-[#141418] border border-[#5E9C8A]/30 space-y-3">
+                          <div className="flex items-center gap-2 text-[#5E9C8A] text-[13px] font-semibold">
+                            <Building2 size={16} /> Company Details
+                          </div>
+                          <PillInput
+                            label="Company Name *"
+                            placeholder="e.g. Apex Tech Solutions"
+                            value={companyName}
+                            onChange={(e) => setCompanyName(e.target.value)}
+                          />
+                          <PillInput
+                            label="Company Website"
+                            placeholder="e.g. https://apextech.io"
+                            value={companyWebsite}
+                            onChange={(e) => setCompanyWebsite(e.target.value)}
+                          />
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-[11px] text-[#8E8E93] mb-1 block px-2">Industry</label>
+                              <select
+                                value={companyIndustry}
+                                onChange={(e) => setCompanyIndustry(e.target.value)}
+                                className="w-full bg-[#1C1C1E] text-white rounded-xl px-3 py-2 text-[12px] border border-[#2A2A2E] outline-none"
+                              >
+                                <option value="B2B SaaS">B2B SaaS</option>
+                                <option value="Fintech">Fintech</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Deeptech">Deeptech</option>
+                                <option value="E-commerce">E-commerce</option>
+                                <option value="Edtech">Edtech</option>
+                                <option value="Manufacturing">Manufacturing</option>
+                                <option value="Agritech">Agritech</option>
+                                <option value="Other">Other</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-[11px] text-[#8E8E93] mb-1 block px-2">Location / Hub</label>
+                              <select
+                                value={companyLocation}
+                                onChange={(e) => setCompanyLocation(e.target.value)}
+                                className="w-full bg-[#1C1C1E] text-white rounded-xl px-3 py-2 text-[12px] border border-[#2A2A2E] outline-none"
+                              >
+                                <option value="Bengaluru">Bengaluru</option>
+                                <option value="Mumbai">Mumbai</option>
+                                <option value="Delhi NCR">Delhi NCR</option>
+                                <option value="Hyderabad">Hyderabad</option>
+                                <option value="Pune">Pune</option>
+                                <option value="Chennai">Chennai</option>
+                                <option value="Kolkata">Kolkata</option>
+                                <option value="Remote">Remote</option>
+                              </select>
+                            </div>
+                          </div>
+                          <PillInput
+                            label="Company Tagline"
+                            placeholder="e.g. Next-gen automated cloud infrastructure"
+                            value={companyTagline}
+                            onChange={(e) => setCompanyTagline(e.target.value)}
+                          />
+                        </div>
+                      )}
+
+                      {/* Investor Specific Details */}
+                      {accountType === "INVESTOR" && (
+                        <div className="p-3.5 rounded-2xl bg-[#141418] border border-[#FF8A3D]/30 space-y-3">
+                          <div className="flex items-center gap-2 text-[#FF8A3D] text-[13px] font-semibold">
+                            <span>💼</span> Fund / Investor Details
+                          </div>
+                          <PillInput
+                            label="Fund / Firm Name (or Angel)"
+                            placeholder="e.g. Bharat Seed Ventures"
+                            value={investorFirm}
+                            onChange={(e) => setInvestorFirm(e.target.value)}
+                          />
+                          <PillInput
+                            label="Investment Thesis"
+                            placeholder="e.g. Early-stage seed investments in B2B SaaS"
+                            value={investorThesis}
+                            onChange={(e) => setInvestorThesis(e.target.value)}
+                          />
+                        </div>
+                      )}
+
                       <PillInput
-                        label="Full Name"
+                        label={accountType === "COMPANY_OWNER" ? "Owner / Representative Full Name" : "Full Name"}
                         autoComplete="name"
                         placeholder="Alex Kumar"
                         error={errors.name?.message}
                         {...reg("name")}
                       />
                       <PillInput
-                        label="Email"
+                        label={accountType === "COMPANY_OWNER" ? "Work Email" : "Email"}
                         type="email"
                         autoComplete="email"
                         placeholder="alex@company.com"
@@ -580,7 +714,7 @@ function SignUpPageContent() {
 
                     <div>
                       <p className="text-white text-[20px] font-semibold">
-                        Welcome to FounderBridge!
+                        Welcome to COLLAB!
                       </p>
                       <p className="text-[#6E6E73] text-[15px] mt-2 leading-relaxed">
                         Account created successfully. Complete your profile to connect with founders and investors.
@@ -590,7 +724,7 @@ function SignUpPageContent() {
                     <GradientRingButton
                       size="lg"
                       className="w-full"
-                      onClick={() => router.replace("/home")}
+                      onClick={() => router.replace("/onboarding")}
                     >
                       Enter Platform <ChevronRight size={18} />
                     </GradientRingButton>

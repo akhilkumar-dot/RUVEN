@@ -16,6 +16,8 @@ import {
   ShieldCheck,
   Clock,
   CheckCircle2,
+  Building2,
+  ChevronRight,
 } from "lucide-react";
 import { Avatar } from "@/ui/Avatar";
 import { BridgeLogo } from "@/ui/BridgeLogo";
@@ -48,6 +50,23 @@ interface LoadedUserProfile {
     experience?: string | null;
     links?: string | null;
     photo_url?: string | null;
+  } | null;
+  investor?: {
+    firm?: string | null;
+    ticket_size?: string | null;
+    thesis?: string | null;
+    site?: string | null;
+    sectors?: { sector: string }[];
+    stages?: { stage: string }[];
+    portfolio?: { company_name: string }[];
+  } | null;
+  company?: {
+    name: string;
+    industry?: string | null;
+    founded_year?: number | null;
+    website?: string | null;
+    tagline?: string | null;
+    about?: string | null;
   } | null;
 }
 
@@ -372,6 +391,91 @@ function UserProfileContent({ params }: PublicUserPageProps) {
                 <p className="text-sm text-white/90 whitespace-pre-line leading-relaxed">
                   {data.profile.experience}
                 </p>
+              </div>
+            )}
+
+            {/* Investor Details */}
+            {data.user.type === "INVESTOR" && data.investor && (
+              <div className="space-y-4">
+                <div className="bg-[#121212] rounded-2xl p-5 border border-[#1C1C1E]">
+                  <h2 className="text-[#FF8A3D] text-xs font-semibold uppercase tracking-wider mb-3">
+                    Investment Details
+                  </h2>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <p className="text-[#8E8E93] text-[10px] uppercase font-bold tracking-tight">Firm</p>
+                      <p className="text-white text-sm font-medium mt-0.5">{data.investor.firm || "Angel"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[#8E8E93] text-[10px] uppercase font-bold tracking-tight">Ticket Size</p>
+                      <p className="text-white text-sm font-medium mt-0.5">{data.investor.ticket_size || "N/A"}</p>
+                    </div>
+                  </div>
+                  {data.investor.thesis && (
+                    <div className="mb-4">
+                      <p className="text-[#8E8E93] text-[10px] uppercase font-bold tracking-tight">Thesis</p>
+                      <p className="text-white/90 text-sm mt-1 leading-relaxed">{data.investor.thesis}</p>
+                    </div>
+                  )}
+                  {data.investor.stages && data.investor.stages.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-[#8E8E93] text-[10px] uppercase font-bold tracking-tight mb-1.5">Focus Stages</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {data.investor.stages.map((s) => (
+                          <span key={s.stage} className="px-2 py-0.5 rounded bg-[#FF8A3D]/10 border border-[#FF8A3D]/20 text-[#FF8A3D] text-[11px]">
+                            {s.stage}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {data.investor.portfolio && data.investor.portfolio.length > 0 && (
+                    <div>
+                      <p className="text-[#8E8E93] text-[10px] uppercase font-bold tracking-tight mb-1.5">Portfolio</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {data.investor.portfolio.map((p) => (
+                          <span key={p.company_name} className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white text-[11px]">
+                            {p.company_name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Company Details */}
+            {data.user.type === "COMPANY_OWNER" && data.company && (
+              <div className="bg-[#121212] rounded-2xl p-5 border border-[#1C1C1E]">
+                <h2 className="text-[#5E9C8A] text-xs font-semibold uppercase tracking-wider mb-3">
+                  Company Details
+                </h2>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-black border border-[#2A2A2E] flex items-center justify-center shrink-0">
+                    <Building2 size={24} className="text-[#5E9C8A]" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-base">{data.company.name}</h3>
+                    <p className="text-[#8E8E93] text-xs">{data.company.industry} · Founded {data.company.founded_year}</p>
+                  </div>
+                </div>
+                {data.company.tagline && (
+                  <p className="text-white/90 text-sm font-medium mb-2 italic">"{data.company.tagline}"</p>
+                )}
+                {data.company.about && (
+                  <p className="text-[#B3B3BA] text-sm leading-relaxed mb-4">{data.company.about}</p>
+                )}
+                {data.company.website && (
+                  <a
+                    href={data.company.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-[#5E9C8A] text-xs font-semibold hover:underline"
+                  >
+                    Visit Website <ChevronRight size={14} />
+                  </a>
+                )}
               </div>
             )}
 

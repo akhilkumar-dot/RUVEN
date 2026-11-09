@@ -444,7 +444,7 @@ function MeetupsPageContent() {
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
-      <TopBar unreadCount={0} />
+      <TopBar />
 
       <main className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))]">
         <div className="px-4 pt-4 w-full">

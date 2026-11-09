@@ -262,7 +262,10 @@ function ChatThread({
   return (
     <div className="flex flex-col h-full relative bg-black">
       {/* Thread header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-[#1C1C1E] bg-[#0A0A0C]">
+      <div 
+        className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3 border-b border-[#1C1C1E] bg-black/80 backdrop-blur-xl"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
+      >
         <button
           onClick={onBack}
           className="text-[#A1A1A6] hover:text-white transition-colors"
@@ -388,6 +391,7 @@ function MessagesPageContent() {
   const user = useAuthStore((s) => s.user);
   const searchParams = useSearchParams();
   const roomParam = searchParams.get("room");
+  const userParam = searchParams.get("user");
 
   const [convos, setConvos] = useState<ChatRoomSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -415,6 +419,19 @@ function MessagesPageContent() {
         if (isMounted) {
           setConvos(rooms);
         }
+
+        if (userParam && isMounted) {
+          try {
+            const directRoomId = await dataService.getOrCreateDirectRoom(user.id, userParam);
+            if (directRoomId && isMounted) {
+              setSelectedId(directRoomId);
+              const updatedRooms = await dataService.fetchUserRooms(user.id);
+              if (isMounted) setConvos(updatedRooms);
+            }
+          } catch (e) {
+            console.warn("Could not auto-open direct room:", e);
+          }
+        }
       } catch (err) {
         console.error("Failed to load user rooms:", err);
       } finally {
@@ -426,13 +443,13 @@ function MessagesPageContent() {
     return () => {
       isMounted = false;
     };
-  }, [user?.id, roomParam]);
+  }, [user?.id, roomParam, userParam]);
 
   const activeConvo = convos.find((c) => c.id === selectedId) || null;
 
   return (
     <div className="min-h-dvh bg-black flex flex-col">
-      {!selectedId && <TopBar unreadCount={0} />}
+      {!selectedId && <TopBar />}
 
       <main
         className="flex-1 flex overflow-hidden w-full"
@@ -448,7 +465,10 @@ function MessagesPageContent() {
               selectedId ? "hidden" : "flex"
             )}
           >
-            <div className="px-4 pt-4 pb-2">
+            <div 
+              className="sticky top-0 z-20 px-4 py-3 bg-black/80 backdrop-blur-xl border-b border-[#1C1C1E]/50"
+              style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
+            >
               <h1 className="text-white font-bold text-[22px]">Messages</h1>
             </div>
             <ConvoList

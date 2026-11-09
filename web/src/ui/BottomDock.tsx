@@ -13,9 +13,8 @@ import {
   Building2,
   User,
   Crown,
-  Plus,
   LayoutDashboard,
-  Rss
+  Rss,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { Avatar } from "./Avatar";
@@ -23,18 +22,16 @@ import { useAuthStore } from "@/lib/store/authStore";
 
 // ── Route map for bottom nav ──────────────────────────────────
 export const NAV_TABS = [
-  { key: "home",      label: "Home",      href: "/home",      icon: Home },
-  { key: "dashboard", label: "Ecosystem", href: "/home",      icon: LayoutDashboard },
-  { key: "feed",      label: "Feed",      href: "/home",      icon: Rss },
-  { key: "discover",  label: "Discover",  href: "/discover",  icon: Compass },
-  { key: "hub",       label: "Hub",       href: "/hub",       icon: Zap },
-  { key: "ideas",     label: "Ideas",     href: "/ideas",     icon: Lightbulb },
-  { key: "meetups",   label: "Meetups",   href: "/meetups",   icon: Coffee },
-  { key: "messages",  label: "Messages",  href: "/messages",  icon: MessageSquare },
-  { key: "workspace", label: "Docs",      href: "/workspace", icon: FileText },
-  { key: "company",   label: "Company",   href: "/company",   icon: Building2 },
-  { key: "profile",   label: "Profile",   href: "/profile",   icon: User },
-  { key: "plans",     label: "Plans",     href: "/plans",     icon: Crown },
+  { key: "home", label: "Home", href: "/home", icon: Home },
+  { key: "discover", label: "Discover", href: "/discover", icon: Compass },
+  { key: "hub", label: "Hub", href: "/hub", icon: Zap },
+  { key: "ideas", label: "Ideas", href: "/ideas", icon: Lightbulb },
+  { key: "meetups", label: "Meetups", href: "/meetups", icon: Coffee },
+  { key: "messages", label: "Messages", href: "/messages", icon: MessageSquare },
+  { key: "workspace", label: "Docs", href: "/workspace", icon: FileText },
+  { key: "company", label: "Company", href: "/company", icon: Building2 },
+  { key: "profile", label: "Profile", href: "/profile", icon: User },
+  { key: "plans", label: "Plans", href: "/plans", icon: Crown },
 ] as const;
 
 const PRIMARY_TABS = NAV_TABS.filter(t =>
@@ -50,7 +47,6 @@ interface BottomDockProps {
   className?: string;
   activeTab?: string;
   onTabChange?: (key: string) => void;
-  onCreateOpen?: () => void;
 }
 
 export function BottomDock({
@@ -61,7 +57,6 @@ export function BottomDock({
   className,
   activeTab: controlledActiveTab,
   onTabChange,
-  onCreateOpen,
 }: BottomDockProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -73,7 +68,7 @@ export function BottomDock({
   const resolvedName = userName === "Me" ? (authUser?.userHandle || "Me") : userName;
 
   // Derive active tab from controlled prop or current route
-  const activeTab = controlledActiveTab ?? 
+  const activeTab = controlledActiveTab ??
     (NAV_TABS.find((t) => pathname?.startsWith(t.href))?.key ?? "home");
 
   const visibleTabs = tabs ?? PRIMARY_TABS;
@@ -91,27 +86,27 @@ export function BottomDock({
     <nav
       aria-label="Main navigation"
       className={cn(
-        "fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 pointer-events-none pb-[env(safe-area-inset-bottom)]",
+        "fixed bottom-0 left-0 w-full z-50 pointer-events-none pb-[env(safe-area-inset-bottom)]",
         className
       )}
     >
       {/* Subtle gradient fade behind the dock */}
       <div
-        className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
+        className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none max-w-[430px] mx-auto"
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto w-full px-4 pb-8">
+      <div className="relative mx-auto w-full max-w-[430px] px-4 pb-6">
         <div
           className={cn(
-            "flex items-center justify-between gap-2 p-2",
-            "bg-[#0E0E10]/80 backdrop-blur-3xl border border-white/5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.6)]",
+            "flex items-center justify-between gap-1 px-3 py-2.5",
+            "bg-[#0E0E10]/90 backdrop-blur-3xl border border-white/8 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]",
             "pointer-events-auto",
             className
           )}
         >
-          {/* Main Tabs */}
-          <div className="flex-1 flex items-center justify-around gap-1 px-1">
+          {/* Main Tabs — 5 primary tabs with icon + label */}
+          <div className="flex items-center justify-around gap-1 px-1 flex-1">
             {visibleTabs.map((tab) => {
               const navTab = NAV_TABS.find(t => t.key === tab.key);
               const Icon = navTab?.icon || Home;
@@ -122,48 +117,33 @@ export function BottomDock({
                   key={tab.key}
                   onClick={() => handleTabChange(tab.key)}
                   className={cn(
-                    "relative flex items-center justify-center gap-2 px-3 lg:px-4 h-11 rounded-2xl transition-all duration-300",
-                    isActive ? "text-white" : "text-[#8E8E93] hover:text-[#A1A1A6] hover:bg-white/5"
+                    "flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-2xl transition-all duration-300 shrink-0",
+                    isActive
+                      ? "bg-[#A24BFF]/20 text-[#A24BFF] shadow-[0_0_16px_#A24BFF/25]"
+                      : "text-[#8E8E93] hover:text-[#A1A1A6] hover:bg-white/5"
                   )}
                 >
                   <Icon className={cn("w-5 h-5 shrink-0 transition-transform duration-300", isActive ? "scale-110" : "scale-100")} />
-
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.span
-                        layoutId="active-pill"
-                        className="absolute inset-0 bg-white/10 rounded-2xl -z-10"
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                      />
-                    )}
-                  </AnimatePresence>
+                  <span className={cn(
+                    "text-[10px] font-medium leading-none tracking-tight transition-colors duration-300",
+                    isActive ? "text-[#A24BFF]" : "text-[#8E8E93]"
+                  )}>
+                    {tab.label}
+                  </span>
                 </button>
               );
             })}
           </div>
 
-          {/* Create / Action Button or Avatar */}
-          <div className="flex items-center gap-2 pr-1">
-            {onCreateOpen && (
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                whileHover={{ scale: 1.05 }}
-                onClick={onCreateOpen}
-                className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#A24BFF] to-[#FF3D81] flex items-center justify-center text-white shadow-lg shadow-[#A24BFF]/20 transition-all"
-              >
-                <Plus className="w-5 h-5" />
-              </motion.button>
-            )}
-            
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              whileHover={{ scale: 1.05 }}
-              onClick={onProfileOpen ?? (() => router.push("/profile"))}
-              className="w-10 h-10 rounded-full border border-white/10 overflow-hidden transition-all shrink-0"
-            >
-              <Avatar name={resolvedName} photoUrl={resolvedPhotoUrl} size="sm" className="w-full h-full" />
-            </motion.button>
-          </div>
+          {/* Profile / Avatar button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.05 }}
+            onClick={onProfileOpen ?? (() => router.push("/profile"))}
+            className="w-10 h-10 rounded-full border border-white/10 overflow-hidden transition-all shrink-0 flex items-center justify-center"
+          >
+            <Avatar name={resolvedName} photoUrl={resolvedPhotoUrl} size="sm" className="w-full h-full" />
+          </motion.button>
         </div>
       </div>
     </nav>

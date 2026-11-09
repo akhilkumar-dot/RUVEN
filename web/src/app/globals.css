@@ -52,6 +52,52 @@
     --z-toast:   50;
     --z-splash:  100;
   }
+
+  /* ── Theme variables — applied via data-theme on <html> ── */
+  [data-theme="oled-midnight"],
+  :root {
+    --color-bg:        #000000;
+    --color-surface-1: #0A0A0C;
+    --color-surface-2: #111113;
+    --color-hairline:  #1E1E22;
+    --color-accent:    #A24BFF;
+  }
+  [data-theme="cyber-blue"] {
+    --color-bg:        #000814;
+    --color-surface-1: #040D21;
+    --color-surface-2: #091A38;
+    --color-hairline:  #0F2D52;
+    --color-accent:    #00B4FF;
+    --color-ring-1:    #00B4FF;
+    --gradient-ring:   linear-gradient(135deg, #00B4FF 0%, #0057FF 100%);
+  }
+  [data-theme="sunset-aurora"] {
+    --color-bg:        #0A0005;
+    --color-surface-1: #120008;
+    --color-surface-2: #1D000F;
+    --color-hairline:  #360020;
+    --color-accent:    #FF3D81;
+    --color-ring-1:    #FF3D81;
+    --gradient-ring:   linear-gradient(135deg, #FF3D81 0%, #FF8A3D 100%);
+  }
+  [data-theme="emerald-tech"] {
+    --color-bg:        #000A05;
+    --color-surface-1: #00130A;
+    --color-surface-2: #001F12;
+    --color-hairline:  #003820;
+    --color-accent:    #00C47A;
+    --color-ring-1:    #00C47A;
+    --gradient-ring:   linear-gradient(135deg, #00C47A 0%, #00B4FF 100%);
+  }
+  [data-theme="clean-light"] {
+    --color-bg:        #F5F5F7;
+    --color-surface-1: #FFFFFF;
+    --color-surface-2: #F0F0F2;
+    --color-hairline:  #D1D1D6;
+    --color-text:      #1C1C1E;
+    --color-text-sec:  #48484A;
+    --color-text-muted:#6E6E73;
+  }
 }
 
 @layer base {

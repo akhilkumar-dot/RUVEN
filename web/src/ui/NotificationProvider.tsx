@@ -79,6 +79,18 @@ export function NotificationProvider() {
         "Someone";
       return `${name} accepted your connection request`;
     }
+    if (activeToast.type === "COLLABORATE_REQUEST") {
+      const name =
+        (activeToast.payload.requester_name as string) ||
+        (activeToast.payload.requester_handle as string) ||
+        "Someone";
+      const title = (activeToast.payload.idea_title as string) || "your idea";
+      return `${name} wants to collaborate on "${title}"`;
+    }
+    if (activeToast.type === "COLLABORATE_ACCEPTED") {
+      const title = (activeToast.payload.idea_title as string) || "your idea";
+      return `Your collaboration on "${title}" was accepted! 🎉`;
+    }
     return "New notification received";
   }
 
@@ -98,6 +110,10 @@ export function NotificationProvider() {
               <UserPlus size={18} className="text-[#A24BFF]" />
             ) : activeToast.type === "CONNECTION_ACCEPTED" ? (
               <CheckCircle2 size={18} className="text-green-400" />
+            ) : activeToast.type === "COLLABORATE_REQUEST" ? (
+              <UserPlus size={18} className="text-[#FF8A3D]" />
+            ) : activeToast.type === "COLLABORATE_ACCEPTED" ? (
+              <CheckCircle2 size={18} className="text-emerald-400" />
             ) : (
               <Bell size={18} className="text-[#A24BFF]" />
             )}

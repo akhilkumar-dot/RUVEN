@@ -95,24 +95,8 @@ function AuthCallbackContent() {
           name: (dbUser as any)?.name || fullName || undefined,
         });
 
-        // Google users sign in without any profile details, so prompt them to
-        // complete their profile — unless they have already filled it out.
-        let needsProfile = false;
-        if (provider === "google") {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("headline, bio")
-            .eq("user_id", authUser.id)
-            .maybeSingle();
-          needsProfile = !(profile?.headline && profile?.bio);
-        }
-
-        const target = needsProfile ? "/onboarding" : "/home";
-        setStatus(
-          needsProfile
-            ? "Almost there! Let's set up your profile…"
-            : "Authentication successful! Redirecting…"
-        );
+        const target = "/onboarding";
+        setStatus("Authentication successful! Redirecting…");
         setTimeout(() => {
           router.replace(target);
         }, 500);

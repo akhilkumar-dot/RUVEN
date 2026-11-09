@@ -101,7 +101,7 @@ export function SplashScreen({ onFinish, persistent = false }: SplashScreenProps
                   transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
                   className="text-white text-[38px] md:text-[42px] font-bold tracking-tight text-center mb-2"
                 >
-                  Ruven
+                  COLLAB
                 </motion.h1>
               )}
             </AnimatePresence>
@@ -146,6 +146,33 @@ export function SplashScreen({ onFinish, persistent = false }: SplashScreenProps
               )}
             </AnimatePresence>
           </div>
+
+          {/* Powered by MK AUTONEX */}
+          <AnimatePresence>
+            {phase === "tagline" && (
+              <motion.div
+                key="powered-by"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                className="absolute bottom-10 flex flex-col items-center gap-2"
+              >
+                <p className="text-[9px] font-medium tracking-[0.3em] uppercase text-white/25 select-none">
+                  Powered by
+                </p>
+                <div className="flex items-center gap-2">
+                  <img
+                    src="/mk-autonex-logo.jpg"
+                    alt="MK AUTONEX"
+                    className="w-6 h-6 object-contain rounded-sm opacity-70"
+                  />
+                  <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/40 select-none">
+                    MK AUTONEX
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       ) : null}
     </AnimatePresence>
