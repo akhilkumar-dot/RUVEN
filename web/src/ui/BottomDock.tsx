@@ -117,19 +117,13 @@ export function BottomDock({
                   key={tab.key}
                   onClick={() => handleTabChange(tab.key)}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-2xl transition-all duration-300 shrink-0",
+                    "flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-2xl transition-all duration-300 shrink-0",
                     isActive
                       ? "bg-[#A24BFF]/20 text-[#A24BFF] shadow-[0_0_16px_#A24BFF/25]"
                       : "text-[#8E8E93] hover:text-[#A1A1A6] hover:bg-white/5"
                   )}
                 >
                   <Icon className={cn("w-5 h-5 shrink-0 transition-transform duration-300", isActive ? "scale-110" : "scale-100")} />
-                  <span className={cn(
-                    "text-[10px] font-medium leading-none tracking-tight transition-colors duration-300",
-                    isActive ? "text-[#A24BFF]" : "text-[#8E8E93]"
-                  )}>
-                    {tab.label}
-                  </span>
                 </button>
               );
             })}
